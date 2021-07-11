@@ -128,7 +128,7 @@ def main() -> None:
     import os
 
     date = datetime.datetime.now()
-    csv_dir = "../csv"
+    csv_dir = "./csv"
     filename = "%s/kdb-%04d%02d%02d.csv" % (csv_dir,
                                             date.year, date.month, date.day)
 

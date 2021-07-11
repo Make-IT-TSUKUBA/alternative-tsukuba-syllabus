@@ -27,17 +27,23 @@ jobs:
         run: |
           cd src
           python download.py
-          python csv-json.py "../csv/kdb-$(date +%Y%m%d).csv" list.txt
           cd ..
+      - name: convert json to url list
+        run: |
+          cat "./csv/kdb-$(date +%Y%m%d).csv" | tail -n +2 | cut -d ',' -f 1 | tr -d '"' | sed -e 's;\(.*\);https://kdb.tsukuba.ac.jp/syllabi/2021/\1/jpn/\n out=\1.html;g' > list
+      - name: download url list
+        run: |
+          cd syllabus
+          aria2c -i ../list -j 100
       - name: Pull and Commit
         run: |
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
-          git add .
-          git commit -m "update csv: $(date +%Y%m%d)"
+          git add syllabus
+          git commit -m "update syllabus: $(date +%Y%m%d)"
           git pull origin master
       - name: Push
         uses: ad-m/github-push-action@master
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GH_ADMIN_TOKEN }}
           branch: ${{ github.ref }}
