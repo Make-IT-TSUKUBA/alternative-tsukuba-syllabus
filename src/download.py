@@ -79,14 +79,12 @@ class KdbDownloader():
         Args:
             filename (str): A save file path.
         """
-        print("download()")
         self.__download()
         open(filename, "w", encoding="utf-8").write(self.response_text)
 
     def __download(self) -> None:
         """Helper for downloading.
         """
-        print("__download()")
         self.__start_session()
         self.__search_kdb()
         self.__download_csv()
@@ -94,15 +92,15 @@ class KdbDownloader():
     def __start_session(self) -> None:
         """Helper for starting session to KdB.
         """
-        print("__start_session()")
         kdb_url = "https://kdb.tsukuba.ac.jp/"
         self.session = requests.session()
         self.response = self.session.get(kdb_url)
+        if self.response.status_code != 200:
+            raise ValueError('System failure on KdB.')
 
     def __search_kdb(self) -> None:
         """Helper for searching.
         """
-        print("__search_kdb")
         search_post = self.get_post()
         search_post["_eventId"] = "searchOpeningCourse"
         self.response = self.session.post(self.response.url, data=search_post)
@@ -114,28 +112,13 @@ class KdbDownloader():
         csv_post = self.get_post()
         csv_post["_eventId"] = "output"
         csv_post["outputFormat"] = 0
-        self.response_text = self.session.post(self.do_url, data=csv_post).text
-
-    def __download_pdf(self) -> None:
-        """Helper for downloading CSV.
-        """
-        print("__download_pdf()")
-        csv_post = self.get_post()
-        csv_post["_eventId"] = "outputSyllabusPdf"
-        csv_post["outputFormat"] = 1
-        csv_post["termCode"] = 4
-        csv_post["dayCode"] = 1
-        csv_post["hierarchy1"] = 441
-        csv_post["hierarchy2"] = 42
-        csv_post["hierarchy3"] = 448
-        r = self.session.post(self.do_url, data=csv_post,stream=True,timeout=(1,30))
-        for line in r.iter_lines():
-            if line: # filter out keep-alive new lines
-                print(line)
-
-        print("download completed!")
-        print(response.raw.read(10))
-        self.response_text = response.content
+        res = self.session.post(self.do_url, data=csv_post).text
+        if len(res) == 0:
+            raise ValueError('Response text is empty.')
+        elif 'sys-err-head' in res:
+            raise ValueError('System failure on KdB.')
+        else:
+            self.response_text = res
 
 
 def main() -> None:
