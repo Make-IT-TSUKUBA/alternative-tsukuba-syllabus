@@ -4,7 +4,7 @@
 
 ## 構造
 
-このリポジトリの`syllabus/`以下にシラバスデータが追加されます。
+このリポジトリの`syllabus/`以下にシラバスのhtmlが保存されています。
 github pagesが有効になっているので、URL直打ちでアクセスできます。
 
 `https://onokatio.github.io/alternative-tsukuba-syllabus/syllabus/<科目番号>.html`
