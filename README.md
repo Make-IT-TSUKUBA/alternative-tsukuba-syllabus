@@ -10,3 +10,8 @@ github pagesが有効になっているので、URL直打ちでアクセスで�
 `https://onokatio.github.io/alternative-tsukuba-syllabus/syllabus/<科目番号>.html`
 
 例: https://onokatio.github.io/alternative-tsukuba-syllabus/syllabus/1101102.html
+
+## 注意点
+
+- 更新にラグがあるため最新ではないです
+- メールアドレス表示が壊れています
