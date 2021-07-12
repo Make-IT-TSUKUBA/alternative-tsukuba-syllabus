@@ -21,3 +21,4 @@ github pagesが有効になっているので、URL直打ちでアクセスで�
 - github actionsで自動更新をする
 - 簡易的なシラバス一覧ページを作る
 - https://github.com/Make-IT-TSUKUBA/alternative-tsukuba-kdb から見れるようにする
+- 複数の年度に対応する
