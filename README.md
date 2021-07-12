@@ -7,9 +7,9 @@
 このリポジトリの`syllabus/`以下にシラバスのhtmlが保存されています。
 github pagesが有効になっているので、URL直打ちでアクセスできます。
 
-`https://onokatio.github.io/alternative-tsukuba-syllabus/syllabus/<科目番号>.html`
+`https://make-it-tsukuba.github.io/alternative-tsukuba-syllabus/syllabus/<科目番号>.html`
 
-例: https://onokatio.github.io/alternative-tsukuba-syllabus/syllabus/1101102.html
+例: https://make-it-tsukuba.github.io/alternative-tsukuba-syllabus/syllabus/1101102.html
 
 ## 注意点
 
