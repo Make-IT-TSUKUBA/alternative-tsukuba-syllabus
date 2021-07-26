@@ -30,6 +30,7 @@ function _download() {
     [ -n "$class_code" ] \
       && wget -O "${DEST}/${class_code}.html" \
               --cipher 'DEFAULT:!DH' -q \
+              -w3 --random-wait \
               "$url" && echo "=>OK" || echo "=>NG"
   done
 }
