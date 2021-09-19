@@ -5,13 +5,14 @@ on:
   - cron: '0 0 * * 0'
   workflow_dispatch:
 
+env:
+  TZ: 'Asia/Tokyo'
+
 jobs:
   update:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix:
-        python-version: [3.8]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -19,22 +20,10 @@ jobs:
         uses: actions/setup-python@v1
         with:
           setup-python: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          python -m pip install -U pip
-          pip install -r src/requirements.txt
       - name: Synchronize the csv file with an up-to-date one
         run: |
-          cd src
-          python download.py
-          cd ..
-      - name: convert json to url list
-        run: |
-          cat "./csv/kdb-$(date +%Y%m%d).csv" | tail -n +2 | cut -d ',' -f 1 | tr -d '"' | sed -e 's;\(.*\);https://kdb.tsukuba.ac.jp/syllabi/2021/\1/jpn/\n out=\1.html;g' > list
-      - name: download url list
-        run: |
-          cd syllabus
-          aria2c -i ../list -j 100
+          chmod +x ./download.sh
+          ./download.sh
       - name: Pull and Commit
         run: |
           git config --global user.email "action@github.com"
