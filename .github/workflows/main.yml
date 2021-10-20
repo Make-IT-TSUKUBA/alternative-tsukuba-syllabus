@@ -1,38 +1,37 @@
-name: Syllabus update
+name: Syllabus scheduled update
 
 on:
   schedule:
-  - cron: '0 0 * * 0'
+  - cron: '0 15 * * 6'
   workflow_dispatch:
-
-env:
-  TZ: 'Asia/Tokyo'
 
 jobs:
   update:
+    environment: actions
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
+    env:
+        TZ: Asia/Tokyo
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
-        with:
-          setup-python: ${{ matrix.python-version }}
-      - name: Synchronize the csv file with an up-to-date one
+        # with:
+        #   token: ${{ secrets.GH_ADMIN_TOKEN }}
+      - name: Run download script
         run: |
-          chmod +x ./download.sh
           ./download.sh
-      - name: Pull and Commit
-        run: |
-          git config --global user.email "action@github.com"
-          git config --global user.name "GitHub Action"
-          git add syllabus
-          git commit -m "update syllabus: $(date +%Y%m%d)"
-          git pull origin master
-      - name: Push
-        uses: ad-m/github-push-action@master
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3
         with:
-          github_token: ${{ secrets.GH_ADMIN_TOKEN }}
-          branch: ${{ github.ref }}
+          # token: ${{ secrets.GH_ADMIN_TOKEN }}
+          title: Sceduled update of syllabus data (${{ steps.date.outputs.date }})
+          branch: update_${{ steps.date.outputs.date }}
+          author: GitHub Action <action@github.com>
+          committer: GitHub Action <action@github.com>
+          commit-message: |
+            update csv: ${{ steps.date.outputs.date }}
+
+          labels: automated pr
+          # delete-branch: true
