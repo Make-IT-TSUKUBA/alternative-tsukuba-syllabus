@@ -1,43 +1,52 @@
 #!/usr/bin/env -S bash -e
 
-readonly ALTKDB_REPO="Make-IT-TSUKUBA/alternative-tsukuba-kdb"
-
 # Get the file name of the latest syllabus data.
 function _get_latest_csv() {
   curl -s -H "Accept: application/vnd.github.v3+json" \
     "https://api.github.com/repos/${ALTKDB_REPO}/git/trees/master?recursive=1" |
-    tac | grep -oPm1 '(?<="path": ")csv/[^"]+\.csv'
+    tac | grep -m1 '"path": .*/csv/kdb-.*csv"' | awk -F '"' '$0=$4'
 }
 
 # Obtaining a list of subject codes from the latest syllabus data.
 function _get_code_list() {
-  local LATEST_CSV YEAR
-  readonly LATEST_CSV="$(_get_latest_csv)"
-  readonly YEAR="${LATEST_CSV:8:4}"
-  echo -e "[latest]:\n${LATEST_CSV}\n[year]:\n${YEAR}">&2
-  echo "[urls]:">&2
-  curl -sL "https://github.com/${ALTKDB_REPO}/raw/master/${LATEST_CSV}" |
-  awk -F'[,"]' 'NR>1&&$2!=""{print"https://kdb.tsukuba.ac.jp/syllabi/"y"/"$2"/jpn/"}' y="$YEAR"
+  local latest_csv year
+
+  latest_csv="$(_get_latest_csv)"
+  echo -e "[latest]:\n${latest_csv}" >&2
+
+  year="${latest_csv:14:4}"
+  echo -e "[year]:\n${year}" >&2
+
+  echo "[urls]:" >&2
+  curl -sL "https://github.com/${ALTKDB_REPO}/raw/master/${latest_csv}" |
+    awk -F '[,"]' 'NR > 1 && $2 != "" {
+      print "https://kdb.tsukuba.ac.jp/syllabi/"y"/"$2"/jpn/"
+    }' y="$year"
 }
 
-# Download stdin urls to received from optional cmdarg.
+# Download stdin urls to a spesific dir.
 function _download() {
-  local DEST url class_code
-  readonly DEST="${1-syllabus}"
-  mkdir -p "$DEST"
+  local url class_code
+
   while read -r url; do
     class_code="${url:39:7}"
     echo -n "[$((++i))]: ${url}"
-    [ -n "$class_code" ] \
-      && wget -O "${DEST}/${class_code}.html" \
-              --cipher 'DEFAULT:!DH' -q \
-              -w 3 --random-wait \
-              "$url" && echo "=>OK" || echo "=>NG"
+    if [ -n "$class_code" ] &&
+      wget -O "${DEST}/${class_code}.html" \
+        --cipher 'DEFAULT:!DH' -q \
+        -w 3 --random-wait "$url"; then
+      echo " =>OK"
+    else
+      echo " =>NG"
+    fi
   done
 }
 
 # Main.
 function main() {
+  readonly ALTKDB_REPO="Make-IT-TSUKUBA/alternative-tsukuba-kdb"
+  readonly DEST="${1-syllabus}"
+  mkdir -p "$DEST"
   _get_code_list | _download
 }
 
