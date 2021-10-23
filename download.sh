@@ -1,21 +1,21 @@
 #!/usr/bin/env -S bash -e
 
-# Get the file name of the latest syllabus data.
+# Get the file name of the latest syllabus data
 function _get_latest_csv() {
   curl -s -H "Accept: application/vnd.github.v3+json" \
     "https://api.github.com/repos/${ALTKDB_REPO}/git/trees/master?recursive=1" |
     tac | grep -m1 '"path": .*/csv/kdb-.*csv"' | awk -F '"' '$0=$4'
 }
 
-# Obtaining a list of subject codes from the latest syllabus data.
+# Obtaining a list of subject codes from the latest syllabus data
 function _get_code_list() {
   local latest_csv year
 
   latest_csv="$(_get_latest_csv)"
-  echo -e "[latest]:\n${latest_csv}" >&2
+  echo -e "[latest]: ${latest_csv}" >&2
 
   year="${latest_csv:14:4}"
-  echo -e "[year]:\n${year}" >&2
+  echo -e "[year]: ${year}" >&2
 
   echo "[urls]:" >&2
   curl -sL "https://github.com/${ALTKDB_REPO}/raw/master/${latest_csv}" |
@@ -24,7 +24,7 @@ function _get_code_list() {
     }' y="$year"
 }
 
-# Download stdin urls to a spesific dir.
+# Download stdin urls to a spesific dir
 function _download() {
   local url class_code
 
@@ -42,7 +42,6 @@ function _download() {
   done
 }
 
-# Main.
 function main() {
   readonly ALTKDB_REPO="Make-IT-TSUKUBA/alternative-tsukuba-kdb"
   readonly DEST="${1-syllabus}"
