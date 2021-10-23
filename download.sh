@@ -24,7 +24,7 @@ function _get_code_list() {
     }' y="$year"
 }
 
-# Download stdin urls to a spesific dir
+# Download pages of urls given from stdin urls to a spesific dir
 function _download() {
   local url class_code
 
