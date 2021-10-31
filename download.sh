@@ -29,8 +29,8 @@ function _get_code_list() {
 
 # Download pages of urls given from stdin urls to a spesific dir
 function _download() {
-  local url class_code
-
+  local url class_code i
+  i=0
   while read -r url; do
     class_code="${url:39:7}"
     echo -n "[$((++i))]: ${url}"
