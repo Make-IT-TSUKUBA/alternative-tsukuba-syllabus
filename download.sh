@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
-IFS=$'\n\t'
+# set -euo pipefail
+# IFS=$'\n\t'
 
 # Get the file name of the latest syllabus data
 function _get_latest_csv() {
