@@ -3,6 +3,15 @@
 # set -euo pipefail
 # IFS=$'\n\t'
 
+# Get present nendo (fiscal year: https://en.wikipedia.org/wiki/Fiscal_year)
+function _get_nendo() {
+  if [[ "$(date +%m)" =~ 0[1-3] ]]; then
+    date +%Y -d "1 year ago"
+  else
+    date +%Y
+  fi
+}
+
 # Get the file name of the latest syllabus data
 function _get_latest_csv() {
   curl -s -H "Accept: application/vnd.github.v3+json" \
@@ -12,19 +21,19 @@ function _get_latest_csv() {
 
 # Obtaining a list of subject codes from the latest syllabus data
 function _get_code_list() {
-  local latest_csv year
+  local latest_csv nendo
 
   latest_csv="$(_get_latest_csv)"
   echo -e "[latest]: ${latest_csv}" >&2
 
-  year="${latest_csv:14:4}"
-  echo -e "[year]: ${year}" >&2
+  nendo="$(_get_nendo)"
+  echo -e "[nendo]: ${nendo}" >&2
 
   echo "[urls]:" >&2
   curl -sL "https://github.com/${ALTKDB_REPO}/raw/master/${latest_csv}" |
     awk -F '[,"]' 'NR > 1 && $2 != "" {
       print "https://kdb.tsukuba.ac.jp/syllabi/"y"/"$2"/jpn/"
-    }' y="$year"
+    }' y="$nendo"
 }
 
 # Download pages of urls given from stdin urls to a spesific dir
