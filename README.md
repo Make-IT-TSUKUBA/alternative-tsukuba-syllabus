@@ -13,6 +13,12 @@ GitHub Pagesが有効になっているので、以下の形式のようなURL�
 
 例: <https://make-it-tsukuba.github.io/alternative-tsukuba-syllabus/syllabus/1101102.html>
 
+前年度までのシラバスについては、以下の形式のようなURLでアクセスできます。
+
+`https://make-it-tsukuba.github.io/alternative-tsukuba-syllabus/syllabus/<年度>/<科目番号>.html`
+
+例: <https://make-it-tsukuba.github.io/alternative-tsukuba-syllabus/syllabus/2019/1101102.html>
+
 ## 注意点
 
 - 毎週土曜0時頃更新しているためシラバスのデータは最新の内容ではないです
