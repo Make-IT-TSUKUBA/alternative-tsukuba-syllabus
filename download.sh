@@ -31,7 +31,7 @@ function _get_code_list() {
   # Archive data of previous year
   if ! [ -d "${DEST}/$((nendo-1))" ]; then
     mkdir "${DEST}/$((nendo-1))"
-    mv "${DEST}/*.html" "${DEST}/$((nendo-1))"
+    mv "${DEST}"/*.html "${DEST}/$((nendo-1))"
   fi
 
   echo "[urls]:" >&2
