@@ -129,6 +129,71 @@ $(function() {
         });
     }
 });
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+});
 </script>
 <body>
 
@@ -137,11 +202,16 @@ $(function() {
 </style>
 
 <h2 align="center">シラバス参照</h2>
-
+        <input type="hidden" name="lang" value="ja_JP">
 <table width="100%">
     <tr>
         <td align="left">
-            
+          
+          
+              <a href="/syllabi/2022/0ABE326/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
           
           &nbsp;
       </td>
@@ -149,14 +219,12 @@ $(function() {
   <tr>
       <td align="right">
           
-              最終更新日：2021/04/02
-          
             &nbsp;
         </td>
     </tr>
 </table>
 
-<object >    <h1 id="course-title">
+    <h1 id="course-title">
         <span id="course">
 0ABE326        </span>&nbsp;
         <span id="title">
@@ -171,7 +239,7 @@ $(function() {
                     1・2 年次,
             </span>
             <span id="timetable">
-春AB月2            </span>
+春AB 月3            </span>
             <br>
             <span id="assignments">
 江口 真規            </span>
@@ -183,7 +251,7 @@ $(function() {
             
         </h2>
         <p id="summary-contents">
-動物と人間の関係についての学際研究「アニマル・スタディーズ」の理論と方法を学び、主要なテキストの講読を通して、文学・文化研究での事例を考察する。アニマル・スタディーズとは、動物と人間の差異や共生のあり方を再考する、人文学・自然科学を融合した研究の枠組みである。「2A」では、アニマル・スタディーズの分野において代表的なテキストの講読と発表を行い、動物の権利や福祉といった概念について知識を深める。<BR>授業内でのディスカッションを通して、動物に対する認識の多様性を学ぶ。<BR>        </p>
+動物と人間の関係についての学際研究「アニマル・スタディーズ」の理論と方法を学び、主要なテキストの講読を通して、文学・文化研究での事例を考察する。アニマル・スタディーズとは、動物と人間の差異や共生のあり方を再考する、人文学・自然科学を融合した研究の枠組みである。「2A」では、アニマル・スタディーズの分野において代表的なテキストの講読と発表を行い、動物の権利や福祉といった概念について知識を深める。授業内でのディスカッションを通して、動物に対する認識の文化的多様性を学ぶ。<BR>        </p>
     </div>
     <div id="note-heading-note">
         <h2 id="note-heading">
@@ -191,7 +259,7 @@ $(function() {
             
         </h2>
         <p id="note">
-西暦偶数年度開講。        </p>
+西暦偶数年度開講。<BR>オンライン(同時双方向型)        </p>
     </div>
     <div id="note-heading-note">
         <h2 id="note-heading">
@@ -202,203 +270,220 @@ $(function() {
 講義及び演習        </p>
     </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
-            <p id="style">
-汎用コンピテンスのうち「知の活用力」「コミュニケーション能力」「国際性」に関連する。<BR>専門コンピテンスのうち「研究力」「専門知識」に関連する。            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+汎用コンピテンスのうち「知の活用力」「コミュニケーション能力」「国際性」に関連する。<BR>専門コンピテンスのうち「研究力」「専門知識」に関連する。                </p>
+            </div>
     
-        <div id="style-heading-style">
-         		   <h2 id="style-heading">授業の到達目標(学修成果)</h2>
-            <p id="style">
-1.アニマル・スタディーズに関する専門的な知識を習得する。<BR>2.テキストの講読を通して、テキストを精読し、批判的に考察することができる。<BR>3.世界や日本の文学・文化について、アニマル・スタディーズの理論と方法を活用しながら考察し、研究力を身に付ける。<BR>4.多様な背景を持つ受講者との議論を通じて、コミュニケーション能力・国際性を身に付ける。            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
+                <p id="style">
+1．アニマル・スタディーズに関する専門的な知識を得ることができる。<BR>2．テキストの講読を通して、テキストを精読し、批判的に考察することができる。<BR>3．世界や日本の文学・文化について、アニマル・スタディーズの理論と方法を活用しながら考察できる。<BR>4．多様な背景を持つ受講者との議論を通じて、コミュニケーション能力・国際性を高めることができる。                </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">キーワード</h2>
-            <p id="style">
-アニマル・スタディーズ, 動物の権利, 動物の福祉, 動物倫理, ピーター・シンガー            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+アニマル・スタディーズ、動物の権利、動物の福祉、ヴィーガン／ベジタリアン、ピーター・シンガー                </p>
+            </div>
     
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">授業計画</h2>
-            <div id="topics">
-                    <p id="pretopics">
-毎回の授業は、教員による講義のほか、テキスト(ピーター・シンガー『動物の解放 改訂版』人文書院、2011年)を講読するかたちで行う。テキストの指定された範囲の発表担当者が、テキストの内容の要約と興味・関心のある点について、20分程度で発表する。重要な語句や概念、文学・文化研究での事例について、教員が解説を行ったうえで、発表内容に関して授業内でディスカッションを行う。<BR><BR>オンライン授業の実施方法(2020年度春学期):<BR>【4/16更新】<BR>1.Microsoft Teamsを用いて、毎週月曜2限の時間帯に授業を行う。<BR>2.初回授業時までに、manabaに自己登録をしておくこと。(この科目名でコースを検索できます。)<BR>3.初回授業時までに、各自、Office 365 EES特典にサインアップしておくこと。<BR>https://www.cc.tsukuba.ac.jp/wp/office365-signup/<BR>4.Teamsのチームコードをmanabaに記載する。そのコードを用いて、初回授業開始時までにチームに参加する。(チーム参加の方法の詳細は、manabaにて案内します。)<BR>5.授業は、主に受講者の発表により行う。<BR>発表者は事前に資料を準備したうえで、Teams内のビデオ会議で発表し、受講者とディスカッションを行う。<BR>6.発表内容をもとにした期末レポートを、manabaに提出する。                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第1回                                    </th>
-                                    <td>
-初回ガイダンス、テキスト講読担当者決め                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第2回                                    </th>
-                                    <td>
-講義:アニマル・スタディーズの研究の歴史と理論の概要                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第3回                                    </th>
-                                    <td>
-ピーター・シンガー『動物の解放』講読:第1章 すべての動物は平等である                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第4回                                    </th>
-                                    <td>
-ピーター・シンガー『動物の解放』講読:第2章 研究の道具                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第5回                                    </th>
-                                    <td>
-ピーター・シンガー『動物の解放』講読:第3章 工場畜産を打倒せよ                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第6回                                    </th>
-                                    <td>
-ピーター・シンガー『動物の解放』講読:第4章 ベジタリアンになる                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第7回                                    </th>
-                                    <td>
-ピーター・シンガー『動物の解放』講読:第5章 人間による支配                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第8回                                    </th>
-                                    <td>
-ピーター・シンガー『動物の解放』講読:第6章 現代のスピシーシズム                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第9回                                    </th>
-                                    <td>
-講義:ピーター・シンガーの思想とアニマル・スタディーズ                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第10回                                    </th>
-                                    <td>
-授業のまとめ                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+毎回の授業は、テキスト（ピーター・シンガー『動物の解放 改訂版』）を講読するかたちで行う。テキストの指定された範囲の発表担当者が、テキストの内容の要約と興味・関心のある点について、20分程度で発表する。重要な語句や概念、文学・文化研究での事例について、教員が解説を行ったうえで、発表内容に関して授業内でディスカッションを行う。<BR><BR>※オンライン授業の場合の実施方法（2022年度）<BR>1．Teamsを用いて、毎週月曜3限の時間帯に授業を行う。<BR>2．初回授業時までに、manabaに登録をしておくこと。（この科目名でコースを検索できます。）<BR>3．Teamsのチームコードをmanabaに記載する。そのコードを用いて、初回授業開始時までにチームに登録する。<BR>                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+初回ガイダンス、テキスト講読担当者決め                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+講義：アニマル・スタディーズの研究の歴史と理論の概要                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+『動物の解放』第1章：すべての動物は平等である                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+『動物の解放』第2章：研究の道具                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+『動物の解放』第2章：研究の道具                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6回                                        </th>
+                                        <td>
+『動物の解放』第3章：工場畜産を打倒せよ                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第7回                                        </th>
+                                        <td>
+『動物の解放』第3章：工場畜産を打倒せよ                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第8回                                        </th>
+                                        <td>
+『動物の解放』第4章：ベジタリアンになる                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第9回                                        </th>
+                                        <td>
+『動物の解放』第5章：人間による支配                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第10回                                        </th>
+                                        <td>
+『動物の解放』第6章：現代のスピシーシズム、授業のまとめ                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">履修条件</h2>
-                <p id="style">
-特になし。「世界の文学・文化と日本2B」(秋AB開講)を合わせて受講することを推奨する。                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+特になし。「世界の文学・文化と日本2B」（秋AB開講）を合わせて受講することを推奨する。                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">成績評価方法</h2>
-                <p id="style">
-口頭発表・授業内活動40%、レポート課題60%により、総合的に評価する。                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+口頭発表・授業内活動40%、レポート課題60%により、総合的に評価する。                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
-                <p id="style">
-講義(40%)、演習(60%)<BR>・授業時に配布するテキストの指定箇所を読んでくる。発表担当者は、テキストの内容と興味・関心のある点について、レジュメにまとめる。<BR>・授業内発表に基づきテーマを決め、アニマル・スタディーズに関連した期末レポートを作成する。                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+講義（40%）、演習（60%）<BR>・授業時に配布するテキストの指定箇所を読んでくる。発表担当者は、テキストの内容と興味・関心のある点について、レジュメにまとめる。<BR>・授業内発表に基づきテーマを決め、アニマル・スタディーズに関連した期末レポートを作成する。                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">教材・参考文献・配付資料等</h2>
-            <div id="topics">
-                    <p id="pretopics">
-《テキスト》<BR>・ピーター・シンガー『動物の解放 改訂版』戸田清訳、人文書院、2011年<BR>・そのほか、適宜授業内で資料を配布する。<BR>《参考文献》<BR>・伊勢田哲治『動物からの倫理学入門』名古屋大学出版会、2008年<BR>・Gruen, Lori, ed. Critical Terms for Animal Studies. Chicago: U of Chicago P, 2018.                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th>
+1. 動物の解放　改訂版                                        </th>
+                                        <td>
+                                                    <a href="https://www.tulips.tsukuba.ac.jp/search/?q=9784409030783" target="_blank">
+https://www.tulips.tsukuba.ac.jp/search/?q=9784409030783                                                    </a>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                        <p id="pretopics">
+上記テキストの準備方法については、初回授業にて説明する。<BR><BR>《参考文献》<BR>・伊勢田哲治『動物からの倫理学入門』名古屋大学出版会、2008年<BR>・Gruen, Lori, ed. Critical Terms for Animal Studies. Chicago: U of Chicago P, 2018.                        </p>
                 </div>
             </div>
-        </div>
     
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
-            <div id="topics">
-                    <p id="pretopics">
-金曜5限(15:15~16:30) 人文社会学系棟A407 ※その他要応談<BR>E-mail: eguchi.maki.fw@u.tsukuba.ac.jp                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <td>
-                                    </td>
-                                </tr>
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                        <p id="pretopics">
+金曜10:30～12:00　※その他の時間については要応談<BR>人文社会学系棟4階A407。オンラインでの相談も可能。<BR>まずはメールにてご連絡ください。<BR>E-mail: eguchi.maki.fw＠u.tsukuba.ac.jp（＠は半角に置き換えてください。）<BR>                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+江口 真規 　                                                        <br>
+                                                                <span class="officehour-address">
+100003217                                                                </span>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
-                <p id="style">
-授業には、必ずテキストと配布資料を持参すること。<BR><BR>【4月17日更新】テキストの準備方法については、初回授業にて説明する。                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
+                    <p id="style">
+授業には、必ずテキストを持参すること。                    </p>
+            </div>
     
     
-        <div id="style-heading-style">
-		            <h2 id="style-heading">他の授業科目との関連</h2>
-        </div>
-        <div id="topic-assignments">
-            <table summary="topsics">
-            </table>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                            <tr>
+                                <th>
+0ABE327                                </th>
+                                <td>
+世界の文学・文化と日本2B                                </td>
+                            </tr>
+                </table>
+            </div>
     
-        <div id="style-heading-style">
-                <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
-                <p id="style">
-TA1名配置予定。                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+                    <p id="style">
+配置なし。                    </p>
+            </div>
     
     
     
@@ -407,6 +492,6 @@ TA1名配置予定。                </p>
 
 
 
-</object>
+
 </body>
 </html>
