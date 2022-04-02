@@ -129,6 +129,71 @@ $(function() {
         });
     }
 });
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+});
 </script>
 <body>
 
@@ -137,11 +202,16 @@ $(function() {
 </style>
 
 <h2 align="center">シラバス参照</h2>
-
+        <input type="hidden" name="lang" value="ja_JP">
 <table width="100%">
     <tr>
         <td align="left">
-            
+          
+          
+              <a href="/syllabi/2022/0ADM116/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
           
           &nbsp;
       </td>
@@ -149,14 +219,14 @@ $(function() {
   <tr>
       <td align="right">
           
-              最終更新日：2021/03/30
+              最終更新日：2022/03/30
           
             &nbsp;
         </td>
     </tr>
 </table>
 
-<object >    <h1 id="course-title">
+    <h1 id="course-title">
         <span id="course">
 0ADM116        </span>&nbsp;
         <span id="title">
@@ -171,7 +241,7 @@ $(function() {
                     1・2 年次,
             </span>
             <span id="timetable">
-秋C火7,8            </span>
+秋C 火7,8            </span>
             <br>
             <span id="assignments">
 伴 正隆            </span>
@@ -183,7 +253,7 @@ $(function() {
             
         </h2>
         <p id="summary-contents">
-本講義では、中級以上の統計手法の中からいくつかのトピックを選び、実際のデータ解析事例に触れながら講義する。トピックの例としては、ベイズ統計、傾向スコア分析、欠測データ解析などが挙げられる。各分析手法の理論面の理解だけではなく、何らかのデータセットに手法を適用してみる解析事例の紹介によって、手法の特性や結果の解釈の仕方、あるいはそもそもどのようなデータに適用されうるかといったことに関する知識の獲得を目指す。        </p>
+本講義では、中級以上の統計手法の中からいくつかのトピックを選び、実際のデータ解析事例に触れながら講義する。トピックの例としては、ベイズ統計、欠測データ解析、傾向スコア分析などが挙げられる。各分析手法の理論面の理解だけではなく、何らかのデータに手法を適用してみる解析事例の紹介によって、手法の特性や結果の解釈の仕方、あるいはそもそもどのようなデータに適用されうるかといったことに関する知識の獲得を目指す。        </p>
     </div>
     <div id="note-heading-note">
         <h2 id="note-heading">
@@ -191,7 +261,7 @@ $(function() {
             
         </h2>
         <p id="note">
-オンライン・対面といった授業方法は、授業実施時の新型コロナの感染状況によって判断します。2020年度は教室での授業をオンライン（同時双方向）でも実施しました。<BR>01KA442と同一。        </p>
+オンライン・対面といった授業方法は、授業実施時の諸々の状況によって判断します。2021年度はオンラインで実施しました。<BR>01KA442と同一。        </p>
     </div>
     <div id="note-heading-note">
         <h2 id="note-heading">
@@ -202,99 +272,117 @@ $(function() {
 講義        </p>
     </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
-            <p id="style">
-汎用コンピテンス「知の活用力」、<BR>専門コンピテンス「経営に関する問題発見能力」、「経営に関する問題解決能力」に関連する。            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+汎用コンピテンス「知の活用力」、<BR>専門コンピテンス「経営に関する問題発見能力」、「経営に関する問題解決能力」に関連する。                </p>
+            </div>
     
-        <div id="style-heading-style">
-         		   <h2 id="style-heading">授業の到達目標（学修成果）</h2>
-            <p id="style">
-ベイズ統計学・ベイズ計量経済学を中心的に扱い、そこに含まれる様々なモデルや分析手法について、実際のデータ解析事例に触れながら講義する。分析方法やモデルの直感的な理解と分析結果解釈の経験を積み、データ分析のリテラシーを洗練することが目標である。            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標（学修成果）</h2>
+                <p id="style">
+(1)ベイズ統計学・ベイズ計量経済学に含まれる様々なモデルや分析手法について、その仕組みや特性を直感的に理解する。<BR>(2)紹介する分析手法について、何らかのデータに応用できる。<BR>(3)分析結果を適切に解釈できる。                </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">キーワード</h2>
-            <p id="style">
-ベイズ統計, ベイズ計量経済学, 欠測データ            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+ベイズ統計, ベイズ計量経済学, 欠測データ解析                </p>
+            </div>
     
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">授業計画</h2>
-            <div id="topics">
-                    <p id="pretopics">
-第1回,第2回:様々なデータ<BR>第3回,第4回:ベイズ統計学の基礎<BR>第5回,第6回:ベイズ計量経済学<BR>第7回,第8回:欠測データ解析<BR>第9回,第10回:統計的因果推論、傾向スコア分析                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+第1回,第2回:様々なデータ<BR>第3回,第4回:ベイズ統計学の基礎<BR>第5回,第6回:ベイズ計量経済学<BR>第7回,第8回:欠測データ解析<BR>第9回,第10回:統計的因果推論、傾向スコア分析                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">履修条件</h2>
-                <p id="style">
-統計学や計量経済学について基本的な知識がある学生を対象とする。                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+統計学や計量経済学について基本的な知識がある学生を対象とする。                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">成績評価方法</h2>
-                <p id="style">
-講義中の質疑・応答(30%)、最終レポート(70%)により評価する。最終レポートでは到達目標にある、モデルの理解とそれに基づく分析結果の妥当な解釈について、十分な理解が確認されたものをA評価とする。<BR>特別な事情がない限り、6割以上の出席を単位取得の条件とする。                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+講義中の質疑・応答(30%)、最終レポート(70%)により評価する。最終レポートでは到達目標にある、モデルや分析手法の理解とそれに基づく分析結果の適切な解釈について、十分な理解が確認されたものをA評価とし、段階に応じてA+からDの評価を行う。                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
-                <p id="style">
-講義(100%)。<BR>授業で使用するコードやRパッケージを自身でも使ってみること、試行錯誤することを勧める。                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+講義(100%)。<BR>授業で使用するコードやRパッケージを自身でも使ってみること、手を動かして試行錯誤することを勧める。                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">教材・参考文献・配付資料等</h2>
-            <div id="topics">
-                    <p id="pretopics">
-講義資料は授業の際に配布する。                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+講義資料は授業の際に配布する。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
-            <div id="topics">
-                    <p id="pretopics">
-事前にアポイントを取ること。                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <td>
-                                    </td>
-                                </tr>
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
+                <div id="topics">
+                        <p id="pretopics">
+事前にアポイントを取ること。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
+            </div>
     
     
-        <div id="style-heading-style">
-		            <h2 id="style-heading">他の授業科目との関連</h2>
-        </div>
-        <div id="topic-assignments">
-            <table summary="topsics">
-            </table>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                            <tr>
+                                <th>
+0ADM114                                </th>
+                                <td>
+データ解析I                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+0ADM115                                </th>
+                                <td>
+データ解析II                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+0ADM118                                </th>
+                                <td>
+計量経済学                                </td>
+                            </tr>
+                </table>
+            </div>
     
-        <div id="style-heading-style">
-                <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
+            </div>
     
     
     
@@ -303,6 +391,6 @@ $(function() {
 
 
 
-</object>
+
 </body>
 </html>

@@ -129,6 +129,71 @@ $(function() {
         });
     }
 });
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+});
 </script>
 <body>
 
@@ -137,12 +202,13 @@ $(function() {
 </style>
 
 <h2 align="center">シラバス参照</h2>
-
+        <input type="hidden" name="lang" value="ja_JP">
 <table width="100%">
     <tr>
         <td align="left">
-            
-              <a href="/syllabi/2021/GB12812/jpn/0/">
+          
+          
+              <a href="/syllabi/2022/GB12812/jpn/0/">
                   最新版のシラバスを表示
               </a>
           
@@ -153,12 +219,14 @@ $(function() {
   <tr>
       <td align="right">
           
+              最終更新日：2022/03/25
+          
             &nbsp;
         </td>
     </tr>
 </table>
 
-<object >    <h1 id="course-title">
+    <h1 id="course-title">
         <span id="course">
 GB12812        </span>&nbsp;
         <span id="title">
@@ -173,10 +241,10 @@ GB12812        </span>&nbsp;
                     2 年次,
             </span>
             <span id="timetable">
-春C木1,2            </span>
+春C 木1,2            </span>
             <br>
             <span id="assignments">
-山口 佳樹, 金澤 健治            </span>
+金澤 健治, 山口 佳樹            </span>
         </p>
     </div>
     <div id="summary-heading-summary-contents">
@@ -185,7 +253,7 @@ GB12812        </span>&nbsp;
             
         </h2>
         <p id="summary-contents">
-演習を通し、ハードウェア記述言語を用いた実用的な論理システム設計について学習する。FPGAを題材とし、画像処理システムにおける回路設計から実機動作までを通した一貫した知識・経験の習得を目指す。        </p>
+演習を通してハードウェア記述言語を用いた実用的な論理システム設計について学習する。演習では，書き換え可能なハードウェア（FPGA）を用い、画像処理システムにおける回路設計から実機動作までを通した一貫した知識・技術の習得を目指す。        </p>
     </div>
     <div id="note-heading-note">
         <h2 id="note-heading">
@@ -193,7 +261,7 @@ GB12812        </span>&nbsp;
             
         </h2>
         <p id="note">
-論理システムの単位を修得していること．または，2020年度に論理システムを履修していること．<BR><BR>オンライン(オンデマンド型)<BR>実験機材を貸与する関係から受講者数制限(20名)がある．<BR>        </p>
+「論理回路」の単位を修得していること。また「論理システム」を修得済みであるか，同年度に履修予定であること。<BR><BR>オンライン(オンデマンド型)<BR>実験機材を貸与する関係から受講者数制限(70名)がある．        </p>
     </div>
     <div id="note-heading-note">
         <h2 id="note-heading">
@@ -204,166 +272,164 @@ GB12812        </span>&nbsp;
 演習        </p>
     </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
-            <p id="style">
-・専門コンピテンス<BR>1. 情報科学を支える基礎知識            </p>
-        </div>
-    
-        <div id="style-heading-style">
-         		   <h2 id="style-heading">授業の到達目標(学修成果)</h2>
-            <p id="style">
-実機を用いた設計/実装を通して、これまでに学んだ論理回路をシステムとして設計/実装する手法を学ぶ。題材である画像処理システムにはカウンタ・バス制御・メモリ制御・論理演算・数値演算などが含まれ、これまでに学習してきた知識を利用してシステムを自力で設計することが求められる課題となっている。与えられた仕様を確認し、ハードウェア記述言語を用いて設計/シミュレーション/実装/動作確認までを行う。以上により、論理回路の系統的設計法を習得すると同時に、実用システムの設計から動作確認までを全て独力で行い、各個人の論理回路に関する一貫した知識・スキルを深め習得することが目標である。            </p>
-        </div>
-    
-        <div id="style-heading-style">
-            		<h2 id="style-heading">キーワード</h2>
-            <p id="style">
-論理回路, 論理システム, 組込みシステム, 画像処理, ハードウェア設計            </p>
-        </div>
-    
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">授業計画</h2>
-            <div id="topics">
-                    <p id="pretopics">
-授業は,オンライン(MS Teams ないし Zoom)で行われます.<BR><BR>2020年度は集中授業として開講されるため,通常授業とは重複しない日程(春季休業を予定)で,長さは2日ないし3日とします.授業時間は,<BR><BR>5 x (説明75分-&gt;演習75分)<BR><BR>で構成される予定です.<BR><BR>提出レポートは,上記の演習時間で行った内容に関わる内容から出題し,それに要する作業時間は,演習時間内と授業時間外の自主学習を合わせて平均60分程度を見込んでいます.これはあくまで平均で,早い人は演習時間内にレポート作成は完了する場合もあります.<BR><BR>レポートの提出先は manaba とし,提出締切は授業終了後2週間後,内容については授業内で連絡します.                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第1回                                    </th>
-                                    <td>
-ガイダンス、FPGA/CAD ツールの使い方、電子工作など                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第2回                                    </th>
-                                    <td>
-論理回路の復習、入出力の扱いについてなど                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第3回                                    </th>
-                                    <td>
-SoC-FPGA の設計と実装(1)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第4回                                    </th>
-                                    <td>
-SoC-FPGA の設計と実装(2)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第5回                                    </th>
-                                    <td>
-SoC-FPGA の設計と実装(3)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                    </table>
-                </div>
-                    <p id="pretopics">
-演習器具の貸出があるため定員があります.<BR>(演習機材の共有が難しいため定員は30名程度となります).<BR><BR>履修申込が定員を超えた場合,<BR>1) 情報科学類生(2年次)<BR>2) 情報科学類生(34年次)<BR>3) 情報科学類生(1年次)<BR>4) 情報学群生<BR>5) 他専門学群・他学類<BR>の順で抽選します.                    </p>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+・専門コンピテンス<BR>1. 情報科学を支える基礎知識                </p>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">履修条件</h2>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
                 <p id="style">
-情報科学類開設科目:「論理回路」および「論理回路実験」を修得していること.他専門学群,他学類で同様の科目を受講している場合は担当教員に事前に連絡を取ること.また「論理システム」を修得ないし同年度に習得予定であること.                </p>
-        </div>
-    
-        <div id="style-heading-style">
-            		<h2 id="style-heading">成績評価方法</h2>
-                <p id="style">
-成績は出席状況・演習結果・レポートによって総合的に評価する。第5回目の課題が終了し、製作したシステムが仕様通りに動作することを立会い検査によって確認した上で、演習の終了とみなす。単位の修得には以下の要素が必須である(どれか一つが欠けても単位の修得はできない)。<BR>・各演習で出される課題達成。<BR>・立会い検査を含めた演習の完了<BR>・期限内でのレポート提出<BR>・機材の返却(返却が確認されない場合は単位が修得できないので注意すること)                </p>
-        </div>
-    
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
-                <p id="style">
-授業終了時に示す演習についてレポートを作成すること。                </p>
-        </div>
-    
-        <div id="style-heading-style">
-            		<h2 id="style-heading">教材・参考文献・配付資料等</h2>
-            <div id="topics">
-                    <p id="pretopics">
-演習スライドを manaba および MS Teams で配布<BR>演習機材は,事前に配布.詳細は後日連絡.                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                    </table>
-                </div>
-                    <p id="pretopics">
-参考書籍<BR>「だれにもわかるディジタル回路 改訂3版」相磯秀夫(監修)、天野英晴、武藤佳恭(共著)、オーム社<BR>「入門Verilog HDL記述―ハードウェア記述言語の速習&amp;実践」小林 優(著)                    </p>
+実機を用いた設計/実装を通して、これまでに学んだ論理回路をシステムとして設計/実装する手法を学ぶ。題材である画像処理システムにはカウンタ・バス制御・メモリ制御・論理演算・数値演算などが含まれ、これまでに学習してきた知識を利用してシステムを自力で設計することが求められる課題となっている。与えられた仕様を確認し、ハードウェア記述言語を用いて設計/シミュレーション/実装/動作確認までを行う。以上により、論理回路の系統的設計法を習得すると同時に、実用システムの設計から動作確認までを全て独力で行い、各個人の論理回路に関する一貫した知識・スキルを深め習得することが目標である。                </p>
             </div>
-        </div>
     
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+論理回路, 論理システム, 組込みシステム, 画像処理, ハードウェア設計                </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
-            <div id="topics">
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <td>
-山口 佳樹 　総合研究棟B SB1109/SB928                                                    <br>
-                                                            <span class="officehour-address">
-1002505                                                            </span>
-                                                            <a href="http://www.cs.tsukuba.ac.jp/~yoshiki/" target="_blank">http://www.cs.tsukuba.ac.jp/~yoshiki/</a>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-金澤 健治 　メールでアポイントメントをとってもらえれば随時　                                                    <br>
-                                                            <span class="officehour-address">
-23051795                                                            </span>
-                                    </td>
-                                </tr>
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+授業は,オンライン ( MS Teams ないし Zoom ) で行われる.<BR>授業は, 5 x (説明75分-&gt;演習75分) で構成される予定である.<BR>提出レポートは, 上記の演習時間で行った内容に関わる内容から出題し, <BR>それに要する作業時間は,演習時間内と授業時間外の自主学習を合わせて<BR>平均60分程度を見込んでいる.これはあくまで平均で,早い人は<BR>演習時間内にレポート作成は完了する場合もある.                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+ガイダンス、FPGA/CAD ツールの使い方                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+論理回路の復習、入出力の扱いについてなど                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+SoC-FPGA の設計と実装(1)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+SoC-FPGA の設計と実装(2)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+SoC-FPGA の設計と実装(3)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                        <p id="pretopics">
+演習器具に限りがあるため定員がある(60名程度).<BR><BR>履修申し込みが定員を超えた場合,<BR>1) 情報科学類生(2年次)<BR>2) 情報科学類生(34年次)<BR>3) 情報科学類生(1年次)<BR>4) 情報学群生<BR>5) 他専門学群・他学類<BR>の順で抽選する.                        </p>
                 </div>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
-                <p id="style">
-2020年度は2021年1~3月に開講します.履修方法および授業の詳細については,2020年12月頃に掲示されます.                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+情報科学類開設科目「論理回路」および「論理回路実験」を修得していること.<BR>他専門学群・他学類で同様の科目を受講している場合は担当教員に事前に確認を取ること.<BR>また「論理システム」を前年度までに修得ないし同年度に修得予定であること．<BR><BR>授業で使用するCADツールを受講者所有のPCにインストールできることが望ましい (下記URL。windowsかlinuxが必要である)。<BR>https://japan.xilinx.com/products/design-tools/vivado/vivado-ml.html                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+成績は出席状況・演習結果・レポートによって総合的に評価する。<BR>5回目の課題が終了し、製作したシステムが仕様通りに動作することを<BR>立ち会い検査ないしソースコードを確認することによって演習の終了とみなす。<BR><BR>単位の修得には以下の要素が必須である(どれか一つが欠けても単位の修得はできない)。<BR>・各演習で出される課題達成。<BR>・立ち会い検査を含めた演習の完了<BR>・期限内でのレポート提出<BR>・機材の返却                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+授業終了時に示す演習についてレポートを作成すること。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+演習スライドを manaba および MS Teams で配布<BR>演習機材は,事前に配布.詳細は後日連絡.                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                        <p id="pretopics">
+参考書籍<BR>「だれにもわかるディジタル回路 改訂3版」相磯秀夫(監修)、天野英晴、武藤佳恭(共著)、オーム社<BR>「入門Verilog HDL記述―ハードウェア記述言語の速習&amp;実践」小林 優(著)                        </p>
+                </div>
+            </div>
     
     
-        <div id="style-heading-style">
-		            <h2 id="style-heading">他の授業科目との関連</h2>
-        </div>
-        <div id="topic-assignments">
-            <table summary="topsics">
-            </table>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+金澤 健治 　メールでアポイントメントをとってもらえれば随時　                                                        <br>
+                                                                <span class="officehour-address">
+23051795                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+山口 佳樹 　総合研究棟B SB1109/SB928                                                        <br>
+                                                                <span class="officehour-address">
+1002505                                                                </span>
+                                                                <a href="http://www.cs.tsukuba.ac.jp/~yoshiki/" target="_blank">http://www.cs.tsukuba.ac.jp/~yoshiki/</a>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
     
-        <div id="style-heading-style">
-                <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
-                <p id="style">
-TA: 1名                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+                    <p id="style">
+TA: 2名                    </p>
+            </div>
     
     
     
@@ -372,6 +438,6 @@ TA: 1名                </p>
 
 
 
-</object>
+
 </body>
 </html>

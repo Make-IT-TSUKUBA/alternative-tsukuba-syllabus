@@ -129,6 +129,71 @@ $(function() {
         });
     }
 });
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+});
 </script>
 <body>
 
@@ -137,12 +202,13 @@ $(function() {
 </style>
 
 <h2 align="center">シラバス参照</h2>
-
+        <input type="hidden" name="lang" value="ja_JP">
 <table width="100%">
     <tr>
         <td align="left">
-            
-              <a href="/syllabi/2021/GB46503/jpn/0/">
+          
+          
+              <a href="/syllabi/2022/GB46503/jpn/0/">
                   最新版のシラバスを表示
               </a>
           
@@ -153,12 +219,14 @@ $(function() {
   <tr>
       <td align="right">
           
+              最終更新日：2022/03/25
+          
             &nbsp;
         </td>
     </tr>
 </table>
 
-<object >    <h1 id="course-title">
+    <h1 id="course-title">
         <span id="course">
 GB46503        </span>&nbsp;
         <span id="title">
@@ -173,10 +241,10 @@ GB46503        </span>&nbsp;
                     3 年次,
             </span>
             <span id="timetable">
-秋ABC水3,4,金5,6            </span>
+秋ABC 水3,4,金5,6            </span>
             <br>
             <span id="assignments">
-西出,秋本,飯塚,伊藤,乾,面,金森,亀山(啓),工藤,酒井,佐久間,鈴木, 滝沢,馬場,福井,古川,三谷,山田,山本, 齊藤 裕一            </span>
+古川 宏, 青砥 隆仁, 秋本 洋平, 飯塚 里志, 五十嵐 康彦, LEE JIEUN, 伊藤 誠, 乾 孝司, 遠藤 結城, 面 和成, 金森 由博, 亀山 啓輔, 工藤 博幸, 國廣 昇, 齊藤 裕一, 酒井 宏, 佐久間 淳, 鈴木 大三, 滝沢 穂高, 西出 隆志, 馬場 雪乃, 福井 和広, 福地 一斗, 三谷 純, 山田 武志, 山本 幹雄            </span>
         </p>
     </div>
     <div id="summary-heading-summary-contents">
@@ -193,7 +261,7 @@ GB46503        </span>&nbsp;
             
         </h2>
         <p id="note">
-情報科学類においては,知能情報メディア主専攻の学生に限る。<BR>BC12893と同一。<BR>オンライン(オンデマンド型)<BR>オンライン(同時双方向型)<BR>対面        </p>
+情報科学類においては,知能情報メディア主専攻の学生に限る。<BR>BC12893と同一。<BR>オンライン(オンデマンド型)<BR>オンライン(同時双方向型)<BR>対面<BR>その他の実施形態<BR>開講日注意（テーマごとに設定。詳細は主専攻実験ウェブページ参照）        </p>
     </div>
     <div id="note-heading-note">
         <h2 id="note-heading">
@@ -204,103 +272,202 @@ GB46503        </span>&nbsp;
 実習･実験･実技        </p>
     </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
-            <p id="style">
-・専門コンピテンス<BR>4. 知能情報メディア分野の専門能力<BR>6. 実践的技術力と問題解決能力<BR>7. 情報専門技術者としての倫理            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+・専門コンピテンス<BR>4. 知能情報メディア分野の専門能力<BR>6. 実践的技術力と問題解決能力<BR>7. 情報専門技術者としての倫理                </p>
+            </div>
     
-        <div id="style-heading-style">
-         		   <h2 id="style-heading">授業の到達目標(学修成果)</h2>
-            <p id="style">
-認識・理解や学習・獲得などの知的情報処理や,音声・ 画像などの情報メディアの生成,入出力,効率的な蓄 積・伝達に関する理論と技術の習得を目指す.特に具体的なシステムを扱うことを通じて,将来の研究開発に役立つ実践的な知識・技能を習得することを目標とする.            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
+                <p id="style">
+認識・理解や学習・獲得などの知的情報処理や,音声・ 画像などの情報メディアの生成,入出力,効率的な蓄 積・伝達に関する理論と技術の習得を目指す.特に具体的なシステムを扱うことを通じて,将来の研究開発に役立つ実践的な知識・技能を習得することを目標とする.                </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">キーワード</h2>
-            <p id="style">
-知能情報, メディア工学            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+知能情報, メディア工学                </p>
+            </div>
     
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">授業計画</h2>
-            <div id="topics">
-                    <p id="pretopics">
-劣化画像修復(T-1)<BR>簡易プロトタイピングによるユーザインタフェース設計(T-3)<BR>日本語形態素解析と文書分類(T-4)<BR>進化的アルゴリズム(T-5)<BR>機械学習による推薦アルゴリズム(T-10)                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+劣化画像修復(T-1)<BR>簡易プロトタイピングによるユーザインタフェース設計(T-3)<BR>日本語形態素解析と文書分類(T-4)<BR>進化的アルゴリズム(T-5)<BR>機械学習による推薦アルゴリズム(T-10)                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">履修条件</h2>
-                <p id="style">
-ガイダンス:春学期,第1回目の実験授業時間に,単位修得条件,実験の進め方,各実験テーマの説明,実験関係資料配布等のためのガイダンスを行うので,必ず出席すること.ガイダンスを行う教室については掲示をするので,確認すること.<BR><BR>テーマの選択について:<BR>実験は選択したテーマを1学期にわたって行う.<BR>各学期に1テーマ,1年間で合計2テーマを履修する.<BR>同じテーマを2度以上選択することはできない.<BR>開設するテーマは各学期によって異なるので,テーマの申請前にガイダンス資料などでよく確認すること.<BR>希望テーマの申請方法と,確定テーマの掲示方法については,ガイダンス 時に説明する.<BR>班分けが必要なテーマに関する班分け表は,各学期の実験開始時に配布する.<BR><BR>情報科学類においては,知能情報メディア主専攻の学生に限る。BC12883と同一。                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+ガイダンス:春学期,第1回目の実験授業時間に,単位修得条件,実験の進め方,各実験テーマの説明,実験関係資料配布等のためのガイダンスを行うので,必ず出席すること.ガイダンスを行う教室については掲示をするので,確認すること.<BR><BR>テーマの選択について:<BR>実験は選択したテーマを1学期にわたって行う.<BR>各学期に1テーマ,1年間で合計2テーマを履修する.<BR>同じテーマを2度以上選択することはできない.<BR>開設するテーマは各学期によって異なるので,テーマの申請前にガイダンス資料などでよく確認すること.<BR>希望テーマの申請方法と,確定テーマの掲示方法については,ガイダンス 時に説明する.<BR>班分けが必要なテーマに関する班分け表は,各学期の実験開始時に配布する.<BR><BR>情報科学類においては,知能情報メディア主専攻の学生に限る。BC12883と同一。                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">成績評価方法</h2>
-                <p id="style">
-課題ごとに定められたレポートにより評価する。ただし、欠席が2割を越す (6 回以上) と成績評価を行わない。                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+課題ごとに定められたレポートにより評価する。ただし、欠席が2割を越す (6 回以上) と成績評価を行わない。                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
-                <p id="style">
-課題ごとに定められたレポートを作成し提出すること。                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+課題ごとに定められたレポートを作成し提出すること。                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">教材・参考文献・配付資料等</h2>
-            <div id="topics">
-                    <p id="pretopics">
-講義のWebページ<BR>https://www.coins.tsukuba.ac.jp/jikken-3nen/                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+講義のWebページ<BR>https://www.coins.tsukuba.ac.jp/jikken-3nen/                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
-            <div id="topics">
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <td>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                    </td>
-                                </tr>
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+齊藤 裕一 　                                                        <br>
+                                                                <span class="officehour-address">
+100002916                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
-                <p id="style">
-実験テーマは増減しうるため春学期のガイダンスに必ず出席しテーマを確認すること                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
+                    <p id="style">
+実験テーマは増減しうるため春学期のガイダンスに必ず出席しテーマを確認すること                    </p>
+            </div>
     
     
-        <div id="style-heading-style">
-		            <h2 id="style-heading">他の授業科目との関連</h2>
-        </div>
-        <div id="topic-assignments">
-            <table summary="topsics">
-            </table>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
     
-        <div id="style-heading-style">
-                <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+            </div>
     
     
     
@@ -309,6 +476,6 @@ GB46503        </span>&nbsp;
 
 
 
-</object>
+
 </body>
 </html>

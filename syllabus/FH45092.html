@@ -129,6 +129,71 @@ $(function() {
         });
     }
 });
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+});
 </script>
 <body>
 
@@ -137,12 +202,13 @@ $(function() {
 </style>
 
 <h2 align="center">シラバス参照</h2>
-
+        <input type="hidden" name="lang" value="ja_JP">
 <table width="100%">
     <tr>
         <td align="left">
-            
-              <a href="/syllabi/2021/FH45092/jpn/0/">
+          
+          
+              <a href="/syllabi/2022/FH45092/jpn/0/">
                   最新版のシラバスを表示
               </a>
           
@@ -153,12 +219,14 @@ $(function() {
   <tr>
       <td align="right">
           
+              最終更新日：2022/01/31
+          
             &nbsp;
         </td>
     </tr>
 </table>
 
-<object >    <h1 id="course-title">
+    <h1 id="course-title">
         <span id="course">
 FH45092        </span>&nbsp;
         <span id="title">
@@ -173,10 +241,10 @@ FH45092        </span>&nbsp;
                     3・4 年次,
             </span>
             <span id="timetable">
-秋AB月5,6            </span>
+秋AB 月5,6            </span>
             <br>
             <span id="assignments">
-藤川 昌樹, 渡辺 俊, 藤井 さやか, 雨宮 護, 山本 幸子            </span>
+渡辺 俊, 藤川 昌樹, 雨宮 護, 藤井 さやか, 山本 幸子            </span>
         </p>
     </div>
     <div id="summary-heading-summary-contents">
@@ -185,7 +253,7 @@ FH45092        </span>&nbsp;
             
         </h2>
         <p id="summary-contents">
-空間の設計能力向上を目指す建築設計製図演習である。1-3年次に「基本製図」、「設計演習I」及び「住環境計画実習」を受講した学生が、これまでに習得した設計製図における基礎手法を用い、より高度な設計方法と設計技術を身に付けることを目標とする。        </p>
+空間の設計能力向上を目指す建築設計製図演習である。1-3年次に「基本製図」、「設計演習I」及び「住環境計画演習（実習）」等を受講した学生が、これまでに習得した設計製図における基礎手法を踏まえて、先進的な情報処理技術による高度な設計方法を身に着けることを目標とする。        </p>
     </div>
     <div id="note-heading-note">
         <h2 id="note-heading">
@@ -193,7 +261,7 @@ FH45092        </span>&nbsp;
             
         </h2>
         <p id="note">
-都市計画共通。<BR>その他の実施形態<BR>講義は原則対面。コロナ禍の状況によっては、演習指導をオンラインに変更する。期末試験はオンライン(オンデマンド型)。原則として「住環境計画実習」または「住環境計画演習」既修得者に限る。        </p>
+都市計画共通。<BR>対面<BR>状況によってオンラインに変更する。<BR>履修者は建築設計製図の基礎を習得していること。        </p>
     </div>
     <div id="note-heading-note">
         <h2 id="note-heading">
@@ -204,229 +272,226 @@ FH45092        </span>&nbsp;
 演習        </p>
     </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
-            <p id="style">
-「コミュニケーション能力、批判的・創造的思考力、データ・情報リテラシー、協働性・主体性・自律性、社会的要請への対応力、コミュニケーション・スキル、課題探求能力」            </p>
-        </div>
-    
-        <div id="style-heading-style">
-         		   <h2 id="style-heading">授業の到達目標（学修成果）</h2>
-            <p id="style">
-「基本製図」「設計演習I」「住環境計画実習」(または住環境計画演習)を受講した後に、これまでに習得した設計製図における基礎手法を用い、より高度な設計方法と設計技術を身に付ける。            </p>
-        </div>
-    
-        <div id="style-heading-style">
-            		<h2 id="style-heading">キーワード</h2>
-            <p id="style">
-建築 設計 製図 オフィスビル            </p>
-        </div>
-    
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">授業計画</h2>
-            <div id="topics">
-                    <p id="pretopics">
-建築計画力・設計企画能力を養うため、最終提出物は、場所・企画・提案内容自由の建築・都市空間の設計提案とする。大規模建築単体に留まらず複合機能を有し、社会情勢を反映させた実現性の高い設計製図提案とする。設計競技(コンペ)を想定した課題を設定する場合もある。<BR>2021年は、コロナウイルス感染防止のため、<BR> ・教員からの説明・エスキースチェック・中間発表・最終発表についてはオンラインで実施するが、<BR> ・学生による端末室での作業は可<BR>とする。                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第1回                                    </th>
-                                    <td>
-オリエンテーション/課題説明                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第2回                                    </th>
-                                    <td>
-建築・都市空間の設計製図1:敷地選定,社会背景調査分析,エスキス                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第3回                                    </th>
-                                    <td>
-〃                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第4回                                    </th>
-                                    <td>
-建築・都市空間の設計製図2:サイトプラン,ゾーニング,基本計画等                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第5回                                    </th>
-                                    <td>
-〃                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第6回                                    </th>
-                                    <td>
-〃                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第7回                                    </th>
-                                    <td>
-建築・都市空間の設計製図3:平面図,立面図作成                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第8回                                    </th>
-                                    <td>
-〃                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第9回                                    </th>
-                                    <td>
-〃                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第10回                                    </th>
-                                    <td>
-建築・都市空間設計提案の提出およびプレゼンテーション                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                    </table>
-                </div>
-                    <p id="pretopics">
-最終的に良い作品を仕上げることが求められる。                    </p>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+「コミュニケーション能力、批判的・創造的思考力、データ・情報リテラシー、協働性・主体性・自律性、社会的要請への対応力、コミュニケーション・スキル、課題探求能力」                </p>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">履修条件</h2>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標（学修成果）</h2>
                 <p id="style">
-1-3年次に「設計演習I」、「住環境計画実習」(または住環境計画演習)を受講していること。                </p>
-        </div>
-    
-        <div id="style-heading-style">
-            		<h2 id="style-heading">成績評価方法</h2>
-                <p id="style">
-設計製図力、及び、総合的な建築・都市計画能力(発想力,労力,プレゼンテーション,的確性など)を評価する                </p>
-        </div>
-    
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
-                <p id="style">
-設計製図の作業は授業時間内だけではなく、授業前後の時間も積極的に活用すること。                </p>
-        </div>
-    
-        <div id="style-heading-style">
-            		<h2 id="style-heading">教材・参考文献・配付資料等</h2>
-            <div id="topics">
-                    <p id="pretopics">
-特になし                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                    </table>
-                </div>
-                    <p id="pretopics">
-設計課題の対象に応じて参考文献を指示する。                    </p>
+「基本製図」、「設計演習I」、「住環境計画演習（実習）」等における建築設計手法の習得を前提として、さらにBIM（Building Information Modeling）による高度な設計技術を身に付けるとともに、デザイン能力の向上を目指す。                </p>
             </div>
-        </div>
     
-    
-        <div id="style-heading-style">
-            		<h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
-            <div id="topics">
-                    <p id="pretopics">
-木曜日18:00-19:00                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <td>
-藤川 昌樹 　                                                    <br>
-                                                            <span class="officehour-address">
-1001437                                                            </span>
-                                                            <a href="http://wright.sk.tsukuba.ac.jp/fujikawa/index.html" target="_blank">http://wright.sk.tsukuba.ac.jp/fujikawa/index.html</a>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                    </td>
-                                </tr>
-                    </table>
-                </div>
-                    <p id="pretopics">
-特になし。                    </p>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+建築 設計 オフィスビル BIM                </p>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
-                <p id="style">
-建築士受験資格の取得のためだけでなく、設計関連職への就職活動の際に必要となる作品を作成するチャンスなので、意欲的に受講して欲しい。                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+最先端のオフィスビルを題材としたBIM演習を通じてオフィス設計の基本を学ぶとともに、具体的な設計課題を通じて建築計画力・設計能力を養い、新しい時代の執務環境にふさわしい建築・都市空間をデザインする。BIMソフトウェアについては、大学の端末でも自身のパーソナルコンピュータでも利用できる教育用ライセンスを提供する。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+課題説明・BIM演習（１）                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+オフィス設計の基礎・BIM演習（２）                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+オフィス事例の紹介・BIM演習（３）                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+敷地分析・BIM演習（４）                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+エスキース・BIM演習（５）                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6回                                        </th>
+                                        <td>
+ゾーニング・ヴォリュームスタディ                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第7回                                        </th>
+                                        <td>
+基本計画発表会                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第8回                                        </th>
+                                        <td>
+計画案のモデリング・設計作業                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第9回                                        </th>
+                                        <td>
+設計作業・プレゼンテーション準備                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第10回                                        </th>
+                                        <td>
+最終発表会                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+1-3年次に「基本製図」、「設計演習I」、「住環境計画演習（実習）」を受講している、あるいは同等のスキルを習得していること。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+設計製図力、及び、総合的な建築・都市計画能力(発想力,労力,プレゼンテーション,的確性など)を評価する。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+設計の作業は授業時間内だけではなく、授業前後の時間も積極的に活用すること。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+特になし                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                        <p id="pretopics">
+設計課題の対象に応じて参考文献を指示する。                        </p>
+                </div>
+            </div>
     
     
-        <div id="style-heading-style">
-		            <h2 id="style-heading">他の授業科目との関連</h2>
-        </div>
-        <div id="topic-assignments">
-            <table summary="topsics">
-            </table>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
+                <div id="topics">
+                        <p id="pretopics">
+月曜日18:00-19:00                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+渡辺 俊 　                                                        <br>
+                                                                <span class="officehour-address">
+1001289                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                        <p id="pretopics">
+特になし。                        </p>
+                </div>
+            </div>
     
-        <div id="style-heading-style">
-                <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
-                <p id="style">
-T.A.配置あり。                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
+                    <p id="style">
+建築士受験資格の取得のためだけでなく、設計関連職への就職活動の際に必要となる作品を作成するチャンスなので、意欲的に受講して欲しい。                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
+                    <p id="style">
+T.A.配置あり。                    </p>
+            </div>
     
     
     
@@ -435,6 +500,6 @@ T.A.配置あり。                </p>
 
 
 
-</object>
+
 </body>
 </html>

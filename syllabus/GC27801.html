@@ -129,6 +129,71 @@ $(function() {
         });
     }
 });
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+});
 </script>
 <body>
 
@@ -137,12 +202,13 @@ $(function() {
 </style>
 
 <h2 align="center">シラバス参照</h2>
-
+        <input type="hidden" name="lang" value="ja_JP">
 <table width="100%">
     <tr>
         <td align="left">
-            
-              <a href="/syllabi/2021/GC27801/jpn/0/">
+          
+          
+              <a href="/syllabi/2022/GC27801/jpn/0/">
                   最新版のシラバスを表示
               </a>
           
@@ -153,12 +219,14 @@ $(function() {
   <tr>
       <td align="right">
           
+              最終更新日：2022/03/29
+          
             &nbsp;
         </td>
     </tr>
 </table>
 
-<object >    <h1 id="course-title">
+    <h1 id="course-title">
         <span id="course">
 GC27801        </span>&nbsp;
         <span id="title">
@@ -173,10 +241,10 @@ GC27801        </span>&nbsp;
                     2 年次,
             </span>
             <span id="timetable">
-秋C月3,4木3,4            </span>
+秋C 月3,4,木3,4            </span>
             <br>
             <span id="assignments">
-辻 泰明            </span>
+辻 泰明, 太田 美奈子            </span>
         </p>
     </div>
     <div id="summary-heading-summary-contents">
@@ -185,7 +253,7 @@ GC27801        </span>&nbsp;
             
         </h2>
         <p id="summary-contents">
-映像コンテンツのデジタル化が進み、その利活用が盛んになるに従い、映像メディアに対する知識と理解が強く求められるようになっている。この講義では、広い意味での情報学としての観点から映像メディアをとらえて、その歴史と現状について幅広く概観し、メディアとしての特性を考察する。また、映像コンテンツにおける文法、構成、類型について解説し、その利活用にあたって、必ず身につけておくべき映像リテラシーの基本を教授すると共に、映像コンテンツのアーカイビングにおける課題についても検討する。        </p>
+映像コンテンツのデジタル化が進み、その利活用が盛んになるに従い、映像メディアに対する知識と理解が強く求められるようになっている。平成期の30年間は、テレビからインターネットへとメディアの主役が転換し、コミュニケーションの革命が生じた人類史上まれにみる時代だった。一方向から双方向へというメディアの転換は、どのように起こったのか。それを知ることは、テレビとインターネットそれぞれの特質を知ることであり、現代におけるコミュニケーションのありかたを探ることでもある。この講義では、かつてない劇的な変革の経緯をたどり、広い意味での情報学としての観点から映像メディアをとらえて、その特性を考察する。また、映像コンテンツの利活用にあたって、必ず身につけておくべき映像リテラシーの基本を教授する。        </p>
     </div>
     <div id="note-heading-note">
         <h2 id="note-heading">
@@ -193,7 +261,7 @@ GC27801        </span>&nbsp;
             
         </h2>
         <p id="note">
-2018年度までの映像メディア論(GE82501, GC54401)を修得済みの者は履修不可。<BR>GE22301と同一。<BR>実務経験教員<BR>情報メディア創成学類生はGC27801を、それ以外の学生はGE22301を履修すること。        </p>
+GE22301と同一。<BR>実務経験教員<BR>オンライン(オンデマンド型)<BR>情報メディア創成学類生はGC27801を、それ以外の学生はGE22301を履修すること。        </p>
     </div>
     <div id="note-heading-note">
         <h2 id="note-heading">
@@ -204,198 +272,202 @@ GC27801        </span>&nbsp;
 講義        </p>
     </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
-            <p id="style">
-文理融合型基礎の獲得, 知識共有現象の理解            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+文理融合型基礎の獲得, 知識共有現象の理解                </p>
+            </div>
     
-        <div id="style-heading-style">
-         		   <h2 id="style-heading">授業の到達目標（学修成果）</h2>
-            <p id="style">
-・映画、テレビ、インターネット配信といった映像メディアについて、概要を理解する。<BR>・映像コンテンツの構成、文法、類型について理解し、基本的な映像リテラシーを習得する。<BR>・映像アーカイブや映像配信サイトについて、現状と課題を把握する。            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標（学修成果）</h2>
+                <p id="style">
+・映画、テレビ、インターネット配信といった映像メディアについて、概要を理解する。<BR>・テレビからインターネット配信への転換について、イノベーションの過程を理解する。<BR>・動画共有サイトや動画配信サービスについて、構造と特徴を理解する。                </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">キーワード</h2>
-            <p id="style">
-映像メディアの現状, デジタル映像, 動く映像の原理とアニメーション, 映像コンテンツの構成と文法, ニュース, ドラマ, ドキュメンタリー, 映画, テレビ, インターネット配信, 映像アーカイブ, 映像配信サイト, インターネット連携, 映像メディアの近未来            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+映像メディアの現状, 映像メディアの転換とイノベーション、 映画, テレビ, 動画共有サイト、動画配信サービス, 映像コンテンツの利活用、映像メディアの連携, 映像メディアの近未来                </p>
+            </div>
     
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">授業計画</h2>
-            <div id="topics">
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-                                    </th>
-                                    <td>
-映像メディアの現状                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-                                    </th>
-                                    <td>
-映像コンテンツ概説(1)文法                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-                                    </th>
-                                    <td>
-映像コンテンツ概説(2)構成                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-                                    </th>
-                                    <td>
-映像コンテンツ概説(3)類型                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-                                    </th>
-                                    <td>
-映画概説                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-                                    </th>
-                                    <td>
-テレビ概説                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-                                    </th>
-                                    <td>
-インターネット配信概説                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-                                    </th>
-                                    <td>
-映像アーカイブ概説                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-                                    </th>
-                                    <td>
-映像配信サイト概説                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-                                    </th>
-                                    <td>
-映像メディアの連携と融合                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+映像メディアの転換                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+多様化の時代におけるテレビ                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+マルチメディアの理念                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+インターネットと多様性                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+放送と通信の融合                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+動画共有の意義                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+動画配信の隆盛                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+スマートフォンと映像メディアの連携                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+映像メディアとグローバリズム                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+映像メディアの課題                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">履修条件</h2>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">成績評価方法</h2>
-                <p id="style">
-授業時間内提出物および受講態度50% レポート50%                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+授業時間内提出物および受講態度50% レポート50%。レポートの評価項目はA+、A、B、C、Dとする。                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
-                <p id="style">
-予習:教科書の該当部分を読んで、予備知識を身につけておく。<BR>復習:関連書籍の参照や映像コンテンツの視聴によって、理解を深める。                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+予習:教科書の該当部分を読んで、予備知識を身につけておく。<BR>復習:関連サイトの参照や映像コンテンツの視聴によって、理解を深める。                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">教材・参考文献・配付資料等</h2>
-            <div id="topics">
-                    <p id="pretopics">
-教科書を参照しつつ授業を進めますので、必ず持参してください。また、課題への回答作成にも教科書が必要となります。                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+教科書を参照しつつ授業を進めますので、必ず所持してください。また、課題への回答作成にも教科書が必要となります。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
-            <div id="topics">
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <td>
-辻 泰明 　火曜2限　7D514                                                    <br>
-                                                            <span class="officehour-address">
-23051643                                                            </span>
-                                    </td>
-                                </tr>
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+辻 泰明 　火曜2限　7D514                                                        <br>
+                                                                <span class="officehour-address">
+23051643                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
-                <p id="style">
-オンライン(オンデマンド型)                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
+                    <p id="style">
+オンライン(オンデマンド型)                    </p>
+            </div>
     
     
-        <div id="style-heading-style">
-		            <h2 id="style-heading">他の授業科目との関連</h2>
-        </div>
-        <div id="topic-assignments">
-            <table summary="topsics">
-            </table>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
     
-        <div id="style-heading-style">
-                <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
+            </div>
     
     
     
@@ -404,6 +476,6 @@ GC27801        </span>&nbsp;
 
 
 
-</object>
+
 </body>
 </html>

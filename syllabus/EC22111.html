@@ -129,6 +129,71 @@ $(function() {
         });
     }
 });
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+});
 </script>
 <body>
 
@@ -137,11 +202,16 @@ $(function() {
 </style>
 
 <h2 align="center">シラバス参照</h2>
-
+        <input type="hidden" name="lang" value="ja_JP">
 <table width="100%">
     <tr>
         <td align="left">
-            
+          
+          
+              <a href="/syllabi/2022/EC22111/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
           
           &nbsp;
       </td>
@@ -149,14 +219,14 @@ $(function() {
   <tr>
       <td align="right">
           
-              最終更新日：2021/04/09
+              最終更新日：2022/03/31
           
             &nbsp;
         </td>
     </tr>
 </table>
 
-<object >    <h1 id="course-title">
+    <h1 id="course-title">
         <span id="course">
 EC22111        </span>&nbsp;
         <span id="title">
@@ -171,10 +241,10 @@ EC22111        </span>&nbsp;
                     2 年次,
             </span>
             <span id="timetable">
-秋AB月1,2            </span>
+秋AB 月1,2            </span>
             <br>
             <span id="assignments">
-市川 創作, 小川 和義            </span>
+青柳 秀紀, 市川 創作, 野村 名可男, 平川 秀彦, 小川 和義            </span>
         </p>
     </div>
     <div id="summary-heading-summary-contents">
@@ -183,7 +253,7 @@ EC22111        </span>&nbsp;
             
         </h2>
         <p id="summary-contents">
-生物化学工学の対象分野を概観し,有用物質生産に用いる生体触媒(微生物,動・植物細胞,酵素)の特性,物理量・化学量の取り扱いに必要な単位と次元,無次元数,平衡と分配,流動,物質移動と物質収支,生物反応の速度論と経時変化,バイオリアクターの形式と操作等について解説し,生物化学工学の基礎を講義する。        </p>
+生物化学工学は、生物または生物が関与する有用物質を定量的・経済的に取り扱うために生まれた学問であり、その対象は発酵、食品製造・加工、環境浄化、ワクチン等医薬品製造、有用天然物の分離精製、人工臓器等の再生医療、バイオ燃料生産など、極めて広範囲に及ぶ。このため、現在の私たちの社会・産業は生物化学工学なしに成立しない。しかし、その対象が広がったために、「生物化学工学とは何か」がわかりにくくなっているのも事実である。そこで、この授業では具体的な例を示しながら生物化学工学を概観し、生物化学工学を学ぶことの重要性を理解すると共に、生物化学工学を理解するために必要な事項等を含めた生物化学工学の基礎を講義する。        </p>
     </div>
     <div id="note-heading-note">
         <h2 id="note-heading">
@@ -202,213 +272,256 @@ EC22111        </span>&nbsp;
 講義        </p>
     </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学位プログラム・専門コンピテンスとの関係</h2>
-            <p id="style">
-バイオ製品を安定に,安価に,さらに安全に得るための生産技術を体系的に習得するうえで必要な生物化学工学の基礎知識を体系的に習得するとともに、その知識の取得に必要な、化学・工学・培養工学の基礎を習得する。<BR>専門コンピテンス1体系的な専門知識。専門コンピテンス2専門の基礎となる教養。<BR>授業の到達目標(学修成果)            </p>
-        </div>
-    
-        <div id="style-heading-style">
-         		   <h2 id="style-heading">授業の到達目標(学修成果)</h2>
-            <p id="style">
-専門コンピテンス1体系的な専門知識。<BR>バイオ製品を安定に,安価に,さらに安全に得るための生産技術に必要な知識<BR>・有用物質生産に用いる生体触媒(微生物,動・植物細胞,酵素)の特性<BR>・生物反応の速度論と経時変化<BR>・バイオリアクターの形式と操作方法<BR>を理解する。<BR>専門コンピテンス2専門の基礎となる教養<BR>バイオ製品を安定に,安価に,さらに安全に得るための生産技術を学ぶために必要な教養<BR>・物理量・化学量の取り扱いに必要な単位と次元<BR>・無次元数,平衡と分配,流動,物質移動と物質収支、化学反応速度論<BR>を身につける。            </p>
-        </div>
-    
-        <div id="style-heading-style">
-            		<h2 id="style-heading">キーワード</h2>
-            <p id="style">
-生体触媒, バイオリアクター, 物質収支            </p>
-        </div>
-    
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">授業計画</h2>
-            <div id="topics">
-                    <p id="pretopics">
-バイオサイエンスの進歩により新たな物質が発見・発明されても、工業生産ができなければ、われわれは利用できない。生物化学工学はバイオ製品を安定に、安全に、安価に得るための生産技術を体系化した学問である。本授業では、生物化学工学を学ぶための基礎知識の習得と工学的アプローチの概念を身につけることを目指す。各週授業の後半には演習を行なう。                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第1回                                    </th>
-                                    <td>
-バイオテクノロジーと生物化学工学                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第2回                                    </th>
-                                    <td>
-バイオテクノロジーを支える生体触媒とバイオリアクター                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第3回                                    </th>
-                                    <td>
-バイオテクノロジーの工学的アプローチ1:単位と次元                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第4回                                    </th>
-                                    <td>
-バイオテクノロジーの工学的アプローチ2:速度と量                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第5回                                    </th>
-                                    <td>
-平衡と分配:気-液平衡、液-液平衡、固-液平衡                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第6回                                    </th>
-                                    <td>
-物質移動と物質収支I                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第7回                                    </th>
-                                    <td>
-物質移動と物質収支II                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第8回                                    </th>
-                                    <td>
-バイオリアクターの形式と操作                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第9回                                    </th>
-                                    <td>
-生物反応の速度論と経時変化                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第10回                                    </th>
-                                    <td>
-総復習                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                    </table>
-                </div>
-                    <p id="pretopics">
-講義は、原則としてmanaba, Microsoft Teams, Microsoft Streamを利用し、オンライン＆オンデマンド型で行う。ただし、期末試験は学生の大学への入構が許可されている場合、対面で行う。<BR><BR>履修に際しては、あらかじめMicrosoft Teamsの「EC22111 基礎生物化学工学 2021」チームにコードにより参加登録してください。チームコードについてはmanabaを通じて知らせる。<BR><BR>＜チームへの参加登録方法＞<BR>Microsoft Teamsのタブを選び、右上の「チームに参加、またはチームを作成」を押し、「チームに参加、またはチームを作成」において<BR>「コードでチームに参加する」にコードを入力してください。<BR>チームに参加登録できない場合は、上記の担当教員にメールで連絡ください。                    </p>
-            </div>
-        </div>
-    
-        <div id="style-heading-style">
-            		<h2 id="style-heading">履修条件</h2>
-        </div>
-    
-        <div id="style-heading-style">
-            		<h2 id="style-heading">成績評価方法</h2>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・専門コンピテンスとの関係</h2>
                 <p id="style">
-試験90%、レポート10%で評価する。<BR>なお、学生の大学への入構が許可されず筆記試験が実施できない場合は、筆記試験にかえて課題を課し理解度を評価する。                </p>
-        </div>
-    
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
-                <p id="style">
-参考書や関連する文献を読み、配布資料にある演習問題を解くことで理解を深める。                </p>
-        </div>
-    
-        <div id="style-heading-style">
-            		<h2 id="style-heading">教材・参考文献・配付資料等</h2>
-            <div id="topics">
-                    <p id="pretopics">
-資料を配布する。                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                    </table>
-                </div>
-                    <p id="pretopics">
-参考書<BR>1. 海野肇・中西一弘・白神直弘・丹治保典「新版生物化学工学」講談社サイエンティフック<BR>2. 合葉修一・永井史郎「生物化学工学-反応速度論-」科学技術社<BR>3. 小林猛・本多裕之「生物化学工学」東京化学同人                    </p>
+生物または生物が関与する有用物質を定量的・経済的に取り扱うために必要な生物化学工学の基礎知識を体系的に習得するとともに、その知識の取得に必要な、化学や工学の基礎を習得する。<BR>専門コンピテンス1　体系的な専門知識<BR>専門コンピテンス2　専門の基礎となる教養<BR>                </p>
             </div>
-        </div>
     
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
+                <p id="style">
+専門コンピテンス1　体系的な専門知識<BR>生物または生物が関与する有用物質を定量的・経済的に取り扱うために必要な生物化学工学の体系的な専門知識を学修する。<BR><BR>専門コンピテンス2　専門の基礎となる教養<BR>生物化学工学の基礎となる下記の事項を学修する。<BR>・物理量・化学量の取り扱いに必要な単位と次元、物質収支<BR>・平衡と分配、物質移動速度、反応速度、生物代謝と物質変換<BR>                </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
-            <div id="topics">
-                    <p id="pretopics">
-随時 (事前にメール連絡することが望ましい)                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <td>
-市川 創作 　                                                    <br>
-                                                            <span class="officehour-address">
-1001615                                                            </span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-小川 和義 　事前に連絡ください。  生物農林学系棟F212号室/F214実験室　                                                    <br>
-                                                            <span class="officehour-address">
-1002373                                                            </span>
-                                    </td>
-                                </tr>
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+バイオプロセス、単位操作、物質収支、平衡と分配、物質移動、反応速度、生体触媒、バイオリアクター                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+バイオサイエンスの進歩により新たな物質が発見されたり、新たな手法が発明されたりしても、社会で活用するためには産業規模で生産や利用ができなければ、その恩恵を広く享受することはできない。生物化学工学は、生物または生物が関与する有用物質を定量的・経済的に取り扱うため体系化された学問である。本授業では、生物化学工学が対象とする具体的な例を示しながら、生物化学工学を学修する上で必要な基礎知識の習得と生物化学工学の概念を身につけることを目指す。各週連続する2コマの授業を一回とし、計10回下記の講義を行う。学習内容の理解と定着のため、演習も適宜行う。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+バイオテクノロジーと生物化学工学                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+平川 秀彦                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+バイオプロセスと単位操作：食品や医薬品製造を例に                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+市川 創作                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+生物化学工学の基礎となる単位、次元、反応速度                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+小川 和義                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+平衡と分配：生体機能を模倣したシステムを例に                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+小川 和義                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+酵素を使用した反応と物質変換                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+平川 秀彦                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6回                                        </th>
+                                        <td>
+微生物や細胞を使用した反応と物質変換                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+青柳 秀紀                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第7回                                        </th>
+                                        <td>
+バイオリアクター                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+青柳 秀紀                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第8回                                        </th>
+                                        <td>
+生物反応と物質収支1：環境浄化を例に                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+野村 名可男                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第9回                                        </th>
+                                        <td>
+生物反応と物質収支2：微生物の制御を例に                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+野村 名可男                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第10回                                        </th>
+                                        <td>
+バイオプロセスにおける分離操作、生物工学の学びを3年次で深めるために                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+市川 創作                                         </td>
+                                    </tr>
+                        </table>
+                    </div>
+                        <p id="pretopics">
+講義は対面で実施する予定である。ただし、学生の入構が制限されるなど、対面での実施が困難な場合は、オンラインで実施する。授業実施形態の変更などは、manabaを通じて連絡する。                        </p>
                 </div>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">その他</h2>
-                <p id="style">
-詳細はmanabaを通じて告知する。                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+特になし。生物化学工学の考え方は、生物資源が関わる広範な分野に適応できるため学士（生物資源学）の取得を目指す多くの学生が履修することを望む。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+講義内容に関するレポートで評価する。春AB学期末の筆記試験は実施しない。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+講義内容や配布資料、参考書を学び理解を深める。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+必要な場合は資料を配布する。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                        <p id="pretopics">
+【参考書】<BR>1.「生物化学工学 第3版」海野肇・中西一弘・丹治保典・今井正直・養田正文, 講談社 (2011)<BR>2.「生物化学工学: バイオプロセスの基礎と応用 第2版」小林猛・田谷正仁, 東京化学同人（2019）<BR>3. 「バイオプロダクション -ものつくりのためのバイオテクノロジー-」化学工学会 バイオ部会 編, コロナ社 (2016)<BR>                        </p>
+                </div>
+            </div>
     
     
-        <div id="style-heading-style">
-		            <h2 id="style-heading">他の授業科目との関連</h2>
-        </div>
-        <div id="topic-assignments">
-            <table summary="topsics">
-            </table>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                        <p id="pretopics">
+随時 (事前にメール連絡することが望ましい)                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+青柳 秀紀 　                                                        <br>
+                                                                <span class="officehour-address">
+1001608                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+市川 創作 　                                                        <br>
+                                                                <span class="officehour-address">
+1001615                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+野村 名可男 　                                                        <br>
+                                                                <span class="officehour-address">
+1002170                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+平川 秀彦 　                                                        <br>
+                                                                <span class="officehour-address">
+100002486                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+小川 和義 　事前に連絡ください。  生物農林学系棟F212号室/F214実験室　                                                        <br>
+                                                                <span class="officehour-address">
+1002373                                                                </span>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
     
-        <div id="style-heading-style">
-                <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他</h2>
+                    <p id="style">
+manabaを通じて連絡するので、コースニュースなどは必ず確認すること。                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+            </div>
     
     
     
@@ -417,6 +530,6 @@ EC22111        </span>&nbsp;
 
 
 
-</object>
+
 </body>
 </html>

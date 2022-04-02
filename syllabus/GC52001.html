@@ -129,6 +129,71 @@ $(function() {
         });
     }
 });
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+});
 </script>
 <body>
 
@@ -137,12 +202,13 @@ $(function() {
 </style>
 
 <h2 align="center">シラバス参照</h2>
-
+        <input type="hidden" name="lang" value="ja_JP">
 <table width="100%">
     <tr>
         <td align="left">
-            
-              <a href="/syllabi/2021/GC52001/jpn/0/">
+          
+          
+              <a href="/syllabi/2022/GC52001/jpn/0/">
                   最新版のシラバスを表示
               </a>
           
@@ -153,12 +219,14 @@ $(function() {
   <tr>
       <td align="right">
           
+              最終更新日：2022/03/29
+          
             &nbsp;
         </td>
     </tr>
 </table>
 
-<object >    <h1 id="course-title">
+    <h1 id="course-title">
         <span id="course">
 GC52001        </span>&nbsp;
         <span id="title">
@@ -173,7 +241,7 @@ GC52001        </span>&nbsp;
                     3・4 年次,
             </span>
             <span id="timetable">
-春AB水1,2            </span>
+春AB 水1,2            </span>
             <br>
             <span id="assignments">
 若林 啓            </span>
@@ -193,7 +261,7 @@ GC52001        </span>&nbsp;
             
         </h2>
         <p id="note">
-実習設備の都合により、70名程度を受講者数の上限とする。履修希望者が上限を越えた場合には、情報メディア創成学類の学生を優先する。        </p>
+実習設備の都合により、70名程度を受講者数の上限とする。履修希望者が上限を越えた場合には、情報メディア創成学類の学生を優先する。<BR>オンライン(オンデマンド型)        </p>
     </div>
     <div id="note-heading-note">
         <h2 id="note-heading">
@@ -204,153 +272,216 @@ GC52001        </span>&nbsp;
 講義        </p>
     </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
-            <p id="style">
-「1. ディジタルコンテンツ」及び「4. コンピューティングとシステム」に関連する。            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+「1. ディジタルコンテンツ」及び「4. コンピューティングとシステム」に関連する。                </p>
+            </div>
     
-        <div id="style-heading-style">
-         		   <h2 id="style-heading">授業の到達目標（学修成果）</h2>
-            <p id="style">
-データベースシステムの基本概念と機能を理解する。<BR>データベースシステムの実装方式と動作原理を理解する。<BR>プログラミング実習により、正しいデータベースシステムの利用法を身につける。            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標（学修成果）</h2>
+                <p id="style">
+・データベースシステムの基本概念と機能を理解する。 <BR>・関係データベースシステムと様々なNoSQLデータベースシステムの特性を理解し、アプリケーションに応じて適切なデータベースシステムの選択ができる。<BR>・物理データ格納方式と問い合わせ処理の動作原理を理解し、処理速度を考慮したデータベースシステムの利用ができる。<BR>・データベースシステムの同時実行制御や障害回復の原理を理解し、アプリケーションの信頼性向上のためにこれらの機能を活用できる。<BR>・データベースシステムを活用して、初歩的なデータ分析やデータマイニング、機械学習を行うことができる。                </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">キーワード</h2>
-            <p id="style">
-データベースシステム, データモデル, 問い合わせ処理            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+関係データベースシステム，NoSQL，問い合わせ最適化，同時実行制御，分散データベース，データマイニング                </p>
+            </div>
     
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">授業計画</h2>
-            <div id="topics">
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第1週                                    </th>
-                                    <td>
-データベースシステムの基本概念、データモデリング                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第2週                                    </th>
-                                    <td>
-リレーショナルデータモデル、データベース設計論                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第3週                                    </th>
-                                    <td>
-データベース操作言語、データ格納方式                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第4週                                    </th>
-                                    <td>
-問い合わせ処理、同時実行制御                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第5週                                    </th>
-                                    <td>
-障害回復、オブジェクト指向データベースシステム                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+データベースシステムの基本概念、関係データベースとNoSQLデータベース                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+関係データモデル、関係代数                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+ドキュメントデータモデル、キーバリューストア                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+物理データ格納方式、索引                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+問い合わせ処理、問い合わせ最適化                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6回                                        </th>
+                                        <td>
+同時実行制御、トランザクション                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第7回                                        </th>
+                                        <td>
+障害回復、分散データベース                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第8回                                        </th>
+                                        <td>
+集合関数、データ分析                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第9回                                        </th>
+                                        <td>
+データマイニング                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第10回                                        </th>
+                                        <td>
+機械学習                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">履修条件</h2>
-                <p id="style">
-GC13201「データ工学概論」を受講していることを前提とする。                </p>
-        </div>
-    
-        <div id="style-heading-style">
-            		<h2 id="style-heading">成績評価方法</h2>
-                <p id="style">
-学習・教育目標に掲げた各項目について期末試験とレポートを課す。期末試験で60点以上取得し、かつ、最終レポートを提出することを合格の基準とする。合格者の評点(A+〜C)は、期末試験の結果と最終レポートの内容を元に、実習課題の提出内容を加味して総合的に決定する。                </p>
-        </div>
-    
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
-                <p id="style">
-授業で配布する資料をよく読み、予習・復習を行うこと。また、実習で配布する資料をよく読み、実装に用いるプログラミング言語に慣れておくこと。                </p>
-        </div>
-    
-        <div id="style-heading-style">
-            		<h2 id="style-heading">教材・参考文献・配付資料等</h2>
-            <div id="topics">
-                    <p id="pretopics">
-以下を教科書として使用する。                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                               <tr>
-                                   <th>
-1. 「データベースシステム」昭晃堂                                   </th>
-                                   <td>
-                                   </td>
-                               </tr>
-                    </table>
-                </div>
-                    <p id="pretopics">
-その他、教材は適宜配布する。                    </p>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+GC13201「データ工学概論」を受講していることを前提とする。                    </p>
             </div>
-        </div>
     
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+毎回の確認課題（30%）と最終レポート課題（70%）により評価する。毎回の確認課題と最終レポート課題の評価点の合計が60点以上で合格とする。合格者の評点（A+〜C）は、評価点に基づいて決定する。                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
-            <div id="topics">
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <td>
-                                    </td>
-                                </tr>
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+・講義（60%）と演習（40%）を併用する。<BR>・教科書および配布する講義資料、演習資料をよく読み、予習と復習を行う。<BR>・毎回、理解を確認するための課題を課す。これに取り組み、次回の授業開始時までにmanabaで解答を提出する。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+教科書として、以下を用いる。<BR>北川博之（著）. 「データベースシステム（改訂2版）」, オーム社, 2020.<BR><BR>また、参考書として、以下を用いる。<BR>河村康爾, 北沢匠, 佐伯嘉康, 佐藤直生, 原沢滋, 平山毅, 李昌桓, 渡部徹太郎. 「RDB技術者のためのNoSQLガイド」, 秀和システム<BR>Kyle Banker（著）, 玉川竜司（訳）. 「MongoDBイン・アクション」, オライリー・ジャパン, 2012.<BR><BR>その他、講義スライドと演習資料をmanabaに掲載する。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
-    
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
-        </div>
     
     
-        <div id="style-heading-style">
-		            <h2 id="style-heading">他の授業科目との関連</h2>
-        </div>
-        <div id="topic-assignments">
-            <table summary="topsics">
-            </table>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
+                <div id="topics">
+                        <p id="pretopics">
+Microsoft Teams上のチャット（24時間いつでも可能）で質問を受け付けるほか、Microsoft Teams上の会議で教員と会話できる時間をもうける（日時は別途manabaに掲載する）。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+若林 啓 　木13:45-15:00　7D207                                                        <br>
+                                                                <span class="officehour-address">
+23050889                                                                </span>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
     
-        <div id="style-heading-style">
-                <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
+                    <p id="style">
+授業はオンライン（オンデマンド型）で実施する。                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                            <tr>
+                                <th>
+GC13201                                </th>
+                                <td>
+データ工学概論                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+GC52101                                </th>
+                                <td>
+データベースシステムII                                </td>
+                            </tr>
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
+                    <p id="style">
+なし                    </p>
+            </div>
     
     
     
@@ -359,6 +490,6 @@ GC13201「データ工学概論」を受講していることを前提とする�
 
 
 
-</object>
+
 </body>
 </html>

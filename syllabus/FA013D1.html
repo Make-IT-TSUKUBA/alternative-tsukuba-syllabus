@@ -129,6 +129,71 @@ $(function() {
         });
     }
 });
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+});
 </script>
 <body>
 
@@ -137,11 +202,12 @@ $(function() {
 </style>
 
 <h2 align="center">シラバス参照</h2>
-
+        <input type="hidden" name="lang" value="ja_JP">
 <table width="100%">
     <tr>
         <td align="left">
-            
+          
+          
           
           &nbsp;
       </td>
@@ -149,14 +215,14 @@ $(function() {
   <tr>
       <td align="right">
           
-              最終更新日：2021/03/30
+              最終更新日：2022/03/29
           
             &nbsp;
         </td>
     </tr>
 </table>
 
-<object >    <h1 id="course-title">
+    <h1 id="course-title">
         <span id="course">
 FA013D1        </span>&nbsp;
         <span id="title">
@@ -171,7 +237,7 @@ FA013D1        </span>&nbsp;
                     1 年次,
             </span>
             <span id="timetable">
-春BC月2            </span>
+春BC 月2            </span>
             <br>
             <span id="assignments">
 大嶋 建一            </span>
@@ -202,110 +268,118 @@ FA013D1        </span>&nbsp;
 講義        </p>
     </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学位プログラム・コンピテンスとの関係(学習・教育到達目標との関係)</h2>
-            <p id="style">
-この科目は理工学の数学的基礎にかかるコンビデンスに対応している。            </p>
-        </div>
-    
-        <div id="style-heading-style">
-         		   <h2 id="style-heading">授業の到達目標(学修成果)</h2>
-            <p id="style">
-微分積分学の基礎的な概念、授業でとりあげる基本事項を理会し、これらの理解に基づいて、教科書にある例題、問題、演習問題を確実に解くことが出来る。<BR>            </p>
-        </div>
-    
-        <div id="style-heading-style">
-            		<h2 id="style-heading">キーワード</h2>
-            <p id="style">
-極限、連続関数、微分、平均値の定理、テイラー展開、不定積分、定積分            </p>
-        </div>
-    
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">授業計画</h2>
-            <div id="topics">
-                    <p id="pretopics">
-項目の順序は、必要に応じて入れ替えることがある。                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                    </table>
-                </div>
-                    <p id="pretopics">
-第　１回　１変数関数の微分法（１）関数と極限、連続関数<BR>第　２回　１変数関数の微分法（２）微分可能性、導関数<BR>第　３回　１変数関数の微分法（３）初等関数の導関数、高次導関数<BR>第　４回　１変数関数の微分法（４）平均値の定理<BR>第　５回　１変数関数の微分法（５）テイラーの定理<BR>第　６回　１変数関数の微分法（６）テイラー級数<BR>第　７回　１変数関数の積分法（１）不定積分<BR>第　８回　１変数関数の積分法（２）積分の計算（１）<BR>第　９回　１変数関数の積分法（３）積分の計算（２）<BR>第１０回　１変数関数の積分法（３）定積分<BR><BR><BR><BR>                    </p>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係(学習・教育到達目標との関係)</h2>
+                <p id="style">
+この科目は理工学の数学的基礎にかかるコンビデンスに対応している。                </p>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">履修条件</h2>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
                 <p id="style">
-なし                </p>
-        </div>
-    
-        <div id="style-heading-style">
-            		<h2 id="style-heading">成績評価方法</h2>
-                <p id="style">
-期末試験の成績（100％）に基づき評価する。                </p>
-        </div>
-    
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
-                <p id="style">
-学修時間の割り当て：講義（100％）<BR>授業外における学修方法：自ら手を動かして予習、復習に努めること。また、修得できるまで繰り返し学習すること。                </p>
-        </div>
-    
-        <div id="style-heading-style">
-            		<h2 id="style-heading">教材・参考文献・配付資料等</h2>
-            <div id="topics">
-                    <p id="pretopics">
-教科書：吉村善一、岩下弘一著、「入門講義　微分積分」、裳華房、2006                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                    </table>
-                </div>
-                    <p id="pretopics">
-参考書については授業中に適宜、紹介する。                    </p>
+微分積分学の基礎的な概念、授業でとりあげる基本事項を理会し、これらの理解に基づいて、教科書にある例題、問題、演習問題を確実に解くことが出来る。<BR>                </p>
             </div>
-        </div>
     
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+極限、連続関数、微分、平均値の定理、テイラー展開、不定積分、定積分                </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
-            <div id="topics">
-                    <p id="pretopics">
-質問等は随時受け付けるが、事前にメールでアポイントを取ることが望ましい。                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <td>
-大嶋 建一 　                                                    <br>
-                                                            <span class="officehour-address">
-1000313                                                            </span>
-                                    </td>
-                                </tr>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+項目の順序は、必要に応じて入れ替えることがある。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                        <p id="pretopics">
+第　１回　１変数関数の微分法（１）関数と極限、連続関数<BR>第　２回　１変数関数の微分法（２）微分可能性、導関数<BR>第　３回　１変数関数の微分法（３）初等関数の導関数、高次導関数<BR>第　４回　１変数関数の微分法（４）平均値の定理<BR>第　５回　１変数関数の微分法（５）テイラーの定理<BR>第　６回　１変数関数の微分法（６）テイラー級数<BR>第　７回　１変数関数の積分法（１）不定積分<BR>第　８回　１変数関数の積分法（２）積分の計算（１）<BR>第　９回　１変数関数の積分法（３）積分の計算（２）<BR>第１０回　１変数関数の積分法（３）定積分<BR><BR><BR><BR>                        </p>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+なし                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+期末試験の成績（100％）に基づき評価する。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+学修時間の割り当て：講義（100％）<BR>授業外における学修方法：自ら手を動かして予習、復習に努めること。また、修得できるまで繰り返し学習すること。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+教科書：吉村善一、岩下弘一著、「入門講義　微分積分」、裳華房、2006                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                        <p id="pretopics">
+参考書については授業中に適宜、紹介する。                        </p>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">参考書</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
                     </table>
                 </div>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
-                <p id="style">
-授業の狙い：微分積分学の基本事項を学習する。その結果、論理的・数学的な思考力と解析力を養い、理工学の分野の修得に必要な基礎を築く。<BR>関連情報：本科目群（微積分１，２，３）は理工系の多くの専門科目の基礎となるものであり、理工学群の学生には一年次の学習、修得が強く求められる。数学リテラシーで取り扱われる実数、数列、関数にかかる事項は、本科目の冒頭に位置づけられるものであり、関連づけた学習が望まれる。将来進みたい、あるいは興味を持つ専門分野の教科書を開いて、授業で取り上げる事項との関係を能動的、発展的に調べていくことは、本科目群、並びに当該専門分野における学修内容の理解を深めていくのに役立つ。                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                        <p id="pretopics">
+質問等は随時受け付けるが、事前にメールでアポイントを取ることが望ましい。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+大嶋 建一 　                                                        <br>
+                                                                <span class="officehour-address">
+1000313                                                                </span>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
+                    <p id="style">
+授業の狙い：微分積分学の基本事項を学習する。その結果、論理的・数学的な思考力と解析力を養い、理工学の分野の修得に必要な基礎を築く。<BR>関連情報：本科目群（微積分１，２，３）は理工系の多くの専門科目の基礎となるものであり、理工学群の学生には一年次の学習、修得が強く求められる。数学リテラシーで取り扱われる実数、数列、関数にかかる事項は、本科目の冒頭に位置づけられるものであり、関連づけた学習が望まれる。将来進みたい、あるいは興味を持つ専門分野の教科書を開いて、授業で取り上げる事項との関係を能動的、発展的に調べていくことは、本科目群、並びに当該専門分野における学修内容の理解を深めていくのに役立つ。                    </p>
+            </div>
     
     
-        <div id="style-heading-style">
-		            <h2 id="style-heading">他の授業科目との関連</h2>
-        </div>
-        <div id="topic-assignments">
-            <table summary="topsics">
-            </table>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
     
-        <div id="style-heading-style">
-                <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
-                <p id="style">
-ＴＡとして大学院博士課程の大学院生を1名配置します。                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+                    <p id="style">
+ＴＡとして大学院博士課程の大学院生を1名配置します。                    </p>
+            </div>
     
     
     
@@ -314,6 +388,6 @@ FA013D1        </span>&nbsp;
 
 
 
-</object>
+
 </body>
 </html>

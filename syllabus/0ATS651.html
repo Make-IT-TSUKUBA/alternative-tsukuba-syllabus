@@ -129,6 +129,71 @@ $(function() {
         });
     }
 });
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+});
 </script>
 <body>
 
@@ -141,12 +206,13 @@ th, td {padding-right:5px;border: 1px #808080 solid;background-color:#e5e5ff;}
 </style>
 
 <h2 align="center">シラバス参照</h2>
-
+        <input type="hidden" name="lang" value="ja_JP">
 <table width="100%">
     <tr>
         <td align="left">
-            
-              <a href="/syllabi/2021/0ATS651/jpn/0/">
+          
+          
+              <a href="/syllabi/2022/0ATS651/jpn/0/">
                   最新版のシラバスを表示
               </a>
           
@@ -157,12 +223,14 @@ th, td {padding-right:5px;border: 1px #808080 solid;background-color:#e5e5ff;}
   <tr>
       <td align="right">
           
+              最終更新日：2022/04/02
+          
             &nbsp;
         </td>
     </tr>
 </table>
 
-<object >    <h1 id="course-title">
+    <h1 id="course-title">
         <span id="course">
 0ATS651        </span>&nbsp;
         <span id="title">
@@ -177,7 +245,7 @@ th, td {padding-right:5px;border: 1px #808080 solid;background-color:#e5e5ff;}
                     1・2 年次,
             </span>
             <span id="timetable">
-夏季休業中集中            </span>
+夏季休業中 集中            </span>
             <br>
             <span id="assignments">
 田邉 解            </span>
@@ -197,7 +265,7 @@ th, td {padding-right:5px;border: 1px #808080 solid;background-color:#e5e5ff;}
             
         </h2>
         <p id="note">
-集中講義10:00~ 履修は本学位プログラムの在籍生に限る<BR>01EK611と同一。<BR>9/11,9/25        </p>
+集中講義10:00~ 履修は本学位プログラムの在籍生に限る<BR>01EK611と同一。<BR>9/10，9/24        </p>
     </div>
     <div id="note-heading-note">
         <h2 id="note-heading">
@@ -208,109 +276,313 @@ th, td {padding-right:5px;border: 1px #808080 solid;background-color:#e5e5ff;}
 講義        </p>
     </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
-            <p id="style">
-専門知識            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+専門知識                </p>
+            </div>
     
-        <div id="style-heading-style">
-         		   <h2 id="style-heading">授業の到達目標(学修成果)</h2>
-            <p id="style">
-スポーツ・健康分野の研究で活用する統計の基礎を学習し、統計データの読解力、適切な統計手法を選択する能力、及び統計解析ソフトを利用したデータ分析能力を養う。            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
+                <p id="style">
+（１）スポーツ・ヘルスプロモーション分野の研究で活用する統計の基礎用語を説明できる。<BR>（２）実験デザインに応じた統計手法を選択できる。<BR>（３）データを収集・整理し、統計的分析のためのデータセットを作成できる。<BR>（４）統計解析ソフトを利用して基本的なデータ集計及び分析ができる。<BR>（５）統計解析ソフトを利用して分析結果を可視化できる。<BR>（６）統計データの読みとり方の基本について解説できる。                </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">キーワード</h2>
-            <p id="style">
-統計データ            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+統計データ                </p>
+            </div>
     
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">授業計画</h2>
-            <div id="topics">
-                    <p id="pretopics">
-統計の必要性と重要性<BR>【基礎編1】データを読む、理解する<BR>【基礎編2】適切な統計手法を選ぶ<BR>【基礎編3】基本的な統計手法を理解する1<BR>【基礎編4】基本的な統計手法を理解する2<BR>【応用編1】データを集める、整理する<BR>【応用編2】データを統計的に比較分析する1<BR>【応用編3】データを統計的に比較分析する2<BR>【応用編4】統計分析データを可視化する                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+統計の必要性と重要性<BR>【基礎編1】データを読む、理解する<BR>【基礎編2】適切な統計手法を選ぶ<BR>【基礎編3】基本的な統計手法を理解する1<BR>【基礎編4】基本的な統計手法を理解する2<BR>【応用編1】データを集める、整理する<BR>【応用編2】データを統計的に比較分析する1<BR>【応用編3】データを統計的に比較分析する2<BR>【応用編4】統計分析データを可視化する                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+オリエンテーション（統計の必要性と重要性）                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+〃                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+【基礎編1】データを読む、理解する                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+〃                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+【基礎編2】適切な統計手法を選ぶ                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6回                                        </th>
+                                        <td>
+〃                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第7回                                        </th>
+                                        <td>
+【基礎編3】基本的な統計手法を理解する1                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第8回                                        </th>
+                                        <td>
+〃                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第9回                                        </th>
+                                        <td>
+【基礎編4】基本的な統計手法を理解する2                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第10回                                        </th>
+                                        <td>
+〃                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第11回                                        </th>
+                                        <td>
+【応用編1】データを集める、整理する                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第12回                                        </th>
+                                        <td>
+〃                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第13回                                        </th>
+                                        <td>
+【応用編2】データを統計的に比較分析する1                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第14回                                        </th>
+                                        <td>
+〃                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第15回                                        </th>
+                                        <td>
+【応用編3】データを統計的に比較分析する2                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第16回                                        </th>
+                                        <td>
+〃                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第17回                                        </th>
+                                        <td>
+【応用編4】統計分析データを可視化する                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第18回                                        </th>
+                                        <td>
+〃                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第19回                                        </th>
+                                        <td>
+総括（全体のまとめ、研究における統計の位置づけ）                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第20回                                        </th>
+                                        <td>
+〃                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                        <p id="pretopics">
+配布した資料に沿って進める。講義だけでなく、グループワーク、及び統計解析ソフトを使った分析の実践も併せて行う。授業時間内に質疑および操作確認の時間を複数設けるので、理解できない点やソフトの操作についていけない点がある場合は、その時間を有効に活用すること。                        </p>
                 </div>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">履修条件</h2>
-                <p id="style">
-SPSSを事前にダウンロードしたPCを各自持参すること。                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+本学位プログラム在籍生<BR>SPSSを事前にダウンロードしたPCを各自持参すること。                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">成績評価方法</h2>
-                <p id="style">
-受講状況、実技試験、レポート                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+達成目標で挙げた６つの項目に着目し、以下の方法で成績評価をする。<BR>１）授業での発言・積極性（３０％）<BR>２）宿題（２５％）<BR>３）ショートレポート（２５％）<BR>４）授業中の実践課題（２０％）<BR>評価基準（A+、A、B、C又はD）                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+SPSSの基本操作は授業中に教えるので、操作方法を事前に修得しておく必要はないが、授業当日にソフトが正常に起動するよう確実に準備しておくこと。<BR>データ収集・整理にあたってはMicrosoft Excel等の表計算ソフトを活用するため、授業前に基本的な操作ができるようにしておくこと。<BR>自身の研究に関連する学術論文（主に原著論文）を複数精読し、自身の研究でよく使われる統計手法を確認すること。<BR>データの収集・整理の仕方を身につけるための宿題に対して真摯に取り組むこと。<BR>                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">教材・参考文献・配付資料等</h2>
-            <div id="topics">
-                    <p id="pretopics">
-教科書<BR>出村慎一、西嶋尚彦、佐藤進 健康・スポーツ科学のためのSPSSによる多変量解析入門、杏林書院<BR><BR>参考図書<BR>1)市原清志 バイオサイエンスの統計学:正しく活用するための実践理論、南江堂<BR>2)佐藤進、山次俊介、長澤吉則 健康・スポーツ科学のためのSPSSによる統計解析入門、杏林書院<BR>3)石村貞夫 SPSSによる分散分析と多重比較の手順、東京図書                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+教科書<BR>なし（配布資料にて授業を進める）<BR><BR>参考図書<BR>1）出村慎一、西嶋尚彦、佐藤進 健康・スポーツ科学のためのSPSSによる多変量解析入門、杏林書院)<BR>2）市原清志 バイオサイエンスの統計学:正しく活用するための実践理論、南江堂<BR>3）佐藤進、山次俊介、長澤吉則 健康・スポーツ科学のためのSPSSによる統計解析入門、杏林書院<BR>4）石村貞夫 SPSSによる分散分析と多重比較の手順、東京図書                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
-            <div id="topics">
-                    <p id="pretopics">
-授業前後に行う                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <td>
-                                    </td>
-                                </tr>
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                        <p id="pretopics">
+オフィスアワーは特に設けない。<BR>随時、下記メールアドレスに事前連絡の上、日時を設定する。<BR>tanabe.kai.gm@u.tsukuba.ac.jp                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                        <p id="pretopics">
+東京キャンパス<BR>学位プログラム事務室:電話03-3942-6365(開始時間等のお問い合わせはこちらへ)                        </p>
                 </div>
-                    <p id="pretopics">
-東京キャンパス<BR>専攻事務室:電話03-3942-6365(開始時間等のお問い合わせはこちらへ)                    </p>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
-                <p id="style">
-積極的な受講態度を望みます                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
+                    <p id="style">
+積極的な受講態度を望みます                    </p>
+            </div>
     
     
-        <div id="style-heading-style">
-		            <h2 id="style-heading">他の授業科目との関連</h2>
-        </div>
-        <div id="topic-assignments">
-            <table summary="topsics">
-                        <tr>
-                            <th>
-0ATS616                            </th>
-                            <td>
-スポーツ健康統計学特講                            </td>
-                        </tr>
-            </table>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                            <tr>
+                                <th>
+0ATS616                                </th>
+                                <td>
+スポーツ健康統計学特講                                </td>
+                            </tr>
+                </table>
+            </div>
     
-        <div id="style-heading-style">
-                <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
-                <p id="style">
-無                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+                    <p id="style">
+無                    </p>
+            </div>
     
     
     
@@ -319,6 +591,6 @@ SPSSを事前にダウンロードしたPCを各自持参すること。        
 
 
 
-</object>
+
 </body>
 </html>

@@ -129,6 +129,71 @@ $(function() {
         });
     }
 });
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+});
 </script>
 <body>
 
@@ -137,11 +202,16 @@ $(function() {
 </style>
 
 <h2 align="center">シラバス参照</h2>
-
+        <input type="hidden" name="lang" value="ja_JP">
 <table width="100%">
     <tr>
         <td align="left">
-            
+          
+          
+              <a href="/syllabi/2022/0ATTL31/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
           
           &nbsp;
       </td>
@@ -149,14 +219,12 @@ $(function() {
   <tr>
       <td align="right">
           
-              最終更新日：2021/04/06
-          
             &nbsp;
         </td>
     </tr>
 </table>
 
-<object >    <h1 id="course-title">
+    <h1 id="course-title">
         <span id="course">
 0ATTL31        </span>&nbsp;
         <span id="title">
@@ -171,7 +239,7 @@ $(function() {
                     1・2 年次,
             </span>
             <span id="timetable">
-春AB金5,6            </span>
+春AB 金5,6            </span>
             <br>
             <span id="assignments">
 山本 美希            </span>
@@ -183,7 +251,7 @@ $(function() {
             
         </h2>
         <p id="summary-contents">
-デザイン、美術、サブカルチュアなどを横断的に探索しつつ、画像表現(絵による表現)の特質、意義、可能性について理解を深めること。<BR> 授業計画:(1)[オリエンテーション]授業全体の説明、(2)[テーマ1]アートトーク1、(3)[テーマ2]「物語」に関する調査1、(4)[テーマ2]物語構造について、(5)[テーマ3]言葉のない絵本精読『アンジュール』、(6)[テーマ3]言葉のない絵本精読『アライバル』1、(7)[テーマ3]言葉のない絵本精読『アライバル』2、(8)[テーマ3]言葉のない絵本精読「赤ずきん」絵本、(9)[テーマ4]多種多様な表現手法、(10)[テーマ5]マンガ文献精読、(11)[テーマ5]マンガ文献精読2、(12)[テーマ6]マンガの文体練習、(13)[テーマ7]物語表現考察1、(14)[テーマ7]物語表現考察2、(15)7つのテーマから一つ選び、レポート提出        </p>
+デザイン、美術、サブカルチュアなどを横断的に探索しつつ、画像表現(絵による表現)の特質、意義、可能性について議論を通じて理解を深める。<BR>[テーマ1]コロナ禍におけるイラストレーション<BR>[テーマ2]本の特質を生かした作品例<BR>[テーマ3]イラストレーション史、絵本史、マンガ史<BR>[テーマ4]絵本表現、マンガ表現<BR>[テーマ5]言葉のない絵本における物語表現<BR>        </p>
     </div>
     <div id="note-heading-note">
         <h2 id="note-heading">
@@ -191,7 +259,7 @@ $(function() {
             
         </h2>
         <p id="note">
-01EB577と同一。<BR>対面        </p>
+対面        </p>
     </div>
     <div id="note-heading-note">
         <h2 id="note-heading">
@@ -202,209 +270,204 @@ $(function() {
 講義        </p>
     </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
-            <p id="style">
-知の活用力、コミュニケーション能力、創造力、理解力、問題解決力            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+知の活用力、コミュニケーション能力、創造力、理解力、問題解決力                </p>
+            </div>
     
-        <div id="style-heading-style">
-         		   <h2 id="style-heading">授業の到達目標(学修成果)</h2>
-            <p id="style">
-様々なイラストレーションをベースにした平面表現について知り、ポスター、風刺画、挿絵等の代表的な作家を知る。さらに複雑な物語を語る絵本やマンガが、いかに物語を絵で表すのかについての理解することができるようになる。            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
+                <p id="style">
+様々なイラストレーションをベースにした平面表現について知り、ポスター、風刺画、挿絵等の代表的な作家を知る。さらに複雑な物語を語る絵本やマンガが、いかに物語を絵で表すのかについて理解することができるようになる。                </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">キーワード</h2>
-            <p id="style">
-イラストレーション, 挿絵, 風刺画, 絵本表現, マンガ表現            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+イラストレーション, 挿絵, 風刺画, 絵本表現, マンガ表現                </p>
+            </div>
     
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">授業計画</h2>
-            <div id="topics">
-                    <p id="pretopics">
-授業前半は講義、授業後半はそれを受けた演習を行うか、宿題やレポート課題を出す。<BR>毎週必ず作品やレポートを作成する。                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-1)                                    </th>
-                                    <td>
-ガイダンス                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-2)                                    </th>
-                                    <td>
-本の物質的なデザイン                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-3)                                    </th>
-                                    <td>
-ポスターイラストレーションの世界                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-4)                                    </th>
-                                    <td>
-新聞・雑誌のイラストレーション                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-5)                                    </th>
-                                    <td>
-イラストレーション展示 作家選び・企画立案                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-6)                                    </th>
-                                    <td>
-イラストレーション展示 図録作成                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-7)                                    </th>
-                                    <td>
-欧米の絵本・マンガ                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-8)                                    </th>
-                                    <td>
-日本の絵本・マンガ                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-9)                                    </th>
-                                    <td>
-絵を描くとは?                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-10)                                    </th>
-                                    <td>
-最終レポート                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+授業前半は講義、授業後半はそれを受けた演習を行うか、宿題やレポート課題を出す。<BR>毎週必ず作品やレポートを作成する。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+1)                                        </th>
+                                        <td>
+ガイダンス                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+2)                                        </th>
+                                        <td>
+本の物質的なデザイン                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+3)                                        </th>
+                                        <td>
+イラストレーション史　ポスター                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+4)                                        </th>
+                                        <td>
+イラストレーション史　新聞・雑誌                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+5)                                        </th>
+                                        <td>
+欧米の絵本・マンガ                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+6)                                        </th>
+                                        <td>
+日本の絵本・マンガ                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+7)                                        </th>
+                                        <td>
+イラストレーション展示 図録作成                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+8)                                        </th>
+                                        <td>
+絵本表現・マンガ表現                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+9)                                        </th>
+                                        <td>
+言葉のない絵本における物語表現                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+10)                                        </th>
+                                        <td>
+最終レポート                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
                 </div>
-                    <p id="pretopics">
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
 特になし                    </p>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">履修条件</h2>
-                <p id="style">
-特になし                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+評価方法：提出課題100%<BR>評価基準：提出物を全て提出した者を評価対象者とする。A+〜Cの評価は提出課題の成績の合計点に基づいて行い、満点の60%を満たせば合格とする。                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">成績評価方法</h2>
-                <p id="style">
-提出課題100%                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+授業では毎回、次回までに読む資料または作成する課題を指示するので、それに対応した学修を各自行ってください。本科目は2単位の設定であり、合計30時間の授業がありますが、授業外で（復習やレポート作成等で）60時間分相当の学修が必要となります。                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
-                <p id="style">
-授業では毎回、次回までに読む資料または作成する課題を指示するので、それに対応した学修を各自行ってください。本科目は1単位の設定であり、合計15時間の授業がありますが、授業外で（復習やレポート作成等で）30時間分相当の学修が必要となります。                </p>
-        </div>
-    
-        <div id="style-heading-style">
-            		<h2 id="style-heading">教材・参考文献・配付資料等</h2>
-            <div id="topics">
-                    <p id="pretopics">
-特になし                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
                 </div>
-                    <p id="pretopics">
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                        <p id="pretopics">
+特に定めないが、メールでアポイントを取っていつでも訪問可能。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+山本 美希 　                                                        <br>
+                                                                <span class="officehour-address">
+100001421                                                                </span>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
+                    <p id="style">
+オンライン授業を含む可能性があります。                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+                    <p id="style">
 特になし                    </p>
             </div>
-        </div>
-    
-    
-        <div id="style-heading-style">
-            		<h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
-            <div id="topics">
-                    <p id="pretopics">
-特に定めないが、メールでアポイントを取っていつでも訪問可能。                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <td>
-                                    </td>
-                                </tr>
-                    </table>
-                </div>
-                    <p id="pretopics">
-特になし                    </p>
-            </div>
-        </div>
-    
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
-                <p id="style">
-オンライン授業を含む可能性があります。                </p>
-        </div>
-    
-    
-        <div id="style-heading-style">
-		            <h2 id="style-heading">他の授業科目との関連</h2>
-        </div>
-        <div id="topic-assignments">
-            <table summary="topsics">
-            </table>
-        </div>
-    
-        <div id="style-heading-style">
-                <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
-                <p id="style">
-特になし                </p>
-        </div>
     
     
     
@@ -413,6 +476,6 @@ $(function() {
 
 
 
-</object>
+
 </body>
 </html>

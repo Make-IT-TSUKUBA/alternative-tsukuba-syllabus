@@ -129,6 +129,71 @@ $(function() {
         });
     }
 });
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+});
 </script>
 <body>
 
@@ -137,12 +202,13 @@ $(function() {
 </style>
 
 <h2 align="center">シラバス参照</h2>
-
+        <input type="hidden" name="lang" value="ja_JP">
 <table width="100%">
     <tr>
         <td align="left">
-            
-              <a href="/syllabi/2021/GC11591/jpn/0/">
+          
+          
+              <a href="/syllabi/2022/GC11591/jpn/0/">
                   最新版のシラバスを表示
               </a>
           
@@ -153,12 +219,14 @@ $(function() {
   <tr>
       <td align="right">
           
+              最終更新日：2022/03/29
+          
             &nbsp;
         </td>
     </tr>
 </table>
 
-<object >    <h1 id="course-title">
+    <h1 id="course-title">
         <span id="course">
 GC11591        </span>&nbsp;
         <span id="title">
@@ -173,7 +241,7 @@ GC11591        </span>&nbsp;
                     1 年次,
             </span>
             <span id="timetable">
-春AB木5,6            </span>
+春AB 木5,6            </span>
             <br>
             <span id="assignments">
 若林 啓            </span>
@@ -185,7 +253,7 @@ GC11591        </span>&nbsp;
             
         </h2>
         <p id="summary-contents">
-本授業では,情報学の基礎となる数学的概念について学ぶ.その中でも特に重要な概念である集合,論理,写像,関係,グラフ等を取りあげ,その基礎的な事項について講義する.また,講義内容に対する理解を深めるため,演習も行う.        </p>
+本授業では,情報学の基礎となる数学的概念について学ぶ.その中でも特に重要な概念である集合,論理,写像,関係,グラフ,帰納等を取りあげ,その基礎的な事項について講義する.また,講義内容に対する理解を深めるため,演習も行う.        </p>
     </div>
     <div id="note-heading-note">
         <h2 id="note-heading">
@@ -193,7 +261,7 @@ GC11591        </span>&nbsp;
             
         </h2>
         <p id="note">
-情報メディア創成学類の2018年度以前の入学者対象。2020年度までに「情報数学I」(GC11501)の単位を修得した者の履修は認めない。GA15131と同一。        </p>
+情報メディア創成学類の2018年度以前の入学者はGC11591を、それ以外の学生はGA15131を履修すること。<BR>定員を超過した場合は履修調整をする場合がある（情報メディア創成学類生および総合学域群生(情報メディア創成学類への移行希望者)優先）。<BR>2020年度までに「情報数学I」(GC11501)の単位を修得した者の履修は認めない。<BR>GA15131と同一。<BR>その他の実施形態        </p>
     </div>
     <div id="note-heading-note">
         <h2 id="note-heading">
@@ -204,87 +272,204 @@ GC11591        </span>&nbsp;
 講義        </p>
     </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
-            <p id="style">
-            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+批判的・創造的思考力、データ・情報リテラシー、広い視野と国際性<BR>ネットワークサイエンス、コンピューティングとシステム、数理的基盤                </p>
+            </div>
     
-        <div id="style-heading-style">
-         		   <h2 id="style-heading">授業の到達目標（学修成果）</h2>
-            <p id="style">
-            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標（学修成果）</h2>
+                <p id="style">
+情報学において必要とされる離散数学の基礎的な用語と概念を理解する。また、論理演算、集合と写像、関係とグラフ、帰納的定義等を題材として、論理的思考、抽象化・形式化・モデル化の手法、厳密な推論方法について理解する。                </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">キーワード</h2>
-            <p id="style">
-            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+命題論理、述語論理、集合、写像、関係、グラフ、帰納                </p>
+            </div>
     
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">授業計画</h2>
-            <div id="topics">
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+命題計算、論理演算子、真理値表                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+述語と真理集合、全称命題、存在命題                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+集合とその記法、集合演算、直積、べき集合                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+数学的論証                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+写像、単射、全射、像、逆像                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+合成、逆写像                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+２項関係とその表現、順序                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+同値関係、グラフ                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+帰納的定義、帰納法                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+授業のまとめ、発展的な話題                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">履修条件</h2>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+特になし                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">成績評価方法</h2>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+演習レポートおよび期末試験により成績評価を行う。演習レポートと期末試験の配点比率は3:7である。<BR>授業の到達目標を基準として演習レポートおよび期末試験を評価し、満点の60%以上の者を合格とする。<BR>100点満点で評価する。                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+学修時間の割り当ては講義50%、例題の解説と演習に50%とする。<BR>事前に教科書に目を通しておくこと。理解を深めるための演習課題に取り組むこと。また教科書の演習問題を全て解いて、各自で自分の理解度を確認すること。                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">教材・参考文献・配付資料等</h2>
-            <div id="topics">
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+講義資料等は、学習管理システム(manaba)上のこの授業のコースページに掲載する。<BR><BR>以下の書籍を教科書として指定するので各自入手すること。<BR>『論理と集合から始める数学の基礎』, 嘉田 勝, 日本評論社, 2008年<BR><BR>参考書籍は以下の通り。<BR>『集合・写像・論理ー数学の基本を学ぶ』, 中島匠一, 共立出版, 2012年<BR>『離散数学入門』, 守屋 悦朗, サイエンス社, 2006年                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
-            <div id="topics">
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <td>
-                                    </td>
-                                </tr>
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
+                <div id="topics">
+                        <p id="pretopics">
+教員への質問・問い合わせ方法：Microsoft Teams上のチャット（24時間いつでも可能）で質問を受け付けるほか、Microsoft Teams上の会議で教員と会話できる時間をもうける（日時は別途連絡）。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+若林 啓 　木13:45-15:00　7D207                                                        <br>
+                                                                <span class="officehour-address">
+23050889                                                                </span>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
+                    <p id="style">
+授業はオンライン（オンデマンド型）で実施する。期末試験は教室で対面形式で実施する。<BR>                    </p>
+            </div>
     
     
-        <div id="style-heading-style">
-		            <h2 id="style-heading">他の授業科目との関連</h2>
-        </div>
-        <div id="topic-assignments">
-            <table summary="topsics">
-            </table>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
     
-        <div id="style-heading-style">
-                <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
+                    <p id="style">
+なし                    </p>
+            </div>
     
     
     
@@ -293,6 +478,6 @@ GC11591        </span>&nbsp;
 
 
 
-</object>
+
 </body>
 </html>

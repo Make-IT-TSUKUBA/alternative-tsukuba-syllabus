@@ -129,6 +129,71 @@ $(function() {
         });
     }
 });
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+});
 </script>
 <body>
 
@@ -137,11 +202,16 @@ $(function() {
 </style>
 
 <h2 align="center">シラバス参照</h2>
-
+        <input type="hidden" name="lang" value="ja_JP">
 <table width="100%">
     <tr>
         <td align="left">
-            
+          
+          
+              <a href="/syllabi/2022/HC21102/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
           
           &nbsp;
       </td>
@@ -149,14 +219,12 @@ $(function() {
   <tr>
       <td align="right">
           
-              最終更新日：2021/04/06
-          
             &nbsp;
         </td>
     </tr>
 </table>
 
-<object >    <h1 id="course-title">
+    <h1 id="course-title">
         <span id="course">
 HC21102        </span>&nbsp;
         <span id="title">
@@ -231,7 +299,7 @@ HC21102        </span>&nbsp;
                                     <th valign="top" nowrap="nowrap">
 第1回                                    </th>
                                     <td>
-【7月1日(木) 1、2限&nbsp;&nbsp;志賀隆 医学医療系】<BR>グループ演習1(課題説明とグループ討論) <BR>---------------------------------------------------------------------------------------------------------                                    </td>
+【7月1日(木) 1、2限 志賀隆 医学医療系】<BR>グループ演習1(課題説明とグループ討論) <BR>---------------------------------------------------------------------------------------------------------                                    </td>
                                     <td nowrap="nowrap">
                                     </td>
                                     <td nowrap="nowrap">
@@ -241,7 +309,7 @@ HC21102        </span>&nbsp;
                                     <th valign="top" nowrap="nowrap">
 第2回                                    </th>
                                     <td>
-【7月8日(木)1、2限 志賀隆 医学医療系】<BR>グループ演習2(グループ討論)-------------------------------------                                    </td>
+【7月8日(木)1、2限 志賀隆 医学医療系】<BR>グループ演習2(グループ討論)<BR>-------------------------------------                                    </td>
                                     <td nowrap="nowrap">
                                     </td>
                                     <td nowrap="nowrap">
@@ -271,7 +339,7 @@ HC21102        </span>&nbsp;
                                     <th valign="top" nowrap="nowrap">
 第5回                                    </th>
                                     <td>
-【8月5日(木)1、2限 志賀隆・増田知之 医学医療系】<BR>グループ演習3(発表と全体討論3)<BR>---------------------------------------------------------------------------------------------------------                                    </td>
+【8月5日(木)1、2限 志賀隆 医学医療系】<BR>グループ演習3(発表と全体討論3)<BR>---------------------------------------------------------------------------------------------------------                                    </td>
                                     <td nowrap="nowrap">
                                     </td>
                                     <td nowrap="nowrap">
@@ -420,6 +488,6 @@ HC21102        </span>&nbsp;
 
 
 
-</object>
+
 </body>
 </html>

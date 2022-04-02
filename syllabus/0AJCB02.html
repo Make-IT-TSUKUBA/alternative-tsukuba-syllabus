@@ -129,6 +129,71 @@ $(function() {
         });
     }
 });
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+});
 </script>
 <body>
 
@@ -137,11 +202,16 @@ $(function() {
 </style>
 
 <h2 align="center">シラバス参照</h2>
-
+        <input type="hidden" name="lang" value="ja_JP">
 <table width="100%">
     <tr>
         <td align="left">
-            
+          
+          
+              <a href="/syllabi/2022/0AJCB02/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
           
           &nbsp;
       </td>
@@ -149,14 +219,14 @@ $(function() {
   <tr>
       <td align="right">
           
-              最終更新日：2021/04/02
+              最終更新日：2022/03/18
           
             &nbsp;
         </td>
     </tr>
 </table>
 
-<object >    <h1 id="course-title">
+    <h1 id="course-title">
         <span id="course">
 0AJCB02        </span>&nbsp;
         <span id="title">
@@ -171,10 +241,10 @@ $(function() {
                     1・2 年次,
             </span>
             <span id="timetable">
-秋AB火2            </span>
+秋AB 火2            </span>
             <br>
             <span id="assignments">
-石塚 成人            </span>
+大野 浩史            </span>
         </p>
     </div>
     <div id="summary-heading-summary-contents">
@@ -183,7 +253,7 @@ $(function() {
             
         </h2>
         <p id="summary-contents">
-格子上の場の理論について、その理論的基礎と数値計算手法について解説する。まず、理論的側面として、格子QCD研究の目的、格子場の理論と格子ゲージ理論の基礎、Wilson型とstaggered型格子フェルミオン、格子カイラルフェルミオン、弱結合展開、強結合展開、有限温度格子理論、臨界現象とユニバーサリティーについて基礎的な知識の習得と理論的枠組みを理解する。その後、数値計算的側面として、マルコフ過程モンテカルロ法、ゲージ理論に対するアルゴリズム、フェルミオン系に対するアルゴリズム、物理量計算のための手法、系統誤差を抑制するための格子場の理論の改良等について学ぶ。        </p>
+格子上の場の理論について、その理論的基礎を解説したのち、応用例として、有限温度・密度格子QCDの手法と研究例を紹介する。具体的には、まず、格子QCD研究の目的、格子場の理論と格子ゲージ理論の基礎、Wilson型とstaggered型格子フェルミオン、格子カイラルフェルミオン、弱結合展開、および強結合展開について、基礎的な知識の習得と理論的枠組みを理解する。また後半では、有限温度・密度格子QCD研究の概要、相転移と臨界現象、状態方程式、有限格子密度QCDの定式化と符号問題、および符号問題を回避する方法について解説する。        </p>
     </div>
     <div id="note-heading-note">
         <h2 id="note-heading">
@@ -191,7 +261,7 @@ $(function() {
             
         </h2>
         <p id="note">
-西暦偶数年度開講。<BR>01BC351と同一。<BR>2021年度開講せず。        </p>
+西暦偶数年度開講。<BR>01BC351と同一。<BR>対面とOLを併用する。        </p>
     </div>
     <div id="note-heading-note">
         <h2 id="note-heading">
@@ -202,199 +272,272 @@ $(function() {
 講義        </p>
     </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
-            <p id="style">
-素粒子物理学の専門分野における高度な知識を習得する。            </p>
-        </div>
-    
-        <div id="style-heading-style">
-         		   <h2 id="style-heading">授業の到達目標（学修成果）</h2>
-            <p id="style">
-素粒子物理学の格子場の理論分野に関する高度な知識を習得する。            </p>
-        </div>
-    
-        <div id="style-heading-style">
-            		<h2 id="style-heading">キーワード</h2>
-            <p id="style">
-格子場の理論, モンテカルロ計算            </p>
-        </div>
-    
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">授業計画</h2>
-            <div id="topics">
-                    <p id="pretopics">
-格子上の場の理論について、その理論的基礎と数値計算手法について解説する。                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第1回                                    </th>
-                                    <td>
-格子QCDの動機                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第2回                                    </th>
-                                    <td>
-格子ゲージ理論の基礎                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第3回                                    </th>
-                                    <td>
-格子上のフェルミオン (1) Wilson, Staggered                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第4回                                    </th>
-                                    <td>
-格子上のフェルミオン (2) Domain wall fermion                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第5回                                    </th>
-                                    <td>
-格子上のフェルミオン (3) Overlap fermion                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第6回                                    </th>
-                                    <td>
-数値計算法 (1)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第7回                                    </th>
-                                    <td>
-強数値計算法 (2)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第8回                                    </th>
-                                    <td>
-ハドロンの質量と構造関数の計算                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第9回                                    </th>
-                                    <td>
-ハドロン間相互作用の研究 (1)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第10回                                    </th>
-                                    <td>
-ハドロン間相互作用の研究 (2)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                    </table>
-                </div>
-            </div>
-        </div>
-    
-        <div id="style-heading-style">
-            		<h2 id="style-heading">履修条件</h2>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
                 <p id="style">
-場の理論を履修済みであること。                </p>
-        </div>
+汎用コンピテンス「1. 知の活用力」、専門コンピテンス「1. 活用力」「2. 物理力」「4. 論理力」に関連する。                </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">成績評価方法</h2>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標（学修成果）</h2>
                 <p id="style">
-レポート。随時レポートを課し、演習的評価を加味する。                </p>
-        </div>
+素粒子物理学の格子場の理論分野に関する高度な知識を習得する。                </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+格子場の理論、有限温度・密度QCD                </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">教材・参考文献・配付資料等</h2>
-            <div id="topics">
-                    <p id="pretopics">
-随時提示                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+格子上の場の理論について、その理論的基礎を解説したのち、応用例として、有限温度・密度格子QCDの手法と研究例を紹介する。具体的には、まず、格子QCD研究の目的、格子場の理論と格子ゲージ理論の基礎、Wilson型とstaggered型格子フェルミオン、格子カイラルフェルミオン、および強結合展開等について、基礎的な知識の習得と理論的枠組みを理解する。また後半では、有限温度・密度格子QCD研究の概要、相転移と臨界現象、状態方程式、有限密度格子QCDの定式化と符号問題、および符号問題を回避する方法について解説する。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+格子QCD研究の目的                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+大野 浩史                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+格子場の理論・格子ゲージ理論の基礎                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+大野 浩史                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+格子上のフェルミオン (1) ：Wilson fermion, staggered fermion                                         </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+大野 浩史                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+格子上のフェルミオン (2) ：domain wall fermion                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+大野 浩史                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+格子上のフェルミオン (3) ：overlap fermion                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+大野 浩史                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6回                                        </th>
+                                        <td>
+物理量の計算：ウィルソンループ、ポリャコフループ、強結合展開                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+大野 浩史                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第7回                                        </th>
+                                        <td>
+物理量の計算：ハドロン質量、連続極限                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+大野 浩史                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第8回                                        </th>
+                                        <td>
+有限温度・密度格子QCDの基礎                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+大野 浩史                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第9回                                        </th>
+                                        <td>
+有限温度QCDの研究                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+大野 浩史                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第10回                                        </th>
+                                        <td>
+有限密度QCDの研究                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+大野 浩史                                         </td>
+                                    </tr>
+                        </table>
+                    </div>
+                        <p id="pretopics">
+具体的な数値計算手法に関しては、本講義では踏み込まない。モンテカルロ計算や格子QCDシミュレーションの基礎的内容に関しては、0AJC031 計算物理学の一部で取り扱う。                        </p>
                 </div>
             </div>
-        </div>
     
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+場の理論を履修済みであること。                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
-            <div id="topics">
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <td>
-石塚 成人 　                                                    <br>
-                                                            <span class="officehour-address">
-1001706                                                            </span>
-                                                            <a href="http://www-het.ph.tsukuba.ac.jp/~ishizuka/index.html" target="_blank">http://www-het.ph.tsukuba.ac.jp/~ishizuka/index.html</a>
-                                    </td>
-                                </tr>
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+いくつかのレポート課題を課し、それらの評価を平均したものを最終評価とする。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+レポート課題に取り組むこと。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+教科書は特になし。<BR>参考文献は以下の通り。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th>
+1. シュプリンガー現代理論物理学シリーズ3 格子上の場の理論 (シュプリンガー・フェアラーク東京)                                        </th>
+                                        <td>
+                                                    <a href="https://www.tulips.tsukuba.ac.jp/search/?q=9784621062432" target="_blank">
+https://www.tulips.tsukuba.ac.jp/search/?q=9784621062432                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+2. Quantum Chromodynamics on the Lattice: An Introductory Presentation (Springer)                                        </th>
+                                        <td>
+                                                    <a href="https://www.tulips.tsukuba.ac.jp/search/?q=3642018491" target="_blank">
+https://www.tulips.tsukuba.ac.jp/search/?q=3642018491                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+3. Lattice Gauge Theories: An Introduction 4th edition (World Scientific)                                        </th>
+                                        <td>
+                                                    <a href="https://www.tulips.tsukuba.ac.jp/search/?q=9789814365857" target="_blank">
+https://www.tulips.tsukuba.ac.jp/search/?q=9789814365857                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+4. The Deconfinement Transition of QCD: Theory Meets Experiment (Springer)                                        </th>
+                                        <td>
+                                                    <a href="https://www.tulips.tsukuba.ac.jp/search/?q=9783030672348" target="_blank">
+https://www.tulips.tsukuba.ac.jp/search/?q=9783030672348                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+5. 相転移・臨界現象とくりこみ群 (丸善出版)                                        </th>
+                                        <td>
+                                                    <a href="https://www.tulips.tsukuba.ac.jp/search/?q=9784621301562" target="_blank">
+https://www.tulips.tsukuba.ac.jp/search/?q=9784621301562                                                    </a>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
-    
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
-        </div>
     
     
-        <div id="style-heading-style">
-		            <h2 id="style-heading">他の授業科目との関連</h2>
-        </div>
-        <div id="topic-assignments">
-            <table summary="topsics">
-            </table>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
+                <div id="topics">
+                        <p id="pretopics">
+オフィスアワーは特に指定しないが、事前にメール等で連絡してから訪問すること。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+大野 浩史 　計算科学研究センター 210号室 8745                                                        <br>
+                                                                <span class="officehour-address">
+100002384                                                                </span>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
     
-        <div id="style-heading-style">
-                <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
+                    <p id="style">
+この授業では以下のツールを用いて授業を進める。<BR>manaba：連絡、資料の配布、レポートの出題・回収<BR>MS Teams：資料の配布、質問受付、学生間の情報交換、授業の実施<BR><BR>授業は、充分な感染対策を取った上での対面形式及び MS Teams の会議を用いたオンライン（リアルタイム）形式を併用する。<BR>また、授業の様子を録画したものを視聴する、オンライン（オンデマンド）形式の参加も可能とする。<BR>ただし、新型コロナウイルス感染症拡大の状況が極めて悪化した場合は、完全オンライン（オンデマンド）形式への変更も検討する。                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                            <tr>
+                                <th>
+0AJC031                                </th>
+                                <td>
+計算物理学                                </td>
+                            </tr>
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
+            </div>
     
     
     
@@ -403,6 +546,6 @@ $(function() {
 
 
 
-</object>
+
 </body>
 </html>

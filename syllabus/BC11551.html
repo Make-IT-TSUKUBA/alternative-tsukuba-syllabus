@@ -129,6 +129,71 @@ $(function() {
         });
     }
 });
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+});
 </script>
 <body>
 
@@ -137,11 +202,16 @@ $(function() {
 </style>
 
 <h2 align="center">シラバス参照</h2>
-
+        <input type="hidden" name="lang" value="ja_JP">
 <table width="100%">
     <tr>
         <td align="left">
-            
+          
+          
+              <a href="/syllabi/2022/BC11551/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
           
           &nbsp;
       </td>
@@ -149,14 +219,14 @@ $(function() {
   <tr>
       <td align="right">
           
-              最終更新日：2021/03/30
+              最終更新日：2022/03/30
           
             &nbsp;
         </td>
     </tr>
 </table>
 
-<object >    <h1 id="course-title">
+    <h1 id="course-title">
         <span id="course">
 BC11551        </span>&nbsp;
         <span id="title">
@@ -171,10 +241,10 @@ BC11551        </span>&nbsp;
                     2 - 4 年次,
             </span>
             <span id="timetable">
-通年集中            </span>
+秋ABC 集中            </span>
             <br>
             <span id="assignments">
-            </span>
+早川 公            </span>
         </p>
     </div>
     <div id="summary-heading-summary-contents">
@@ -183,7 +253,7 @@ BC11551        </span>&nbsp;
             
         </h2>
         <p id="summary-contents">
-家族と親族、貨幣と経済、環境と技術、芸術と音楽という4つのトピックは、人類学の古典的研究領域であると同時に、現代社会の流動変化とあいまって、理論的・方法論的進捗が近年著しい分野でもある。この授業では、各トピックについて2回ずつ講義をおこなう。それぞれのトピックについて、1回目の講義では古典的な研究蓄積を、2回目の講義では近年の研究動向を主に取り上げる。その際、講師が研究対象とするソロモン諸島の事例を紹介し、同時に受講者各々の生活経験についての自省的考察を促す。受講者には、各講義日の最終時限にリアクションペーパーを兼ねた小レポートの執筆を課す。        </p>
+本科目は、文化人類学の考え方の修得をつうじて、「世界をわかりなおす」ための知識や態度を身につけます。講義では、気候変動、科学技術、経済問題、働き方・生き方など現代的なトピックを考えるにあたって人類学的なものの見方が「遠い」ものではないことを解説し、受講者自身が「プチ人類学者」として現代社会の諸問題をとらえられるようになることを目指します。これからの未来づくりを担うみなさんには、これまでの「あたりまえを疑う」ための道具が必要となります。そのための有用な「武器」になりうるのが文化人類学です。学修を通じて、ともに思考のバージョンアップをしていきましょう。        </p>
     </div>
     <div id="note-heading-note">
         <h2 id="note-heading">
@@ -191,7 +261,7 @@ BC11551        </span>&nbsp;
             
         </h2>
         <p id="note">
-        </p>
+その他の実施形態        </p>
     </div>
     <div id="note-heading-note">
         <h2 id="note-heading">
@@ -202,209 +272,319 @@ BC11551        </span>&nbsp;
 講義        </p>
     </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
-            <p id="style">
-1. 汎用コンピテンス:コミュニケーション能力、批判的・創造的思考力、広い視野と国際性。<BR>2. 専門コンピテンス:国際学(国際開発)の理解、国際学(国際開発)についての分析能力、国際学(国際開発)についての論理的表現能力。            </p>
-        </div>
-    
-        <div id="style-heading-style">
-         		   <h2 id="style-heading">授業の到達目標（学修成果）</h2>
-            <p id="style">
-1. 人類学的アプローチについて理解する。 <BR>2. 人類学のオーソドックスな研究課題について理解を深める。 <BR>3. 近年における人類学の研究動向について理解を深める。 <BR>4. 現代社会の諸課題について人類学的に考察することができる。            </p>
-        </div>
-    
-        <div id="style-heading-style">
-            		<h2 id="style-heading">キーワード</h2>
-            <p id="style">
-            </p>
-        </div>
-    
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">授業計画</h2>
-            <div id="topics">
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第1回                                    </th>
-                                    <td>
-はじめに:人類学的アプローチについて                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第2回                                    </th>
-                                    <td>
-家族と親族(1)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第3回                                    </th>
-                                    <td>
-家族と親族(2)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第4回                                    </th>
-                                    <td>
-貨幣と経済(1)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第5回                                    </th>
-                                    <td>
-貨幣と経済(2)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第6回                                    </th>
-                                    <td>
-環境と技術(1)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第7回                                    </th>
-                                    <td>
-環境と技術(2)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第8回                                    </th>
-                                    <td>
-芸術と音楽(1)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第9回                                    </th>
-                                    <td>
-芸術と音楽(2)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第10回                                    </th>
-                                    <td>
-まとめ:現代社会への人類学的アプローチ                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                    </table>
-                </div>
-            </div>
-        </div>
-    
-        <div id="style-heading-style">
-            		<h2 id="style-heading">履修条件</h2>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
                 <p id="style">
-履修の前提となる科目はとくにない。                </p>
-        </div>
+1. 汎用コンピテンス:コミュニケーション能力、批判的・創造的思考力、広い視野と国際性。<BR>2. 専門コンピテンス:国際学(国際開発)の理解、国際学(国際開発)についての分析能力、国際学(国際開発)についての論理的表現能力。                </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">成績評価方法</h2>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標（学修成果）</h2>
                 <p id="style">
-小レポート(15%&times;4)と期末レポート(40%)                </p>
-        </div>
+1. 自分の依拠する考えや価値観を言語化できる<BR>2. 文化人類学をめぐる基本的な知識・態度を理解する<BR>3. 文化人類学的思考法に基づいて、現代社会を考察できる                </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+文化、自然、科学、ケア、労働、アナキズム                </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">教材・参考文献・配付資料等</h2>
-            <div id="topics">
-                    <p id="pretopics">
-教科書は指定しない。授業ごとに資料を配布する。 <BR>下記は参考書(任意)。                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                               <tr>
-                                   <th>
-1. 『文化人類学の思考法』世界思想社、2019年。                                   </th>
-                                   <td>
-                                   </td>
-                               </tr>
-                               <tr>
-                                   <th>
-2. 『詳論文化人類学:基本と最新のトピックを深く学ぶ』、ミネルヴァ書房、2018年。                                   </th>
-                                   <td>
-                                   </td>
-                               </tr>
-                               <tr>
-                                   <th>
-3. 『社会人類学入門:多文化共生のために〈増補新版〉』(桑山敬己・堀口佐知子訳)、法政大学出版局、2017年。                                   </th>
-                                   <td>
-                                   </td>
-                               </tr>
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+オリエンテーション                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+世界のとらえ方①：自然と知識                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+世界のとらえ方②：技術と環境                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+世界のとらえ方③：呪術と科学                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+価値と秩序が生まれるとき①：贈り物と負債                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6回                                        </th>
+                                        <td>
+価値と秩序が生まれるとき②：貨幣と信用                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第7回                                        </th>
+                                        <td>
+価値と秩序が生まれるとき③：国家とグローバリゼーション                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第8回                                        </th>
+                                        <td>
+コール＆レスポンス（課題内容やワークへの応答）                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第9回                                        </th>
+                                        <td>
+あらたな共同性へ①：子どもと大人                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第10回                                        </th>
+                                        <td>
+あらたな共同性へ②：親族と名前                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第11回                                        </th>
+                                        <td>
+あらたな共同性へ③：ケアと共同性                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第12回                                        </th>
+                                        <td>
+コール＆レスポンス（課題内容やワークへの応答）                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第13回                                        </th>
+                                        <td>
+ワークとライフ①：労働・仕事・活動                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第14回                                        </th>
+                                        <td>
+ワークとライフ②：市民社会・民主主義・アナキズム                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第15回                                        </th>
+                                        <td>
+ワークとライフ③：日々のアナキズム                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第16回                                        </th>
+                                        <td>
+コール＆レスポンス（課題内容やワークへの応答）                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第17回                                        </th>
+                                        <td>
+プチ人類学者に向けて①：サイロ・エフェクト                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第18回                                        </th>
+                                        <td>
+プチ人類学者に向けて②：トンネル・ビジョンとアンスロ・ビジョン                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第19回                                        </th>
+                                        <td>
+プチ人類学者に向けて③：もう一つのAI（Anthropological Intelligence）                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第20回                                        </th>
+                                        <td>
+デブリーフィング                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+履修の前提となる科目はとくにない。                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
-            <div id="topics">
-                    <p id="pretopics">
-世話人教員に連絡。世話人は関根久雄(国際総合学類、sekine.hisao.gm@u.tsukuba.ac.jp)。                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+各回課題に対するリアクションペーパーの質&hellip;70％<BR>最終レポート&hellip;30％<BR>                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+以下の参考テキストの解説を中心に進めます。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th>
+1. Think Like an Anthropologist, A PELICAN BOOK, 2017.                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+2. 『文化人類学の思考法』世界思想社、2019年                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+3. ANTHRO-VISION：A New Way to See in Business and Life, Random House Business Books, 2021                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+4. コクヨ野外学習センター編『働くことの人類学【活字版】 仕事と自由をめぐる8つの対話』黒鳥社、2021年                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
-    
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
-        </div>
     
     
-        <div id="style-heading-style">
-		            <h2 id="style-heading">他の授業科目との関連</h2>
-        </div>
-        <div id="topic-assignments">
-            <table summary="topsics">
-            </table>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
+                <div id="topics">
+                        <p id="pretopics">
+世話人教員に連絡。世話人は関根久雄(国際総合学類、sekine.hisao.gm@u.tsukuba.ac.jp)。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
     
-        <div id="style-heading-style">
-                <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
+            </div>
     
     
     
@@ -413,6 +593,6 @@ BC11551        </span>&nbsp;
 
 
 
-</object>
+
 </body>
 </html>

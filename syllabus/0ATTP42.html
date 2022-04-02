@@ -129,6 +129,71 @@ $(function() {
         });
     }
 });
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+});
 </script>
 <body>
 
@@ -137,12 +202,13 @@ $(function() {
 </style>
 
 <h2 align="center">シラバス参照</h2>
-
+        <input type="hidden" name="lang" value="ja_JP">
 <table width="100%">
     <tr>
         <td align="left">
-            
-              <a href="/syllabi/2021/0ATTP42/jpn/0/">
+          
+          
+              <a href="/syllabi/2022/0ATTP42/jpn/0/">
                   最新版のシラバスを表示
               </a>
           
@@ -158,7 +224,7 @@ $(function() {
     </tr>
 </table>
 
-<object >    <h1 id="course-title">
+    <h1 id="course-title">
         <span id="course">
 0ATTP42        </span>&nbsp;
         <span id="title">
@@ -173,10 +239,10 @@ $(function() {
                     1 年次,
             </span>
             <span id="timetable">
-秋AB木6,集中            </span>
+秋AB 木6,集中            </span>
             <br>
             <span id="assignments">
-藤田 直子, 渡 和由, 野中 勝利, 橋本 剛            </span>
+藤田 直子, 渡 和由, 野中 勝利, 橋本 剛, 菅野 圭祐            </span>
         </p>
     </div>
     <div id="summary-heading-summary-contents">
@@ -193,7 +259,7 @@ $(function() {
             
         </h2>
         <p id="note">
-01EB634と同一。<BR>オンライン(同時双方向型)        </p>
+オンライン(同時双方向型)        </p>
     </div>
     <div id="note-heading-note">
         <h2 id="note-heading">
@@ -204,225 +270,228 @@ $(function() {
 演習        </p>
     </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
-            <p id="style">
-芸術学学位プログラム<BR>汎用<BR>1. 知の活用力<BR>2. マネージメント能力<BR>3. コミュニケーション能力<BR>4. チームワーク力<BR><BR>専門<BR>1. 創造力<BR>2. 理解力<BR>3. 問題解決力<BR><BR><BR>芸術専攻<BR>デザイン、造形の知識・技能を活かし、諸問題に対して新たな答えを見出せる発想力、研究能力、創造力<BR>デザイン、造形の意義と役割に対する自覚に基づいた専門諸事項への深い理解力<BR>多様な知識・経験、論理的思考に基づく問題発見力、解決力            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+汎用コンピテンス：1. 知の活用力、2. マネージメント能力、3. コミュニケーション能力、4. チームワーク力<BR>専門コンピテンス：1. 創造力、2. 理解力、3. 問題解決力                </p>
+            </div>
     
-        <div id="style-heading-style">
-         		   <h2 id="style-heading">授業の到達目標(学修成果)</h2>
-            <p id="style">
-環境デザインに関する課題設定、コンセプト、構想、計画、デザインにかかる一連のプロセス、表現方法を習得できるようになる。            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
+                <p id="style">
+環境デザインに関する課題設定、コンセプト、構想、計画、デザインにかかる一連のプロセス、表現方法を習得できるようになる                </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">キーワード</h2>
-            <p id="style">
-環境デザイン            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+環境デザイン                </p>
+            </div>
     
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">授業計画</h2>
-            <div id="topics">
-                    <p id="pretopics">
-環境デザインにかかわる具体的な課題をもとに計画、設計、デザインを実践的に行う。<BR>対面により行う(状況に応じてオンライン対応する)。資料の配付、出席確認等はTeams内で行う。オンラインによる当該授業形態に基づく成績評価方法、成績評価方法における課題の取扱い等に変更はない。                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-1)                                    </th>
-                                    <td>
-課題の提示、関連事例の解説                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-2)                                    </th>
-                                    <td>
-現地調査、敷地条件の確認                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-3)                                    </th>
-                                    <td>
-設計指導1(コンセプト、構想)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-4)                                    </th>
-                                    <td>
-設計指導2(構想、計画)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-5)                                    </th>
-                                    <td>
-設計指導3(基本計画、エスキス模型)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-6)                                    </th>
-                                    <td>
-中間発表、講評                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-7)                                    </th>
-                                    <td>
-設計指導4(基本計画、設計)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-8)                                    </th>
-                                    <td>
-設計指導5(基本設計)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-9)                                    </th>
-                                    <td>
-設計指導6(基本設計、模型)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-10)                                    </th>
-                                    <td>
-提出、発表、講評                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+環境デザインにかかわる具体的な課題をもとに計画、設計、デザインを実践的に行う。対面により行う(状況に応じてオンライン対応する)。資料の配付、出席確認等はTeams内で行う。オンラインによる当該授業形態に基づく成績評価方法、成績評価方法における課題の取扱い等に変更はない。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+1)                                        </th>
+                                        <td>
+課題の提示、関連事例の解説                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+2)                                        </th>
+                                        <td>
+現地調査、敷地条件の確認                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+3)                                        </th>
+                                        <td>
+設計指導1(コンセプト、構想)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+4)                                        </th>
+                                        <td>
+設計指導2(構想、計画)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+5)                                        </th>
+                                        <td>
+設計指導3(基本計画、エスキス模型)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+6)                                        </th>
+                                        <td>
+中間発表、講評                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+7)                                        </th>
+                                        <td>
+設計指導4(基本計画、設計)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+8)                                        </th>
+                                        <td>
+設計指導5(基本設計)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+9)                                        </th>
+                                        <td>
+設計指導6(基本設計、模型)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+10)                                        </th>
+                                        <td>
+成果物提出、最終発表、講評                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">履修条件</h2>
-                <p id="style">
-環境デザイン領域                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+環境デザイン領域                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">成績評価方法</h2>
-                <p id="style">
-授業中の積極性(50%)、成果物(50%)                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+評価方法：授業中の積極性(50%)、成果物(50%)<BR>評価基準：各回の設計指導で前回よりも改善が認められた者，かつ中間発表と最終発表を行った者を評価対象者(C以上)とし、A+~Cの評価と各評点の割合は評価対象者の数に応じて相対評価する                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
-                <p id="style">
-環境デザインに関する研究・作品について調査すること。<BR>身の回りの環境、空間、自然現象や人間の行動に関心を向け、自身の問題意識と照らし合わせながらよく観察すること。<BR>本科目は2単位の設定であり、合計30時間の授業がありますが、授業外で（復習やレポート作成等で）60時間分相当の学修が必要となります。                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+学修時間の割り当て：本科目は2単位の設定であり合計30時間の授業があるが、授業外で（復習やレポート作成等で）60時間分相当の学修が必要<BR>授業外における学修方法：環境デザインに関する研究・作品について自主調査すること。身の回りの環境、空間、自然現象や人間の行動に関心を向け、自身の問題意識と照らし合わせながらよく観察すること<BR>                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">教材・参考文献・配付資料等</h2>
-            <div id="topics">
-                    <p id="pretopics">
-必要に応じて授業中に適宜提示する。                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+必要に応じて授業中に適宜提示する                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
-            <div id="topics">
-                    <p id="pretopics">
-随時受け付ける．希望者は事前に連絡すること．                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <td>
-藤田 直子 　適宜受け付ける．事前に連絡すること．　                                                    <br>
-                                                            <span class="officehour-address">
-100003061                                                            </span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-渡 和由 　                                                    <br>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-野中 勝利 　                                                    <br>
-                                                            <span class="officehour-address">
-1001389                                                            </span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-橋本 剛 　火曜10：00〜12：00　他の時間帯を希望する場合はメールにて事前連絡すること。　芸術学系棟B534                                                    <br>
-                                                            <span class="officehour-address">
-1002315                                                            </span>
-                                    </td>
-                                </tr>
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+藤田 直子 　適宜受け付ける．事前に連絡すること．　                                                        <br>
+                                                                <span class="officehour-address">
+100003061                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+渡 和由 　                                                        <br>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+野中 勝利 　                                                        <br>
+                                                                <span class="officehour-address">
+1001389                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+橋本 剛 　火曜10：00〜12：00　他の時間帯を希望する場合はメールにて事前連絡すること。　芸術学系棟B534                                                        <br>
+                                                                <span class="officehour-address">
+1002315                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+菅野 圭祐 　                                                        <br>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
-                <p id="style">
-特になし。                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
+                    <p id="style">
+特になし                    </p>
+            </div>
     
     
-        <div id="style-heading-style">
-		            <h2 id="style-heading">他の授業科目との関連</h2>
-        </div>
-        <div id="topic-assignments">
-            <table summary="topsics">
-            </table>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
     
-        <div id="style-heading-style">
-                <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
-                <p id="style">
-なし。                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+                    <p id="style">
+なし                    </p>
+            </div>
     
     
     
@@ -431,6 +500,6 @@ $(function() {
 
 
 
-</object>
+
 </body>
 </html>

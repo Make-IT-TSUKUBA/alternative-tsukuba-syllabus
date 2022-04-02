@@ -129,6 +129,71 @@ $(function() {
         });
     }
 });
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+});
 </script>
 <body>
 
@@ -137,12 +202,13 @@ $(function() {
 </style>
 
 <h2 align="center">シラバス参照</h2>
-
+        <input type="hidden" name="lang" value="ja_JP">
 <table width="100%">
     <tr>
         <td align="left">
-            
-              <a href="/syllabi/2021/0ADM133/jpn/0/">
+          
+          
+              <a href="/syllabi/2022/0ADM133/jpn/0/">
                   最新版のシラバスを表示
               </a>
           
@@ -153,12 +219,14 @@ $(function() {
   <tr>
       <td align="right">
           
+              最終更新日：2022/03/30
+          
             &nbsp;
         </td>
     </tr>
 </table>
 
-<object >    <h1 id="course-title">
+    <h1 id="course-title">
         <span id="course">
 0ADM133        </span>&nbsp;
         <span id="title">
@@ -173,7 +241,7 @@ $(function() {
                     1・2 年次,
             </span>
             <span id="timetable">
-秋C土3,4            </span>
+春B 土3,4            </span>
             <br>
             <span id="assignments">
 吉田 光男            </span>
@@ -238,12 +306,14 @@ Medium of instruction is Japanese. Please see the Japanese syllabus for the deta
     
             <div id="style-heading-style">
                     <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+なし                    </p>
             </div>
     
             <div id="style-heading-style">
                     <h2 id="style-heading">成績評価方法</h2>
                     <p id="style">
-講義参加（質問・ディスカッション等）への積極性（10%），各回の課題レポート（50%），最終レポート（40%）で評価します。なお，授業の到達目標に照らし，その到達具合に応じてA＋からDの評価点を付けます。                    </p>
+講義参加（質問・ディスカッション等）への積極性（10%），各回の課題レポート（40%），最終レポート（50%）で評価します。なお，授業の到達目標に照らし，その到達具合に応じてA＋からDの評価点を付けます。                    </p>
             </div>
     
             <div id="style-heading-style">
@@ -256,7 +326,7 @@ Medium of instruction is Japanese. Please see the Japanese syllabus for the deta
                     <h2 id="style-heading">教材・参考文献・配付資料等</h2>
                 <div id="topics">
                         <p id="pretopics">
-教科書は使わず，配付資料をもとに授業を進めます。ただし，本科目は以下の図書をもとに構成しており，併せて読むとより理解が深まります。                        </p>
+教科書は使わず，配付資料をもとに授業を進めます。ただし，本科目は「計算社会科学入門」をもとに構成しており，併せて読むとより理解が深まります。                        </p>
                     <div id="topic-assignments">
                         <table summary="topsics">
                                     <tr>
@@ -345,6 +415,6 @@ https://www.tulips.tsukuba.ac.jp/search/?q=9784621305966                        
 
 
 
-</object>
+
 </body>
 </html>
