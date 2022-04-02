@@ -129,6 +129,71 @@ $(function() {
         });
     }
 });
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+});
 </script>
 <body>
 
@@ -137,12 +202,13 @@ $(function() {
 </style>
 
 <h2 align="center">シラバス参照</h2>
-
+        <input type="hidden" name="lang" value="ja_JP">
 <table width="100%">
     <tr>
         <td align="left">
-            
-              <a href="/syllabi/2021/0AL5200/jpn/0/">
+          
+          
+              <a href="/syllabi/2022/0AL5200/jpn/0/">
                   最新版のシラバスを表示
               </a>
           
@@ -153,12 +219,14 @@ $(function() {
   <tr>
       <td align="right">
           
+              最終更新日：2022/03/30
+          
             &nbsp;
         </td>
     </tr>
 </table>
 
-<object >    <h1 id="course-title">
+    <h1 id="course-title">
         <span id="course">
 0AL5200        </span>&nbsp;
         <span id="title">
@@ -173,10 +241,10 @@ $(function() {
                     1・2 年次,
             </span>
             <span id="timetable">
-春C集中            </span>
+春C 集中            </span>
             <br>
             <span id="assignments">
-梅川 智也, 川口 明子, 塩谷 英生            </span>
+梅川 智也, 川口 明子, 塩谷 英生, 岡本 直久            </span>
         </p>
     </div>
     <div id="summary-heading-summary-contents">
@@ -185,7 +253,7 @@ $(function() {
             
         </h2>
         <p id="summary-contents">
-本授業は、梅川智也客員教授を中心とする日本交通公社(JTBF)による提供科目である。JTBFの経験・取り組みをもとに、市場・社会調査、データ分析、提案という一連の調査・分析方法論を学び、わが国の旅行・観光分野の現状と課題を踏まえた上で、市場分析、観光行動分析、観光消費分析等の基本的考え方と方法論を理解する。        </p>
+本授業は、梅川智也客員教授を中心とする観光エキスパートによる提供科目である。これまでの観光シンクタンクでの経験・取り組みをもとに、市場・社会調査、データ分析、提案という一連の調査・分析方法論を教授する。さらに、わが国の旅行・観光分野の現状と課題を踏まえた上で、市場分析、観光行動分析、観光消費分析等の基本的考え方と方法論を理解する。        </p>
     </div>
     <div id="note-heading-note">
         <h2 id="note-heading">
@@ -193,7 +261,7 @@ $(function() {
             
         </h2>
         <p id="note">
-履修人数によりサービス工学学位プログラム以外の学生の履修を制限することもある。<BR>01CN953と同一。<BR>7/3,10,17        </p>
+履修人数によりサービス工学学位プログラム以外の学生の履修を制限することもある。<BR>オンライン同時双方向型が主となる予定、詳細は掲示等で連絡する。<BR>01CN953と同一。<BR>7/2,7/9,7/16        </p>
     </div>
     <div id="note-heading-note">
         <h2 id="note-heading">
@@ -204,105 +272,215 @@ $(function() {
 講義        </p>
     </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
-            <p id="style">
- 1. 知の活用力：高度な知識を社会に役立てる能力<BR> 2. マネジメント能力：広い視野に立ち課題に的確に対応する能力            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+ 1. 知の活用力：高度な知識を社会に役立てる能力<BR> 2. マネジメント能力：広い視野に立ち課題に的確に対応する能力                </p>
+            </div>
     
-        <div id="style-heading-style">
-         		   <h2 id="style-heading">授業の到達目標(学修成果)</h2>
-            <p id="style">
-本授業は、梅川智也客員教授を中心とする日本交通公社(JTBF)による提供科目である。JTBFの経験・取り組みをもとに、市場・社会調査、データ分析、提案という一連の調査・分析方法論を学び、わが国の旅行・観光分野の現状と課題を踏まえた上で、市場分析、観光行動分析、観光消費分析等の基本的考え方と方法論を理解する。<BR>            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
+                <p id="style">
+本授業は、観光分野における調査論、市場・消費・行動分析の方法論について理解するとともに、分析技法を習得することを目標とする。<BR>                </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">キーワード</h2>
-            <p id="style">
-観光、市場調査、行動分析、消費分析            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+観光、市場調査、行動分析、消費分析                </p>
+            </div>
     
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">授業計画</h2>
-            <div id="topics">
-                    <p id="pretopics">
-講義初回に提示する。講義日程は以下の通り。<BR>7月 3日（土）12:15～18:00<BR>7月10日（土）12:15～16:30<BR>7月17日（土）13:45～18：00                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+講義初回に提示する。講義日程は以下の通り。<BR>7月 2日（土）12:15～18:00<BR>7月 9日（土）13:30～18:00<BR>7月16日（土）13:30～18:00                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+観光学の概要と観光先進国に向けた動き　Overview of tourism studies and movement toward advanced tourism countries                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+「観光地経営」－９つの視点　&quot;Tourist destination management&quot; -9 perspectives                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+世界に誇るわが国の観光資源と観光地　Japan's world-class tourism resources and tourist destinations                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+「観光地経営」に必要なビジョンづくり　Creating the vision necessary for &quot;Destination management&quot;                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+旅行市場・観光産業のすがた Tourism market / industry                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6回                                        </th>
+                                        <td>
+観光の経済効果と施策 Economic effects and measures of tourism                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第7回                                        </th>
+                                        <td>
+観光統計演習 Tourism statistics exercise                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第8回                                        </th>
+                                        <td>
+国の観光統計の作成方法① How to create national tourism statistics ①                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第9回                                        </th>
+                                        <td>
+国の観光統計の作成方法②How to create national tourism statistics ②                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第10回                                        </th>
+                                        <td>
+観光統計の利活用の実態　Actual conditions of utilization of tourism statistics                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">履修条件</h2>
-                <p id="style">
-履修人数によりサービス工学学位プログラム以外の学生の履修を制限する。                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+履修人数によりサービス工学学位プログラム以外の学生の履修を制限する。                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">成績評価方法</h2>
-                <p id="style">
-各講師から出題される課題に対するレポートを総合的に評価する。                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+各講師から出題される課題に対する3つのレポートに対する評価を総合する（４：３：３）。<BR>                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
-                <p id="style">
-なし                </p>
-        </div>
-    
-        <div id="style-heading-style">
-            		<h2 id="style-heading">教材・参考文献・配付資料等</h2>
-            <div id="topics">
-                    <p id="pretopics">
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
 なし                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                    </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+なし                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
-            <div id="topics">
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <td>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                    </td>
-                                </tr>
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                        <p id="pretopics">
+e-mail等により事前にアポイントを取ること.                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+岡本 直久 　                                                        <br>
+                                                                <span class="officehour-address">
+1001709                                                                </span>
+                                                                <a href="http://infoshako.sk.tsukuba.ac.jp/~okamoto" target="_blank">http://infoshako.sk.tsukuba.ac.jp/~okamoto</a>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
+            </div>
     
     
-        <div id="style-heading-style">
-		            <h2 id="style-heading">他の授業科目との関連</h2>
-        </div>
-        <div id="topic-assignments">
-            <table summary="topsics">
-            </table>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
     
-        <div id="style-heading-style">
-                <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+            </div>
     
     
     
@@ -311,6 +489,6 @@ $(function() {
 
 
 
-</object>
+
 </body>
 </html>

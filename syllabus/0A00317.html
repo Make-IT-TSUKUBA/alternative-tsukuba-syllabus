@@ -129,6 +129,71 @@ $(function() {
         });
     }
 });
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+});
 </script>
 <body>
 
@@ -137,12 +202,13 @@ $(function() {
 </style>
 
 <h2 align="center">シラバス参照</h2>
-
+        <input type="hidden" name="lang" value="ja_JP">
 <table width="100%">
     <tr>
         <td align="left">
-            
-              <a href="/syllabi/2021/0A00317/jpn/0/">
+          
+          
+              <a href="/syllabi/2022/0A00317/jpn/0/">
                   最新版のシラバスを表示
               </a>
           
@@ -153,12 +219,14 @@ $(function() {
   <tr>
       <td align="right">
           
+              最終更新日：2022/03/25
+          
             &nbsp;
         </td>
     </tr>
 </table>
 
-<object >    <h1 id="course-title">
+    <h1 id="course-title">
         <span id="course">
 0A00317        </span>&nbsp;
         <span id="title">
@@ -173,10 +241,10 @@ $(function() {
                     1 - 5 年次,
             </span>
             <span id="timetable">
-春C集中            </span>
+春C 集中            </span>
             <br>
             <span id="assignments">
-坂本 瑞樹, 荒川 裕則, 松尾 豊, 和田 元, 齋 均            </span>
+坂本 瑞樹, 神原 貴樹, 岩室 憲幸, 蓮沼 隆, 磯部 高範, 松尾 豊, 和田 元, 齋 均            </span>
         </p>
     </div>
     <div id="summary-heading-summary-contents">
@@ -193,7 +261,7 @@ $(function() {
             
         </h2>
         <p id="note">
-英語で授業。<BR>対面        </p>
+英語で授業。<BR>8月上旬を予定。<BR>講義の実施形態については今後決定する。        </p>
     </div>
     <div id="note-heading-note">
         <h2 id="note-heading">
@@ -204,211 +272,223 @@ $(function() {
 講義        </p>
     </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
-            <p id="style">
-修士レベル<BR> 知の活用力・コミュニケーション能力・国際性<BR>博士レベル<BR> 知の創成力・コミュニケーション能力・国際性            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+修士レベル<BR> 知の活用力・コミュニケーション能力・国際性<BR>博士レベル<BR> 知の創成力・コミュニケーション能力・国際性                </p>
+            </div>
     
-        <div id="style-heading-style">
-         		   <h2 id="style-heading">授業の到達目標(学修成果)</h2>
-            <p id="style">
-・多国籍、多様な講師陣を迎え、当該問題の学術的アプローチの紹介、講師陣や他の受講者との議論により国際社会が抱える地球規模課題について認識を深めること。<BR>特に,プラズマ,ナノグリーン,ナノエレ・パワエレの重要な3分野に関連する英語での講義を通して,地球規模の問題について理解する.<BR>・国連が提示しているSDGs (Sustainable Developmental Goals)を題材として学内外の人たちとの意見交換や議論が十分できるようになること。(SDGSに関連した講義を受けることによる国際性の向上をもたらす学修成果)<BR>・英語によるコミュニケーション力や活用力の向上をもたらす学修成果<BR>・国際社会の一員としての自覚を誘起することで、高等教育を受けた者が果たすべき役割と責任について熟考する経験を通して、国連や国際機関へのキャリアパスにチャレンジできる能力を身に着けるきっかけを得ること。<BR>・「持続可能な開発目標(SDGs)」のうち、Goal 7, 9 &amp; 13に関連する国際社会が直面する「環境・エネルギー」について理解を深めることにより、科学的根拠を基に地球環境問題を論ずることができる能力を身につけること。(最先端の研究に基づいたトップクラスの講義により専門分野に接続する知識の獲得につながる学修成果)<BR><BR>(英語で)レポートを書くことにより,自身の考えることを如何に表現するかについて深く考え,他者とのコミュニケーション能力の涵養につながる.            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
+                <p id="style">
+・多国籍、多様な講師陣を迎え、当該問題の学術的アプローチの紹介、講師陣や他の受講者との議論により国際社会が抱える地球規模課題について認識を深めること。<BR>特に,プラズマ,ナノグリーン,ナノエレ・パワエレの重要な3分野に関連する英語での講義を通して,地球規模の問題について理解する.<BR>・国連が提示しているSDGs (Sustainable Developmental Goals)を題材として学内外の人たちとの意見交換や議論が十分できるようになること。(SDGSに関連した講義を受けることによる国際性の向上をもたらす学修成果)<BR>・英語によるコミュニケーション力や活用力の向上をもたらす学修成果<BR>・国際社会の一員としての自覚を誘起することで、高等教育を受けた者が果たすべき役割と責任について熟考する経験を通して、国連や国際機関へのキャリアパスにチャレンジできる能力を身に着けるきっかけを得ること。<BR>・「持続可能な開発目標(SDGs)」のうち、Goal 7, 9 &amp; 13に関連する国際社会が直面する「環境・エネルギー」について理解を深めることにより、科学的根拠を基に地球環境問題を論ずることができる能力を身につけること。(最先端の研究に基づいたトップクラスの講義により専門分野に接続する知識の獲得につながる学修成果)<BR><BR>(英語で)レポートを書くことにより,自身の考えることを如何に表現するかについて深く考え,他者とのコミュニケーション能力の涵養につながる.                </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">キーワード</h2>
-            <p id="style">
-Nuclear fusion, Plasma, Solar Light, Energy Conversion, Power efficiency, Smaller size, SiC MOSFET, Si IGBT, MOSFET, memory device            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+Nuclear fusion, Plasma, Solar Light, Energy Conversion, Power efficiency, Smaller size, SiC MOSFET, Si IGBT, MOSFET, memory device                </p>
+            </div>
     
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">授業計画</h2>
-            <div id="topics">
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第1回                                    </th>
-                                    <td>
-Clean and Renewable Energy Development I                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第2回                                    </th>
-                                    <td>
-Clean and Renewable Energy Development&nbsp;&nbsp;II                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第3回                                    </th>
-                                    <td>
-Organic Optoelectronic Devices I                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第4回                                    </th>
-                                    <td>
-Organic Optoelectronic Devices&nbsp;&nbsp;II                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第5回                                    </th>
-                                    <td>
-Fusion plasma as the future energy source I                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第6回                                    </th>
-                                    <td>
-Fusion plasma as the future energy source II                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第7回                                    </th>
-                                    <td>
-Power Conversion and its Applications                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第8回                                    </th>
-                                    <td>
-Recent Progress of Power Semiconductor Devices and Their<BR>Futures                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第9回                                    </th>
-                                    <td>
-Nanoelectronics I                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第10回                                    </th>
-                                    <td>
-Nanoelectronics II                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+Clean and Renewable Energy Development I                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+Clean and Renewable Energy Development&nbsp;&nbsp;II                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+Organic Optoelectronic Devices I                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+Organic Optoelectronic Devices&nbsp;&nbsp;II                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+Fusion plasma as the future energy source I                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6回                                        </th>
+                                        <td>
+Fusion plasma as the future energy source II                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第7回                                        </th>
+                                        <td>
+Power Conversion and its Applications                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第8回                                        </th>
+                                        <td>
+Recent Progress of Power Semiconductor Devices and Their<BR>Futures                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第9回                                        </th>
+                                        <td>
+Nanoelectronics I                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第10回                                        </th>
+                                        <td>
+Nanoelectronics II                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">履修条件</h2>
-                <p id="style">
-特になし                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+特になし                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">成績評価方法</h2>
-                <p id="style">
-Report レポートにより評価を行う。                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+Report レポートにより評価を行う。                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
-                <p id="style">
-授業で学んだ内容の復習をすること                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+授業で学んだ内容の復習をすること                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">教材・参考文献・配付資料等</h2>
-            <div id="topics">
-                    <p id="pretopics">
-・国連のSustainable Developmental Goals (SDGs)のウエブサイト <BR> (1) https://www.unglobalcompact.org/what-is-gc/our-work/sustainable-development (UN Global Compact)<BR> (2) https://www.unic.or.jp/(国際連合広報センター)<BR> (3) https://www.osi.tsukuba.ac.jp/sdgs/(筑波大学-Driving Sustainable Development)                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+・国連のSustainable Developmental Goals (SDGs)のウエブサイト <BR> (1) https://www.unglobalcompact.org/what-is-gc/our-work/sustainable-development (UN Global Compact)<BR> (2) https://www.unic.or.jp/(国際連合広報センター)<BR> (3) https://www.osi.tsukuba.ac.jp/sdgs/(筑波大学-Driving Sustainable Development)                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
-            <div id="topics">
-                    <p id="pretopics">
-連絡先:大学院共通科目オフィス(ggec@un.tsukuba.ac.jp)                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <td>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                    </td>
-                                </tr>
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                        <p id="pretopics">
+連絡先:大学院共通科目オフィス(ggec@un.tsukuba.ac.jp)                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">他の授業科目との関連</h2>
-                <p id="style">
-・「地球規模課題と国際社会」シリーズの他の科目は本科目と密接に関係することから、それらの科目の履修を推奨する。                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+                    <p id="style">
+・「地球規模課題と国際社会」シリーズの他の科目は本科目と密接に関係することから、それらの科目の履修を推奨する。                    </p>
+            </div>
     
     
-        <div id="style-heading-style">
-                <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+            </div>
     
     
     
@@ -417,6 +497,6 @@ Report レポートにより評価を行う。                </p>
 
 
 
-</object>
+
 </body>
 </html>

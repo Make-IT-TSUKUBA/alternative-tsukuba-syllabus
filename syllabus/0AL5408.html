@@ -129,6 +129,71 @@ $(function() {
         });
     }
 });
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+});
 </script>
 <body>
 
@@ -137,12 +202,13 @@ $(function() {
 </style>
 
 <h2 align="center">シラバス参照</h2>
-
+        <input type="hidden" name="lang" value="ja_JP">
 <table width="100%">
     <tr>
         <td align="left">
-            
-              <a href="/syllabi/2021/0AL5408/jpn/0/">
+          
+          
+              <a href="/syllabi/2022/0AL5408/jpn/0/">
                   最新版のシラバスを表示
               </a>
           
@@ -153,12 +219,14 @@ $(function() {
   <tr>
       <td align="right">
           
+              最終更新日：2022/03/30
+          
             &nbsp;
         </td>
     </tr>
 </table>
 
-<object >    <h1 id="course-title">
+    <h1 id="course-title">
         <span id="course">
 0AL5408        </span>&nbsp;
         <span id="title">
@@ -173,7 +241,7 @@ $(function() {
                     1・2 年次,
             </span>
             <span id="timetable">
-春C集中            </span>
+春C 集中            </span>
             <br>
             <span id="assignments">
 早瀬 康裕            </span>
@@ -193,7 +261,7 @@ $(function() {
             
         </h2>
         <p id="note">
-        </p>
+オンライン(オンデマンド型)        </p>
     </div>
     <div id="note-heading-note">
         <h2 id="note-heading">
@@ -204,115 +272,119 @@ $(function() {
 講義及び演習        </p>
     </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
-            <p id="style">
-知の活用力,マネジメント能力,チームワーク力,研究力,知識力            </p>
-        </div>
-    
-        <div id="style-heading-style">
-         		   <h2 id="style-heading">授業の到達目標(学修成果)</h2>
-            <p id="style">
-ソフトウェアリポジトリを分析することの目的と意義を理解するとともに、リポジトリのデータ構造と意味を理解し、リポジトリからデータを抽出して分析できるようになる。            </p>
-        </div>
-    
-        <div id="style-heading-style">
-            		<h2 id="style-heading">キーワード</h2>
-            <p id="style">
-ソフトウェアリポジトリ, データ分析, バージョン管理システム, Issue tracking system            </p>
-        </div>
-    
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">授業計画</h2>
-            <div id="topics">
-                    <p id="pretopics">
-講義と演習を交互に行いながら進める.<BR>2020年度はオンデマンドのビデオ講義に,オフィスアワーでの質問受付と演習サポートを組み合わせて行なう.                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-(1)                                    </th>
-                                    <td>
-基礎知識の習得<BR><BR>* 前提知識<BR>&nbsp;&nbsp;* ソフトウェア開発の基本的な性質と、リポジトリマイニングの必要性<BR>&nbsp;&nbsp;* 代表的なリポジトリマイニングの情報源 <BR>* バージョン管理システム (Git等.VCS) に格納されるデータの性質と, VCS に対する分析手法<BR>* Issue Tracking System (ITS) および Pull Request System の性質と, ITS に対する分析手法                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-(2)                                    </th>
-                                    <td>
-発展的な分析<BR><BR>* VCSやITSに格納された情報の詳細な分析<BR>&nbsp;&nbsp;* ソースコードの解析<BR>&nbsp;&nbsp;* 自然文 (コメントやドキュメント) の解析 <BR>* その他の情報源と,それに対する分析手法の紹介<BR>&nbsp;&nbsp;* リポジトリホスティングサービス (メタリポジトリ)<BR>&nbsp;&nbsp;* テストログ<BR>&nbsp;&nbsp;* 実行履歴<BR>&nbsp;&nbsp;* Developer SNS<BR>&nbsp;&nbsp;* アプリケーションストア<BR>&nbsp;&nbsp;* 編集操作 <BR>* 最終演習                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                    </table>
-                </div>
-            </div>
-        </div>
-    
-        <div id="style-heading-style">
-            		<h2 id="style-heading">履修条件</h2>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
                 <p id="style">
-ソフトウェア開発についての基礎知識か、データ分析の基礎知識のどちらかを有していることが望ましい。                </p>
-        </div>
+知の活用力,マネジメント能力,チームワーク力,研究力,知識力                </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">成績評価方法</h2>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
                 <p id="style">
-授業中に行なう演習の成果と、最終レポートを合わせて評価する。                </p>
-        </div>
+ソフトウェアリポジトリを分析することの目的と意義を理解するとともに、リポジトリのデータ構造と意味を理解し、リポジトリからデータを抽出して分析できるようになる。                </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+ソフトウェアリポジトリ, データ分析, バージョン管理システム, Issue tracking system                </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">教材・参考文献・配付資料等</h2>
-            <div id="topics">
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+講義と演習を交互に行いながら進める.<BR>                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+(1)                                        </th>
+                                        <td>
+基礎知識の習得<BR><BR>* 前提知識<BR>&nbsp;&nbsp;* ソフトウェア開発の基本的な性質と、リポジトリマイニングの必要性<BR>&nbsp;&nbsp;* 代表的なリポジトリマイニングの情報源 <BR>* バージョン管理システム (Git等.VCS) に格納されるデータの性質と, VCS に対する分析手法<BR>* Issue Tracking System (ITS) および Pull Request System の性質と, ITS に対する分析手法                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+(2)                                        </th>
+                                        <td>
+発展的な分析<BR><BR>* VCSやITSに格納された情報の詳細な分析<BR>&nbsp;&nbsp;* ソースコードの解析<BR>&nbsp;&nbsp;* 自然文 (コメントやドキュメント) の解析 <BR>* その他の情報源と,それに対する分析手法の紹介<BR>&nbsp;&nbsp;* リポジトリホスティングサービス (メタリポジトリ)<BR>&nbsp;&nbsp;* テストログ<BR>&nbsp;&nbsp;* 実行履歴<BR>&nbsp;&nbsp;* Developer SNS<BR>&nbsp;&nbsp;* アプリケーションストア<BR>&nbsp;&nbsp;* 編集操作 <BR>* 最終演習                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+ソフトウェア開発についての基礎知識か、データ分析の基礎知識のどちらかを有していることが望ましい。                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
-            <div id="topics">
-                    <p id="pretopics">
-Microsoft Teams でのビデオ会議によって,オフィスアワーを実施する.<BR>9月16日 3限 (12:15〜13:30)<BR>9月17日 3限 (12:15〜13:30)<BR>9月23日 3限 (12:15〜13:30)<BR>9月24日 3限 (12:15〜13:30)<BR><BR>Microsoft Teams へのアクセス方法や,課題と最終レポートの提出方法は,Manabaから案内する.                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <td>
-                                    </td>
-                                </tr>
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+授業中に行なう演習の成果と、最終レポートを合わせて評価する。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+オンデマンドのビデオ講義を視聴し，課題を提出すること．<BR>講義内容や課題についての質問は，オフィスアワーに受け付ける．                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+授業内で配布・指定する．                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
-    
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
-        </div>
     
     
-        <div id="style-heading-style">
-		            <h2 id="style-heading">他の授業科目との関連</h2>
-        </div>
-        <div id="topic-assignments">
-            <table summary="topsics">
-            </table>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                        <p id="pretopics">
+Microsoft Teams でのビデオ会議によって,オフィスアワーを実施する.<BR>Microsoft Teams へのアクセス方法や,課題と最終レポートの提出方法は,Manabaから案内する.                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
     
-        <div id="style-heading-style">
-                <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+            </div>
     
     
     
@@ -321,6 +393,6 @@ Microsoft Teams でのビデオ会議によって,オフィスアワーを実施
 
 
 
-</object>
+
 </body>
 </html>

@@ -129,6 +129,71 @@ $(function() {
         });
     }
 });
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+});
 </script>
 <body>
 
@@ -141,11 +206,16 @@ th, td {padding-right:5px;border: 1px #808080 solid;background-color:#e5e5ff;}
 </style>
 
 <h2 align="center">シラバス参照</h2>
-
+        <input type="hidden" name="lang" value="ja_JP">
 <table width="100%">
     <tr>
         <td align="left">
-            
+          
+          
+              <a href="/syllabi/2022/0ATS220/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
           
           &nbsp;
       </td>
@@ -153,14 +223,12 @@ th, td {padding-right:5px;border: 1px #808080 solid;background-color:#e5e5ff;}
   <tr>
       <td align="right">
           
-              最終更新日：2021/05/19
-          
             &nbsp;
         </td>
     </tr>
 </table>
 
-<object >    <h1 id="course-title">
+    <h1 id="course-title">
         <span id="course">
 0ATS220        </span>&nbsp;
         <span id="title">
@@ -175,7 +243,7 @@ th, td {padding-right:5px;border: 1px #808080 solid;background-color:#e5e5ff;}
                     1・2 年次,
             </span>
             <span id="timetable">
-春A集中; 春B金7,8            </span>
+秋AB水7,8            </span>
             <br>
             <span id="assignments">
 山口 香            </span>
@@ -195,7 +263,7 @@ th, td {padding-right:5px;border: 1px #808080 solid;background-color:#e5e5ff;}
             
         </h2>
         <p id="note">
-集中講義10:00~<BR>01EK206と同一。<BR>4/17,4/24        </p>
+集中講義10:00~<BR>01EK206と同一。        </p>
     </div>
     <div id="note-heading-note">
         <h2 id="note-heading">
@@ -206,349 +274,354 @@ th, td {padding-right:5px;border: 1px #808080 solid;background-color:#e5e5ff;}
 講義        </p>
     </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
-            <p id="style">
-知の活用力、マネジメント能力、国際性、研究力、専門知識、倫理観            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+知の活用力、マネジメント能力、国際性、研究力、専門知識、倫理観                </p>
+            </div>
     
-        <div id="style-heading-style">
-         		   <h2 id="style-heading">授業の到達目標(学修成果)</h2>
-            <p id="style">
-国際競技力開発の理念としてのスポーツ・プロフェッショナリズムの重要性およびシ ステム編成に必要な資源評価・査定・開発とそのシステムマネジメントの課題と方法論について理解する            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
+                <p id="style">
+(1)国際競技力開発の理念としてのスポーツ・プロフェッショナリズムの重要性およびシ ステム編成に必要な資源評価・査定・開発とそのシステムマネジメントの内容を理解し、説明できる。<BR>(2) スポーツ・プロフェッショナリズムの重要性およびシ ステム編成に必要な資源評価・査定・開発とそのシステムマネジメントについて因果関係も含めて分析できる。<BR>(3)スポーツ・プロフェッショナリズムの重要性およびシステム編成に必要な資源評価・査定・開発とそのシステムマネジメントについて類似例を引用して具体策について解説できる。                </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">キーワード</h2>
-            <p id="style">
-国際競技力向上, マネジメント, 組織, コーチング            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+国際競技力向上, マネジメント, 組織, コーチング                </p>
+            </div>
     
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">授業計画</h2>
-            <div id="topics">
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第1回                                    </th>
-                                    <td>
-ガイダンス                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第2回                                    </th>
-                                    <td>
-総合戦略<BR>(マネジメント, ストラテジー)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第3回                                    </th>
-                                    <td>
-組織のあり方<BR>(JOC,NF,JSC の構造及び役割)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第4回                                    </th>
-                                    <td>
-ナショナルトレーニングセンター (1)<BR>(合宿, 国際交流)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第5回                                    </th>
-                                    <td>
-ナショナルトレーニングセンター (2)<BR>(エリートアカデミー, コーチアカデミー)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第6回                                    </th>
-                                    <td>
-タレント発掘と一貫指導 (1)<BR>(タレント, 地域の取り組み)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第7回                                    </th>
-                                    <td>
-タレント発掘と一貫指導 (2)<BR>(指導理念の共有, 種目転向)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第8回                                    </th>
-                                    <td>
-コーチングとは<BR>(コーチング, 理念)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第9回                                    </th>
-                                    <td>
-一流プレーヤーの特徴<BR>(理解, 信頼関係)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第10回                                    </th>
-                                    <td>
-コーチに必要な資質<BR>(公平性, 伝達能力, 探究心, ネットワーク)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第11回                                    </th>
-                                    <td>
-キャリア教育の重要性<BR>(セカンドキャリア)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第12回                                    </th>
-                                    <td>
-オリンピックや W 杯など大会のマネジメント<BR>(役割分担, 情報収集・管理, メディア対策)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第13回                                    </th>
-                                    <td>
-Team behind the team<BR>(医科学サポート, 栄養, ドーピング)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第14回                                    </th>
-                                    <td>
-リスクマネジメント<BR>(コンディショニング・安全)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第15回                                    </th>
-                                    <td>
-情報戦略<BR>(情報収集・選別・活用)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第16回                                    </th>
-                                    <td>
-国際競争力<BR>(IF,IOC)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第17回                                    </th>
-                                    <td>
-コミュニケーションスキル<BR>(ネットワーク, 社交性, 国際性)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第18回                                    </th>
-                                    <td>
-スポーツの目指すもの<BR>(スポーツ庁の役割・強化拠点)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第19回                                    </th>
-                                    <td>
-2020のレガシーと今後の国際強化戦略<BR>(金メダル戦略・重点強化)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第20回                                    </th>
-                                    <td>
-まとめ                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+ガイダンス                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+総合戦略<BR>(マネジメント, ストラテジー)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+組織のあり方<BR>(JOC,NF,JSC の構造及び役割)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+ナショナルトレーニングセンター (1)<BR>(合宿, 国際交流)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+ナショナルトレーニングセンター (2)<BR>(エリートアカデミー, コーチアカデミー)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6回                                        </th>
+                                        <td>
+タレント発掘と一貫指導 (1)<BR>(タレント, 地域の取り組み)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第7回                                        </th>
+                                        <td>
+タレント発掘と一貫指導 (2)<BR>(指導理念の共有, 種目転向)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第8回                                        </th>
+                                        <td>
+コーチングとは<BR>(コーチング, 理念)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第9回                                        </th>
+                                        <td>
+一流プレーヤーの特徴<BR>(理解, 信頼関係)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第10回                                        </th>
+                                        <td>
+コーチに必要な資質<BR>(公平性, 伝達能力, 探究心, ネットワーク)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第11回                                        </th>
+                                        <td>
+キャリア教育の重要性<BR>(セカンドキャリア)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第12回                                        </th>
+                                        <td>
+オリンピックや W 杯など大会のマネジメント<BR>(役割分担, 情報収集・管理, メディア対策)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第13回                                        </th>
+                                        <td>
+Team behind the team<BR>(医科学サポート, 栄養, ドーピング)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第14回                                        </th>
+                                        <td>
+リスクマネジメント<BR>(コンディショニング・安全)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第15回                                        </th>
+                                        <td>
+情報戦略<BR>(情報収集・選別・活用)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第16回                                        </th>
+                                        <td>
+国際競争力<BR>(IF,IOC)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第17回                                        </th>
+                                        <td>
+コミュニケーションスキル<BR>(ネットワーク, 社交性, 国際性)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第18回                                        </th>
+                                        <td>
+スポーツの目指すもの<BR>(スポーツ庁の役割・強化拠点)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第19回                                        </th>
+                                        <td>
+2020のレガシーと今後の国際強化戦略<BR>(金メダル戦略・重点強化)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第20回                                        </th>
+                                        <td>
+まとめ                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                        <p id="pretopics">
+毎回資料を事前にデータで共有し、それに沿って進める。<BR>授業後には、各自内容を復習し、疑問点や理解不足な点について次回の授業までに確認、整理しておく。<BR>                        </p>
                 </div>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">履修条件</h2>
-                <p id="style">
-スポーツにおける基本的な知識を有しており、国際競技力向上施策について研究する意欲のある者                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+スポーツにおける基本的な知識を有しており、国際競技力向上施策について研究する意欲のある者                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">成績評価方法</h2>
-                <p id="style">
-レポートで評価する。<BR><BR><BR>評価基準(A+, A, B, C又はD)                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+達成目標で挙げた３つの項目に着目し、授業内での発言・発表、課題発表・レポートを通して、達成度による成績評価をする。<BR>1)授業での発言・発表（40%）<BR>2)課題発表（30%）<BR>3)レポート（30%）<BR><BR>評価基準(A+, A, B, C又はD)                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
-                <p id="style">
-授業外における学修(予習・復習等)については、適宜担当教員より指示                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+予習・復習は必ず行うこと。レスポンスシートを毎回の授業で課す。各自が要点を整理した上で、次回の授業でレスポンスシートを提出すること。                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">教材・参考文献・配付資料等</h2>
-            <div id="topics">
-                    <p id="pretopics">
-テキストは特になし。必要に応じて資料を配布する。                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                               <tr>
-                                   <th>
-1. SPORTS COACHING CONCEPTS                                   </th>
-                                   <td>
-                                   </td>
-                               </tr>
-                               <tr>
-                                   <th>
-2. フランスサッカーのプロフェッショナル・コーチング                                   </th>
-                                   <td>
-                                   </td>
-                               </tr>
-                               <tr>
-                                   <th>
-3. 知的コーチングのすすめ                                   </th>
-                                   <td>
-                                   </td>
-                               </tr>
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+プリント等、必要な資料を配布し、それによって進める。指定する教科書はない。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th>
+1. SPORTS COACHING CONCEPTS                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+2. フランスサッカーのプロフェッショナル・コーチング                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+3. 知的コーチングのすすめ                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
-            <div id="topics">
-                    <p id="pretopics">
-木曜日 17 時半~18 時 20 分<BR>東京キャンパス 電話 03-3942-6451<BR>つくばキャンパス B405 電話 029-853-2687                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <td>
-                                    </td>
-                                </tr>
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                        <p id="pretopics">
+オフィスアワーは特に設けない。<BR>随時、下記メールアドレスに事前連絡の上、日時を設定する。<BR>                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+山口 香 　                                                        <br>
+                                                                <span class="officehour-address">
+1001595                                                                </span>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
-                <p id="style">
-積極的な受講態度を望みます。                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
+                    <p id="style">
+積極的な受講態度を望みます。                    </p>
+            </div>
     
     
-        <div id="style-heading-style">
-		            <h2 id="style-heading">他の授業科目との関連</h2>
-        </div>
-        <div id="topic-assignments">
-            <table summary="topsics">
-                        <tr>
-                            <th>
-0ATS221                            </th>
-                            <td>
-高度競技マネジメント論演習1                            </td>
-                        </tr>
-                        <tr>
-                            <th>
-0ATS222                            </th>
-                            <td>
-高度競技マネジメント論演習2                            </td>
-                        </tr>
-                        <tr>
-                            <th>
-0ATS223                            </th>
-                            <td>
-高度競技マネジメント論実習                            </td>
-                        </tr>
-                        <tr>
-                            <th>
-0ATS264                            </th>
-                            <td>
-スポーツマネジメント研究方法論IV                            </td>
-                        </tr>
-                        <tr>
-                            <th>
-0ATS265                            </th>
-                            <td>
-スポーツマネジメント研究方法論V                            </td>
-                        </tr>
-            </table>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                            <tr>
+                                <th>
+0ATS221                                </th>
+                                <td>
+高度競技マネジメント論演習1                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+0ATS222                                </th>
+                                <td>
+高度競技マネジメント論演習2                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+0ATS223                                </th>
+                                <td>
+高度競技マネジメント論実習                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+0ATS264                                </th>
+                                <td>
+スポーツマネジメント研究方法論IV                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+0ATS265                                </th>
+                                <td>
+スポーツマネジメント研究方法論V                                </td>
+                            </tr>
+                </table>
+            </div>
     
-        <div id="style-heading-style">
-                <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
-                <p id="style">
-無                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+                    <p id="style">
+無                    </p>
+            </div>
     
     
     
@@ -557,6 +630,6 @@ Team behind the team<BR>(医科学サポート, 栄養, ドーピング)        
 
 
 
-</object>
+
 </body>
 </html>

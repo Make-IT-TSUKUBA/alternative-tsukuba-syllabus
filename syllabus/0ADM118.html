@@ -129,6 +129,71 @@ $(function() {
         });
     }
 });
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+});
 </script>
 <body>
 
@@ -137,11 +202,16 @@ $(function() {
 </style>
 
 <h2 align="center">シラバス参照</h2>
-
+        <input type="hidden" name="lang" value="ja_JP">
 <table width="100%">
     <tr>
         <td align="left">
-            
+          
+          
+              <a href="/syllabi/2022/0ADM118/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
           
           &nbsp;
       </td>
@@ -149,14 +219,14 @@ $(function() {
   <tr>
       <td align="right">
           
-              最終更新日：2021/03/30
+              最終更新日：2022/03/30
           
             &nbsp;
         </td>
     </tr>
 </table>
 
-<object >    <h1 id="course-title">
+    <h1 id="course-title">
         <span id="course">
 0ADM118        </span>&nbsp;
         <span id="title">
@@ -171,7 +241,7 @@ $(function() {
                     1・2 年次,
             </span>
             <span id="timetable">
-秋A土3,4            </span>
+秋A 土3,4            </span>
             <br>
             <span id="assignments">
 牧本 直樹            </span>
@@ -202,119 +272,147 @@ $(function() {
 講義        </p>
     </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
-            <p id="style">
-汎用コンピテンス：「1. 知の活用力」<BR>専門コンピテンス：「2. 経営に関する問題発見能力」，「3. 経営に関する問題解決能力」            </p>
-        </div>
-    
-        <div id="style-heading-style">
-         		   <h2 id="style-heading">授業の到達目標（学修成果）</h2>
-            <p id="style">
-(1) 回帰モデルの理論的な基礎について理解できるようになること.<BR><BR>(2) 回帰モデルの推定，係数に対する検定，モデル選択などのフレームワークを理解できるようになること．<BR>実データに対して適切に適用できるようになること．<BR><BR>(3) 不均一分散や系列相関などに留意して，実データに対して回帰モデルを適切に適用できるようになること．<BR><BR>(4) 同時方程式モデルに対して適切な推定ができるようになること．<BR><BR>(5) パネルデータの分析手法を理解できるようになること．<BR>            </p>
-        </div>
-    
-        <div id="style-heading-style">
-            		<h2 id="style-heading">キーワード</h2>
-            <p id="style">
-確率分布，モーメント公式，最尤法，回帰分析，モデル選択，不均一分散，系列相関，2段階最小二乗法，パネルデータ            </p>
-        </div>
-    
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">授業計画</h2>
-            <div id="topics">
-                    <p id="pretopics">
-回帰モデルを用いて分析を行う際に必要となる理論や分析技術，分析結果の解釈などを，データ分析例を交えながら解説する．                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                    </table>
-                </div>
-                    <p id="pretopics">
-(1) 確率変数と分布<BR>確率変数とデータ，分布の表現と特性量，代表的な分布，モーメント公式，大数の法則，中心極限定理，尤度<BR><BR>(2) 重回帰分析<BR>古典的回帰モデル，回帰係数の仮説検定，複数の係数に対する検定(F検定)<BR><BR>(3) 変数選択，多重共線性<BR>過少定式化と過剰定式化，多重共線性，最尤法，情報量規準による変数選択<BR><BR>(4) 不均一分散・系列相関<BR>加重最小二乗法，不均一分散の検定，一般化最小二乗法，系列相関の検定，実行可能な一般化最小二乗法<BR><BR>(5) 説明変数と誤差項の相関・パネルデータ<BR>新古典的回帰モデル，同時方程式，操作変数法，2段階最小二乗法，固定効果と変量効果，パネルデータの推定<BR>                    </p>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+汎用コンピテンス：「1. 知の活用力」<BR>専門コンピテンス：「2. 経営に関する問題発見能力」，「3. 経営に関する問題解決能力」                </p>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">履修条件</h2>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標（学修成果）</h2>
                 <p id="style">
-ソフトウェアを用いて基本的なデータ解析ができること．ベクトルと行列と微分の基礎を理解していること．                </p>
-        </div>
+(1) 計量経済学の基礎となる確率や統計の基礎を理解すること．<BR><BR>(2) 回帰モデルの理論的な基礎を理解できるようになること.<BR><BR>(3) 回帰モデルの推定，回帰係数に対する検定，モデル選択などのフレームワークを理解できるようになること．<BR>実データに対して適切に適用できるようになること．<BR><BR>(4) 不均一分散や系列相関などに留意して，実データに対して回帰モデルを適切に適用できるようになること．<BR><BR>(5) 同時方程式モデルに対して適切な推定ができるようになること．<BR><BR>(6) パネルデータの分析手法を理解できるようになること．                </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">成績評価方法</h2>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
                 <p id="style">
-各回のレポートの合計(90%)と授業中の発言や質疑応答(10%)により評価する.                </p>
-        </div>
+推定量の性質，回帰分析，最小二乗法，最尤法，モデル選択，不均一分散，系列相関，2段階最小二乗法，操作変数，パネルデータ                </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
-                <p id="style">
-各回の講義内容について，講義資料中の例題を解いたり，講義録画を視聴するなどして復習すること．<BR>また各回の講義内容に関連する課題をレポートとして課すので，次回講義時までに解答して提出すること．                </p>
-        </div>
-    
-        <div id="style-heading-style">
-            		<h2 id="style-heading">教材・参考文献・配付資料等</h2>
-            <div id="topics">
-                    <p id="pretopics">
-教科書は使用せず,配布資料をもとに講義する.<BR>                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                               <tr>
-                                   <th>
-1. 計量経済学（第2版），有斐閣，2009                                   </th>
-                                   <td>
-                                   </td>
-                               </tr>
-                               <tr>
-                                   <th>
-2. Rによる計量経済分析，朝倉書店，2011                                   </th>
-                                   <td>
-                                   </td>
-                               </tr>
-                               <tr>
-                                   <th>
-3. 計量経済学，多賀出版，2006                                   </th>
-                                   <td>
-                                   </td>
-                               </tr>
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+経営学におけるさまざまなデータに対して回帰モデルを用いて分析を行う際に必要となる理論や分析技術，分析結果の解釈などを，データ分析例を交えながら解説する．                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                        <p id="pretopics">
+〇1・2回<BR>・確率と統計：確率，確率の計算公式，期待値と分散，モーメント公式，大数の法則，中心極限定理，推定量の性質<BR><BR>〇3・4回<BR>・重回帰モデル：古典的回帰モデル，回帰係数の仮説検定，複数の係数に対する検定，回帰結果の検討<BR><BR>〇5・6回<BR>・説明変数の選択：過少定式化と過剰定式化，多重共線性，最尤法，情報量規準による変数選択<BR>・モデル診断：残差の検討，変数変換<BR><BR>〇7・8回<BR>・不均一分散，不均一分散の検定，一般化最小二乗法<BR>・系列相関，系列相関の検定，一般化最小二乗法<BR><BR>〇9・10回<BR>・説明変数と誤差項の相関，操作変数法<BR>・同時方程式，2段階最小二乗法<BR>・パネルデータ：固定効果と変量効果，パネルデータの推定                        </p>
                 </div>
             </div>
-        </div>
     
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+統計の基礎知識があること．ソフトウェアを用いて基本的なデータ解析ができること．ベクトルと行列と微分の基礎を理解していること．                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
-            <div id="topics">
-                    <p id="pretopics">
-オフィスアワーは特に定めないが，質問等がある場合は講義終了後時，もしくはメールで事前連絡を取った上で相談すること．                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <td>
-                                    </td>
-                                </tr>
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+各回の講義内容に関するレポート（次回講義時に提出，全5回）の評点合計に基づいてA+～Dを判定する．                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+各回の講義内容について，講義資料中の例題を解いたり，講義録画を視聴するなどして復習すること．<BR>また各回の講義内容に関連する演習問題をレポートとして課すので，次回講義時までに解答して提出すること．                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+〇教材<BR>教科書は使用せず，配布した講義資料をもとに講義する．<BR>講義資料は各回の講義前にmanabaからダウンロードすること．<BR><BR>〇参考文献<BR>以下に参考書を挙げるが，講義内容に関する書籍は多数出版されているので，ここに挙げた以外の書籍も含めて<BR>各自の必要性や関心に応じて選択するとよい．<BR><BR>                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th>
+1. 計量経済学（第2版），有斐閣，2009                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+2. Rによる計量経済分析，朝倉書店，2011                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
-    
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
-        </div>
     
     
-        <div id="style-heading-style">
-		            <h2 id="style-heading">他の授業科目との関連</h2>
-        </div>
-        <div id="topic-assignments">
-            <table summary="topsics">
-            </table>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
+                <div id="topics">
+                        <p id="pretopics">
+オフィスアワーは特に定めないが，質問等がある場合は講義終了後，もしくはメールで事前連絡を取った上で相談すること．                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
     
-        <div id="style-heading-style">
-                <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
+                    <p id="style">
+〇新型コロナウイルスの感染状況に応じて，講義は教室またはオンライン(zoom)で実施する．<BR>〇講義録画を大学内のMicrosoft Streamで公開するので，必要に応じて復習等に活用すること．<BR>〇詳細はmanabaのコースコンテンツ欄に掲出する講義案内を参照のこと．                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                            <tr>
+                                <th>
+0ADM001                                </th>
+                                <td>
+ビジネス数理                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+0ADM114                                </th>
+                                <td>
+データ解析I                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+0ADM115                                </th>
+                                <td>
+データ解析II                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+0ADM117                                </th>
+                                <td>
+共分散構造分析                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+0ADM119                                </th>
+                                <td>
+時系列分析                                </td>
+                            </tr>
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
+                    <p id="style">
+TA配置なし．                    </p>
+            </div>
     
     
     
@@ -323,6 +421,6 @@ $(function() {
 
 
 
-</object>
+
 </body>
 </html>

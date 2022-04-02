@@ -129,6 +129,71 @@ $(function() {
         });
     }
 });
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+});
 </script>
 <body>
 
@@ -137,11 +202,16 @@ $(function() {
 </style>
 
 <h2 align="center">シラバス参照</h2>
-
+        <input type="hidden" name="lang" value="ja_JP">
 <table width="100%">
     <tr>
         <td align="left">
-            
+          
+          
+              <a href="/syllabi/2022/0BTNA0B/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
           
           &nbsp;
       </td>
@@ -149,14 +219,14 @@ $(function() {
   <tr>
       <td align="right">
           
-              最終更新日：2021/03/22
+              最終更新日：2022/03/29
           
             &nbsp;
         </td>
     </tr>
 </table>
 
-<object >    <h1 id="course-title">
+    <h1 id="course-title">
         <span id="course">
 0BTNA0B        </span>&nbsp;
         <span id="title">
@@ -171,7 +241,7 @@ $(function() {
                     1・2 年次,
             </span>
             <span id="timetable">
-通年応談            </span>
+通年 応談            </span>
             <br>
             <span id="assignments">
 医学学位プログラム全教員            </span>
@@ -183,7 +253,7 @@ $(function() {
             
         </h2>
         <p id="summary-contents">
-ポストゲノム時代の医学生物学研究を支える新たな技術や概念について講義を受け、内容について討論を行なうとともに、関係論文を読み、レポートを作成して理解を深める。主な内容は、以下のとおりである。<BR> (1) 哺乳動物遺伝学:遺伝子改変マウスをはじめとした哺乳動物モデルを用いた最先端の医学生物学研究について、技術基盤と有用性を学ぶ。(2) 医学物理・化学:最先端の研究機器や物理化学的技術について、またこれらを駆使した最先端の研究について聴講し、医学生物学研究に必要な物理学、物理化学、化学的知識について理解する。        </p>
+医学生物学研究に必要な知識・技術を解説するセミナーを受講して討論に参加するとともに、その内容について関係論文を読み、レポートを作成して理解を深める。これにより、他分野について詳細に議論し応用力を磨く訓練を行うとともに、科学的文章に対する理解を深め、文章作成のための技術力向上に取り組む。<BR>なお、医学医療系ポスター発表会におけるポスター発表も対象とする。その場合、ポスター発表者に１つ以上、メール等で質問をし、その内容もレポートに記載する。        </p>
     </div>
     <div id="note-heading-note">
         <h2 id="note-heading">
@@ -202,99 +272,103 @@ $(function() {
 演習        </p>
     </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
-            <p id="style">
-【汎用】知の創成力、マネージメント能力<BR>【専門】研究課題設定力、先端研究遂行力、専門知識運用力            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+【汎用】知の創成力、マネージメント能力<BR>【専門】研究課題設定力、先端研究遂行力、専門知識運用力                </p>
+            </div>
     
-        <div id="style-heading-style">
-         		   <h2 id="style-heading">授業の到達目標（学修成果）</h2>
-            <p id="style">
-1. セミナーに参加し、その内容について大旨説明できるようになる。 <BR>2. 当該分野について、文献調査を行う課題を設定できる。 <BR>3. 調べる課題に即して、読むべき論文を適切に選択できる。 <BR>4. 選んだ課題、読んでいる論文とその内容について、他の学生と討論し、理解を深めることができる。 <BR>5. セミナーの内容と文献調査した結果についてレポートにまとめて、科学的な文章の書き方に習熟する。            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標（学修成果）</h2>
+                <p id="style">
+１. セミナーに参加し、その内容について大旨説明できるようになる。<BR>２. 当該分野について、文献調査を行う課題を設定できる。<BR>３. 調べる課題に即して、読むべき論文を適切に選択できる。<BR>４. 選んだ課題、読んでいる論文とその内容について、他の学生と討論し、理解を深めることができる。<BR>５. 疑問点などについて発表者に質問をし、考察を深めることができる。<BR>６. セミナーの内容と文献調査した結果、考察内容についてレポートにまとめて、科学的な文章の書き方に習熟する。                </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">キーワード</h2>
-            <p id="style">
-セミナー, 医学研究            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+セミナー, 医学研究                </p>
+            </div>
     
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">授業計画</h2>
-            <div id="topics">
-                    <p id="pretopics">
-&lt;予定講師&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<BR>・藤本明洋(東京大学医学系研究科);時期未定&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<BR>他                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+TBA                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">履修条件</h2>
-                <p id="style">
-なし                </p>
-        </div>
-    
-        <div id="style-heading-style">
-            		<h2 id="style-heading">成績評価方法</h2>
-                <p id="style">
-3回以上のセミナーを受講してレポートを提出し、その内容を大旨理解できていれば合格(C以上)と判断する。さらに、当該分野の関係論文を適切に選択して理解できている場合はB以上と判断する。前記ならびに文章作成能力について優れている場合はAと判断する。 特に優れたレポートを提出した場合は(上位10%)A+と判断する。                </p>
-        </div>
-    
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
-                <p id="style">
-講義(セミナー)50%、 演習50%<BR>セミナーの内容と関連分野の論文の内容について、学生同士で討論し、専門分野以外の研究について理解を深め、応用力とコミュニケーション能力の向上に努める。                </p>
-        </div>
-    
-        <div id="style-heading-style">
-            		<h2 id="style-heading">教材・参考文献・配付資料等</h2>
-            <div id="topics">
-                    <p id="pretopics">
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
 なし                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                    </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+３回以上のセミナーを受講してレポートを提出し、その内容を大旨理解できていれば合格（C以上）と判断する。さらに、当該分野の関係論文を適切に選択して理解できている場合はB以上と判断する。前記ならびに文章作成能力について優れている場合はAと判断する。 特に優れたレポートを提出した場合は（上位10%）A+と判断する。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+講義（セミナー）50％、　演習50％<BR>セミナーの内容と関連分野の論文の内容について、学生同士もしくは発表者と討論し、専門分野以外の研究について理解を深め、応用力とコミュニケーション能力の向上に努める。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+なし                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
-            <div id="topics">
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <td>
-                                    </td>
-                                </tr>
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
+                <div id="topics">
+                        <p id="pretopics">
+オフィスアワーは定めない。メールで予定を確認のうえ、訪問すること。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                        <p id="pretopics">
+西村　健：ken-nishimura(at)md.tsukuba.ac.jp<BR>尾花　望：obana.nozomu.gb(at)u.tsukuba.ac.jp<BR>                        </p>
                 </div>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
-                <p id="style">
-本科目の目的を理解し、自分の専門とは異なる分野のセミナーを選んでレポートを提出すること。<BR>一部のセミナーは筑波大学統一認証システムを用いた e-learning により視聴することも可能である。詳細は E-mail にて周知する。                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
+                    <p id="style">
+本科目の目的を理解し、自分の専門とは異なる分野のセミナーを選んでレポートを提出すること。<BR>一部のセミナーは筑波大学統一認証システムを用いた e-learning により視聴することも可能である。詳細は E-mail にて周知する。                    </p>
+            </div>
     
     
-        <div id="style-heading-style">
-		            <h2 id="style-heading">他の授業科目との関連</h2>
-        </div>
-        <div id="topic-assignments">
-            <table summary="topsics">
-            </table>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
     
-        <div id="style-heading-style">
-                <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
+            </div>
     
     
     
@@ -303,6 +377,6 @@ $(function() {
 
 
 
-</object>
+
 </body>
 </html>

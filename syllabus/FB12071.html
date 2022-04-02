@@ -129,6 +129,71 @@ $(function() {
         });
     }
 });
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+});
 </script>
 <body>
 
@@ -137,11 +202,16 @@ $(function() {
 </style>
 
 <h2 align="center">シラバス参照</h2>
-
+        <input type="hidden" name="lang" value="ja_JP">
 <table width="100%">
     <tr>
         <td align="left">
-            
+          
+          
+              <a href="/syllabi/2022/FB12071/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
           
           &nbsp;
       </td>
@@ -149,14 +219,12 @@ $(function() {
   <tr>
       <td align="right">
           
-              最終更新日：2021/03/30
-          
             &nbsp;
         </td>
     </tr>
 </table>
 
-<object >    <h1 id="course-title">
+    <h1 id="course-title">
         <span id="course">
 FB12071        </span>&nbsp;
         <span id="title">
@@ -171,10 +239,10 @@ FB12071        </span>&nbsp;
                     2 年次,
             </span>
             <span id="timetable">
-春ABC月3            </span>
+春ABC 月3            </span>
             <br>
             <span id="assignments">
-相山 玲子            </span>
+山本 光            </span>
         </p>
     </div>
     <div id="summary-heading-summary-contents">
@@ -183,7 +251,7 @@ FB12071        </span>&nbsp;
             
         </h2>
         <p id="summary-contents">
-ベクトル解析の基礎および曲線・曲面の幾何について論述する.        </p>
+ベクトル解析の基礎について論述する.        </p>
     </div>
     <div id="note-heading-note">
         <h2 id="note-heading">
@@ -202,306 +270,365 @@ FB12071        </span>&nbsp;
 講義        </p>
     </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
-            <p id="style">
-数学類の専門コンピテンス：数学の専門知識（解析学の理解，幾何学の理解）<BR>汎用コンピテンス：批判的・創造的思考力，広い視野と国際性            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+数学類の専門コンピテンス：数学の専門知識（解析学の理解，幾何学の理解）<BR>汎用コンピテンス：批判的・創造的思考力，広い視野と国際性                </p>
+            </div>
     
-        <div id="style-heading-style">
-         		   <h2 id="style-heading">授業の到達目標（学修成果）</h2>
-            <p id="style">
-微分積分や線形代数の基本事項に対する理解を幾何学的に深める.<BR>逆関数定理や陰関数定理に親しみながら, 曲線や曲面の定義を理解する.<BR>ベクトル場の微分, 線積分や面積分など, ベクトル解析の基礎を修得する.<BR>具体例を通して, グリーン, ストークス, ガウスの定理の意味を修得する.            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標（学修成果）</h2>
+                <p id="style">
+1. 微分積分や線形代数の基本事項がベクトル解析の理論の構築の中でどのように使われているか他者に説明することができる．<BR>2. ベクトル場の微分や線積分や面積分などのベクトル解析の基礎となる概念の定義を何も見ずに書き下すことができる．<BR>3. グリーンの定理，ストークスの定理，ガウスの定理の主張を何も見ずに書き下すことができ，それらの定理の意味を他者に説明することができる．<BR>4. 積分定理を使うような具体的かつ簡単な問題を解くことができる．                </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">キーワード</h2>
-            <p id="style">
-ベクトル場, スカラー場, 内積, ノルム, ベクトル積, 多変数の微積分, 逆関数定理, 陰関数定理, 曲線, 曲面, 弧長, 面積・体積, 線積分, 面積分, 勾配ベクトル場, ベクトル場の回転, ベクトル場の発散, グリーンの定理, ストークスの定理, ガウスの定理.            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+内積，外積，多変数の微積分，ベクトル場，線積分，面積分，ベクトル場の発散，グリーンの定理，ストークスの定理，ガウスの定理                </p>
+            </div>
     
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">授業計画</h2>
-            <div id="topics">
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第1回                                    </th>
-                                    <td>
-ベクトルとベクトル場                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第2回                                    </th>
-                                    <td>
-平面上のベクトル解析(1)仕事と線積分                                     </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第3回                                    </th>
-                                    <td>
-平面上のベクトル解析(2)平面曲線 , 閉曲線上の線積分                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第4回                                    </th>
-                                    <td>
-平面上のベクトル解析(3) ベクトル場の発散，ガウスの発散定理                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第5回                                    </th>
-                                    <td>
-平面上のベクトル解析(4)ベクトル場の回転，グリーンの定理                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第6回                                    </th>
-                                    <td>
-３次元空間のベクトル解析(1)&nbsp;&nbsp;曲面                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第7回                                    </th>
-                                    <td>
-３次元空間のベクトル解析(2)&nbsp;&nbsp;面積分                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第8回                                    </th>
-                                    <td>
-３次元空間のベクトル解析(3)&nbsp;&nbsp;閉曲面上の面積分，ガウスの発散定理                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第9回                                    </th>
-                                    <td>
-３次元空間のベクトル解析(4)&nbsp;&nbsp;ベクトル場の回転，ストークスの定理                                     </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第10回                                    </th>
-                                    <td>
-３次元空間のベクトル解析(5)&nbsp;&nbsp;ベクトル場と積分曲線                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第11回                                    </th>
-                                    <td>
-３次元空間のベクトル解析(6) ベクトル場と座標変換                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第12回                                    </th>
-                                    <td>
-３次元空間のベクトル解析(7)&nbsp;&nbsp;微分形式                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第13回                                    </th>
-                                    <td>
-３次元空間のベクトル解析(8)&nbsp;&nbsp;微分形式の積分とストークスの定理                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第14回                                    </th>
-                                    <td>
-n次元空間の微分形式とその積分                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第15回                                    </th>
-                                    <td>
-講義内容の補足説明                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+本講義では多変数の微分積分学の発展として，ベクトル解析と呼ばれるものに関する基本的な事項を説明する．本講義で扱う主な対象はベクトル場と呼ばれるものである．ベクトル場とは定義域も値域も多変数であるような（ある程度滑らかな）写像である．そのようなものの微分や積分の定義を詳しく説明する．また，１変数関数の微分積分学の基本定理の（ある種の）一般化として「積分定理」と呼ばれる一連の定理がある．グリーンの定理，ストークスの定理，ガウスの定理である．これらの定理の証明と意味の理解，そして具体的な状況への応用を本講義の目標とする．ベクトル解析は微分積分学と線形代数の続論という位置付けと，曲線曲面論への準備という２つの位置付けを持っている．従って，本講義の前半では微分積分学と線形代数の復習も兼ねた内容を積極的に取り入れる．また，後半では曲線曲面論への準備になるような定式化を積極的に採用する．                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+ベクトル解析を学ぶモチベーションの共有１：離散量の変化                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+ベクトル解析を学ぶモチベーションの共有２：連続量の変化                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+内積付きベクトル空間の様々な演算とその性質                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+多変数ベクトル値関数の偏微分とその性質                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+多変数ベクトル値関数の積分の定義                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6回                                        </th>
+                                        <td>
+多変数ベクトル値関数の積分と変数変換の関係                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第7回                                        </th>
+                                        <td>
+ベクトル場の線積分の定義とその性質                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第8回                                        </th>
+                                        <td>
+ベクトル場の面積分の定義                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第9回                                        </th>
+                                        <td>
+ベクトル場の面積分と変数変換の関係                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第10回                                        </th>
+                                        <td>
+ベクトル場や関数に作用する微分作用素(grad, div, rot)の導入とその意味                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第11回                                        </th>
+                                        <td>
+グリーンの定理とストークスの定理の紹介とその意味及び応用                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第12回                                        </th>
+                                        <td>
+グリーンの定理の証明その１（縦線集合の場合）                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第13回                                        </th>
+                                        <td>
+グリーンの定理の証明その２（一般の領域の場合）                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第14回                                        </th>
+                                        <td>
+ガウスの定理の紹介とその意味及び応用                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第15回                                        </th>
+                                        <td>
+ガウスの定理の証明                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">履修条件</h2>
-                <p id="style">
-微分積分学や線形代数学の基本事項に親しみがあることが望ましい.<BR>「数学リテラシー」(旧「数学基礎」), 「微積分I~III」, 「線形代数I~III」を履修していることが望ましい.                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+微分積分学や線形代数学の基本事項に親しみがあることが望ましいが，講義内でも適宜復習する．科目としては「数学リテラシー1,2」や「線形代数I〜III」（もしくは線形代数1〜3）や「微積分I〜III」（もしくは微積分1〜3）, を履修していることが望ましい．                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">成績評価方法</h2>
-                <p id="style">
-成績評価は各回終了後の小テスト(50%) と期末試験(50%)の得点によって行う．<BR>小テストを10回以上受けていることを期末試験の受験資格とする．                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+毎回提出する小レポート（３０％）＋７回目周辺で行う大レポート（３５％）＋１５回目周辺で行う大レポート（３５％）とする．毎回提出する小レポートではその回に扱った内容の理解度をチェックする簡単かつ題数の少ない問題（や論述）とする．７回目周辺で行う大レポート（中間レポート）では１回目〜７回目（ぐらい）までに扱った内容の総合的な理解度をチェックするやや難しい問題を出題する．１５回目周辺で行う大レポート（期末レポート）では７回目（ぐらい）〜１５回目までに扱った内容の総合的な理解度をチェックするやや難しい問題を出題する．                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
-                <p id="style">
-講義を聞いただけで内容を完全に理解することは難しいので、必ず復習をすること。<BR>1年次に学んだ微分積分学や線形代数学の基本事項を随所で利用するため、<BR>必要に応じてこれらについても内容を確認することが望ましい。                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+講義の聴講以外に１週間に３時間以上自習することが望ましい．自習の方法としては例えば次のようなものが挙げられる．講義のノートを読み返す．ノートを閉じ，今週の内容を思い出せるか考えてみる．参考文献を読んでみる．講義中に出た具体的な計算問題を実際に手を動かして解いてみる．参考書中に書いてある問題を実際に解いてみる．分からない箇所を友人と議論したり図書館やインターネットを使い調べてみる．分からない箇所を担当教員に質問する．                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">教材・参考文献・配付資料等</h2>
-            <div id="topics">
-                    <p id="pretopics">
-教科書については，初回授業で説明する．主な参考書として次を挙げておく．                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                               <tr>
-                                   <th>
-1. 深谷賢治 著「電磁場とベクトル解析」(岩波書店)(2004年)                                   </th>
-                                   <td>
-                                   </td>
-                               </tr>
-                               <tr>
-                                   <th>
-2. 深谷賢治 著 「解析力学と微分形式」(岩波書店) (2004年)                                   </th>
-                                   <td>
-                                   </td>
-                               </tr>
-                               <tr>
-                                   <th>
-3. 小林真平 著 「曲面とベクトル解析」 （日評ベーシック・シリーズ）（日本評論社）（2016年)                                   </th>
-                                   <td>
-                                   </td>
-                               </tr>
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+この講義は何か１つの教科書に完全に沿って行っているわけではないので，教科書は必ずしも購入する必要はなく，講義を受講していれば分かるようにする．この講義の内容に強く興味を持った人のためにいくつか参考図書を挙げておく．                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th>
+1. ベクトル解析と幾何学：　坪井俊(著)　                                        </th>
+                                        <td>
+                                                    <a href="https://www.tulips.tsukuba.ac.jp/search/?q=9784254115857" target="_blank">
+https://www.tulips.tsukuba.ac.jp/search/?q=9784254115857                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+2. ベクトル解析：　大岩顕，奥薗透，松野俊一，岡隆史，有田亮太郎(著)　                                        </th>
+                                        <td>
+                                                    <a href="https://www.tulips.tsukuba.ac.jp/search/?q=9784621301012" target="_blank">
+https://www.tulips.tsukuba.ac.jp/search/?q=9784621301012                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+3. 曲面とベクトル解析：　小林真平(著)　                                        </th>
+                                        <td>
+                                                    <a href="https://www.tulips.tsukuba.ac.jp/search/?q=9784535806375" target="_blank">
+https://www.tulips.tsukuba.ac.jp/search/?q=9784535806375                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+4. 電磁場とベクトル解析：　深谷賢治(著)　                                        </th>
+                                        <td>
+                                                    <a href="https://www.tulips.tsukuba.ac.jp/search/?q=4000068830" target="_blank">
+https://www.tulips.tsukuba.ac.jp/search/?q=4000068830                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+5. 解析入門II：　杉浦光夫(著)　                                        </th>
+                                        <td>
+                                                    <a href="https://www.tulips.tsukuba.ac.jp/search/?q=9784130620062" target="_blank">
+https://www.tulips.tsukuba.ac.jp/search/?q=9784130620062                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+6. ベクトル解析からの幾何学入門：　千葉逸人(著)　                                        </th>
+                                        <td>
+                                                    <a href="https://www.tulips.tsukuba.ac.jp/search/?q=9784768704660" target="_blank">
+https://www.tulips.tsukuba.ac.jp/search/?q=9784768704660                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+7. ベクトル解析：　加須栄篤(著)　                                        </th>
+                                        <td>
+                                                    <a href="https://www.tulips.tsukuba.ac.jp/search/?q=9784320111851" target="_blank">
+https://www.tulips.tsukuba.ac.jp/search/?q=9784320111851                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+8. ベクトル解析30講：　志賀浩二(著)　                                        </th>
+                                        <td>
+                                                    <a href="https://www.tulips.tsukuba.ac.jp/search/?q=9784254114829" target="_blank">
+https://www.tulips.tsukuba.ac.jp/search/?q=9784254114829                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+9. 続微分積分読本：　小林昭七(著)　                                        </th>
+                                        <td>
+                                                    <a href="https://www.tulips.tsukuba.ac.jp/search/?q=9784785315269" target="_blank">
+https://www.tulips.tsukuba.ac.jp/search/?q=9784785315269                                                    </a>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
-            <div id="topics">
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <td>
-相山 玲子 　まずメールで連絡して下さい．　                                                    <br>
-                                                            <span class="officehour-address">
-1001531                                                            </span>
-                                    </td>
-                                </tr>
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
+                <div id="topics">
+                        <p id="pretopics">
+具体的にオフィスアワーは設けない．分からないことがあれば随時連絡して良い．                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+山本 光 　随時　                                                        <br>
+                                                                <span class="officehour-address">
+100004008                                                                </span>
+                                                                <a href="http://www.math.tsukuba.ac.jp/~hyamamoto/" target="_blank">http://www.math.tsukuba.ac.jp/~hyamamoto/</a>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
-                <p id="style">
-「ベクトル解析と幾何演習」を合わせて履修することが望ましい.                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
+                    <p id="style">
+ベクトル解析では一般論の理解だけではなく，具体的な計算が自力でできるかどうかも重要である．講義中に出た計算や参考書中の問題を自力で解く練習をしておくこと．分からないことが大量にたまり手遅れになる前に，こまめに質問や相談などして分からない部分を解決すること．また，「ベクトル解析と幾何演習」も併せて履修することを強くお勧めする．                    </p>
+            </div>
     
     
-        <div id="style-heading-style">
-		            <h2 id="style-heading">他の授業科目との関連</h2>
-        </div>
-        <div id="topic-assignments">
-            <table summary="topsics">
-                        <tr>
-                            <th>
-FB12931                            </th>
-                            <td>
-曲面論                            </td>
-                        </tr>
-                        <tr>
-                            <th>
-FB13241                            </th>
-                            <td>
-多様体入門                            </td>
-                        </tr>
-                        <tr>
-                            <th>
-FBA1501                            </th>
-                            <td>
-微積分II                            </td>
-                        </tr>
-                        <tr>
-                            <th>
-FBA1541                            </th>
-                            <td>
-微積分III                            </td>
-                        </tr>
-                        <tr>
-                            <th>
-FBA1621                            </th>
-                            <td>
-線形代数II                            </td>
-                        </tr>
-                        <tr>
-                            <th>
-FBA1661                            </th>
-                            <td>
-線形代数III                            </td>
-                        </tr>
-            </table>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                            <tr>
+                                <th>
+FB12931                                </th>
+                                <td>
+曲面論                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+FB13241                                </th>
+                                <td>
+多様体入門                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+FBA1501                                </th>
+                                <td>
+微積分II                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+FBA1541                                </th>
+                                <td>
+微積分III                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+FBA1621                                </th>
+                                <td>
+線形代数II                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+FBA1661                                </th>
+                                <td>
+線形代数III                                </td>
+                            </tr>
+                </table>
+            </div>
     
-        <div id="style-heading-style">
-                <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
-                <p id="style">
-なし．                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
+                    <p id="style">
+なし．                    </p>
+            </div>
     
     
     
@@ -510,6 +637,6 @@ FBA1661                            </th>
 
 
 
-</object>
+
 </body>
 </html>

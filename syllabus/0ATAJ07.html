@@ -129,6 +129,71 @@ $(function() {
         });
     }
 });
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+});
 </script>
 <body>
 
@@ -137,12 +202,13 @@ $(function() {
 </style>
 
 <h2 align="center">シラバス参照</h2>
-
+        <input type="hidden" name="lang" value="ja_JP">
 <table width="100%">
     <tr>
         <td align="left">
-            
-              <a href="/syllabi/2021/0ATAJ07/jpn/0/">
+          
+          
+              <a href="/syllabi/2022/0ATAJ07/jpn/0/">
                   最新版のシラバスを表示
               </a>
           
@@ -158,7 +224,7 @@ $(function() {
     </tr>
 </table>
 
-<object >    <h1 id="course-title">
+    <h1 id="course-title">
         <span id="course">
 0ATAJ07        </span>&nbsp;
         <span id="title">
@@ -173,10 +239,10 @@ $(function() {
                     1・2 年次,
             </span>
             <span id="timetable">
-春ABC応談            </span>
+春AB火3            </span>
             <br>
             <span id="assignments">
-石﨑 和宏            </span>
+石﨑 和宏, 王 文純            </span>
         </p>
     </div>
     <div id="summary-heading-summary-contents">
@@ -185,7 +251,7 @@ $(function() {
             
         </h2>
         <p id="summary-contents">
-人々は芸術作品をどのように理解するのかという問いにかかわる先行研究の検討や事例分析を通して、芸術鑑賞における協調的学習の知見を理解し、それらの知見を活用した芸術教育での学習方策を開発できることを目標とする。そのために、芸術鑑賞における解釈や判断等の思考過程に注目し、その過程で葛藤やジレンマ、意味の生成、論争などを促す方法について検討する。さらに美術的な思考の深化を促す美的判断ジレンマやArt as Therapyのプランを立案・実践し、議論する。        </p>
+　人々は芸術品からの個人的な意味づくりをどのようにできるのか。この問いにかかわる鑑賞の機能や課題について考察する。対話型鑑賞の手法を通して、具体的な事例の分析を試みる。芸術鑑賞における「視覚」と「言葉」がどのように作用するのかという問いに関わる事例演習を通して、鑑賞の個人的な意味づくりについての議論を深めていく。        </p>
     </div>
     <div id="note-heading-note">
         <h2 id="note-heading">
@@ -193,7 +259,7 @@ $(function() {
             
         </h2>
         <p id="note">
-西暦奇数年度開講。<BR>01B9575, 01EB495と同一。        </p>
+Teamsを利用したオンライン(同時双方向型)で実施します。<BR>西暦奇数年度開講。<BR>01B9575, 01EB495と同一。        </p>
     </div>
     <div id="note-heading-note">
         <h2 id="note-heading">
@@ -204,123 +270,129 @@ $(function() {
 講義        </p>
     </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
-            <p id="style">
-1. 知の活用力<BR>2. マネージメント能力<BR>3. コミュニケーション能力<BR>6. 教育課題発見能力 <BR>7. 教育内容探究能力            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+1. 知の活用力<BR>2. マネージメント能力<BR>3. コミュニケーション能力<BR>6. 教育課題発見能力 <BR>7. 教育内容探究能力                </p>
+            </div>
     
-        <div id="style-heading-style">
-         		   <h2 id="style-heading">授業の到達目標（学修成果）</h2>
-            <p id="style">
-人々は芸術をどのように理解するのかという問いにかかわる先行研究や事例分析を通して、芸術鑑賞に関する基礎的な知見を習得し、それらの知見を活用した実践方法を具体化できる。            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標（学修成果）</h2>
+                <p id="style">
+１. 文献レビューと事例演習から対話型鑑賞の機能や課題を理解する。<BR>２. 鑑賞の多元化という視点から作品の解釈や意味生成についての議論を深め、それぞれの具体的な事例をまとめ、レポートを作成する。                </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">キーワード</h2>
-            <p id="style">
-美的判断ジレンマ, Art as Therapy, 思考の深化            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+鑑賞、対話、視覚と言葉、意味づくり                </p>
+            </div>
     
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">授業計画</h2>
-            <div id="topics">
-                    <p id="pretopics">
-第1回&nbsp;&nbsp;オリエンテーション<BR>第2回 芸術鑑賞における美的判断ジレンマとArt as Therapy<BR>第3回 美的判断ジレンマの事例(1)「館長の決断」<BR>第4回&nbsp;&nbsp;美的判断ジレンマの事例(2)「最悪の修復?」<BR>第5回&nbsp;&nbsp;Art as Therapyの事例(1)「自己」「愛」<BR>第6回&nbsp;&nbsp;Art as Therapyの事例(2)「文化」「社会」<BR>第7回&nbsp;&nbsp;Art as Therapyの視点の活用と広がり<BR>第8回&nbsp;&nbsp;美的判断ジレンマでのプラン実践<BR>第9回&nbsp;&nbsp;Art as Therapyでのプラン実践<BR>第10回 レポート発表と総括                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+Teamsを利用したオンライン(同時双方向型)で実施します。<BR>第１回　（４月 13日）オリエンテーション <BR>第２回　（４月 20日）文献レビュー(1)&nbsp;&nbsp;&nbsp;&nbsp;対話型鑑賞について<BR>第３回　（４月 27日）文献レビュー(2) 　対話型鑑賞の実践　(１)<BR>第４回　（５月 11日）文献レビュー(3) 　対話型鑑賞の実践　(２)<BR>第５回　（５月 18日）文献レビュー(4) 　対話型鑑賞の実践　(３)<BR>第６回　（５月 25日）文献レビュー(5) 　パフォーマーの感性の熟達<BR>第７回　（６月&nbsp;&nbsp;１日）事例演習の計画&nbsp;&nbsp;(各自の問いやアイディア 発表）<BR>第８回　（６月&nbsp;&nbsp;８日）事例演習の実践　<BR>第９回　（６月 15日）事例演習をふまえた考察の発表　(1)<BR>第10回　 (６月 22日）事例演習をふまえた考察の発表 （2)                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">履修条件</h2>
-                <p id="style">
-特になし。                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+特になし。                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">成績評価方法</h2>
-                <p id="style">
-授業での議論(30%)、グループワーク(20%)、 プランの開発と実践(30%)、レポート(20%)を総合的に判断する。                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+レビュー発表 30%、授業での議論 30%、事例演習とレポート 40%                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
-                <p id="style">
-授業内容に関連する資料収集を行い、考察を広げ、学習を発展させる。                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+授業内容に関連する資料収集を行い、考察を広げ、学習を発展させる。                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">教材・参考文献・配付資料等</h2>
-            <div id="topics">
-                    <p id="pretopics">
-テキスト 授業時に資料等を配布する。<BR>参考書・参考資料等 中学校学習指導要領(平成29年3月告示 文部科学省)、高等学校学習指導要領(平成30年3月告示 文部科学省)、中学校学習指導要領解説 美術編(平成29年7月 文部科学省)、高等学校学習指導要領解説 芸術編(平成30年7月 文部科学省)、石崎和宏・王文純『美術鑑賞学習における発達とレパートリーに関する研究』(風間書房 2006年)、 De Botton, A. &amp; Armstrong J. (2013) Art as Therapy, Phaidon Press.                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+テキスト 授業時に資料等を配布する。<BR>参考書・参考資料等 中学校学習指導要領(平成29年3月告示 文部科学省)、高等学校学習指導要領(平成30年3月告示 文部科学省)、中学校学習指導要領解説 美術編(平成29年7月 文部科学省)、高等学校学習指導要領解説 芸術編(平成30年7月 文部科学省)、石崎和宏・王文純『美術鑑賞学習における発達とレパートリーに関する研究』(風間書房、2006年)、 奥本素子「協調的対話式美術鑑賞法 対話式美術鑑賞法の認知心理学分析を加えた新仮説」『美術教育学』27、2006年、pp.93-105、鈴木有紀『教えない授業：美術館発、｢正解のない問い」に挑む力の育て方』(英治出版、2019年)、平野智紀・鈴木有紀「対話型鑑賞の問いかけ「どこからそう思う？」の意味の考察ー「どうしてそう思う？」との比較からー」『美術教育学』41、2020年、pp.275-284、三浦佳世 編著『感性認知　アイステーシスの心理学』（北大路書房、2016年）、アメリア・アレナス (訳:福のりこ)『なぜこれがアートなの』(淡交社、1996)、アメリア・アレナス (訳:木下哲夫)『みる・かんがえる・はなす 鑑賞教育のヒント』(淡交社、2001)、 上野行一『まなざしの共有ーアメリア・アレナスの鑑賞教育に学ぶ一』(淡交社、2001).                         </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
-            <div id="topics">
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <td>
-石﨑 和宏 　火 16:30〜17:30 それ以外の日時を希望する場合は、前もってe-mailで連絡のこと　芸術学系棟 4階 B435                                                    <br>
-                                                            <span class="officehour-address">
-1001532                                                            </span>
-                                                            <a href="https://www.geijutsu.tsukuba.ac.jp/kansho/" target="_blank">https://www.geijutsu.tsukuba.ac.jp/kansho/</a>
-                                    </td>
-                                </tr>
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+石﨑 和宏 　火 16:30〜17:30 それ以外の日時を希望する場合は、前もってe-mailで連絡してください　芸術学系棟 4階 B435                                                        <br>
+                                                                <span class="officehour-address">
+1001532                                                                </span>
+                                                                <a href="https://www.geijutsu.tsukuba.ac.jp/kansho/" target="_blank">https://www.geijutsu.tsukuba.ac.jp/kansho/</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                        <p id="pretopics">
+王　文純　􏰞􏰟 前もってe-mailで連絡してください<BR>􏴟􏰋􏴨􏴠􏴽􏴣􏴦􏰋􏳁􏵆􏰎􏴨􏳄􏰎􏴢􏳅wang〇ucatv.ne.jp (メール送信には○を@ に置き換えてください)                         </p>
                 </div>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
-                <p id="style">
-特になし。                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
+                    <p id="style">
+特になし。                    </p>
+            </div>
     
     
-        <div id="style-heading-style">
-		            <h2 id="style-heading">他の授業科目との関連</h2>
-        </div>
-        <div id="topic-assignments">
-            <table summary="topsics">
-                        <tr>
-                            <th>
-0ATAJ05                            </th>
-                            <td>
-芸術鑑賞論a-1                            </td>
-                        </tr>
-                        <tr>
-                            <th>
-0ATAJ06                            </th>
-                            <td>
-芸術鑑賞論a-2                            </td>
-                        </tr>
-                        <tr>
-                            <th>
-0ATAJ08                            </th>
-                            <td>
-芸術鑑賞論b-2                            </td>
-                        </tr>
-            </table>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                            <tr>
+                                <th>
+0ATAJ05                                </th>
+                                <td>
+芸術鑑賞論a-1                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+0ATAJ06                                </th>
+                                <td>
+芸術鑑賞論a-2                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+0ATAJ08                                </th>
+                                <td>
+芸術鑑賞論b-2                                </td>
+                            </tr>
+                </table>
+            </div>
     
-        <div id="style-heading-style">
-                <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
-                <p id="style">
-なし。                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
+                    <p id="style">
+なし。                    </p>
+            </div>
     
     
     
@@ -329,6 +401,6 @@ $(function() {
 
 
 
-</object>
+
 </body>
 </html>

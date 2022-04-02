@@ -129,6 +129,71 @@ $(function() {
         });
     }
 });
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+});
 </script>
 <body>
 
@@ -141,11 +206,16 @@ th, td {padding-right:5px;border: 1px #808080 solid;background-color:#e5e5ff;}
 </style>
 
 <h2 align="center">シラバス参照</h2>
-
+        <input type="hidden" name="lang" value="ja_JP">
 <table width="100%">
     <tr>
         <td align="left">
-            
+          
+          
+              <a href="/syllabi/2022/0ATS410/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
           
           &nbsp;
       </td>
@@ -153,14 +223,14 @@ th, td {padding-right:5px;border: 1px #808080 solid;background-color:#e5e5ff;}
   <tr>
       <td align="right">
           
-              最終更新日：2021/05/19
+              最終更新日：2022/04/02
           
             &nbsp;
         </td>
     </tr>
 </table>
 
-<object >    <h1 id="course-title">
+    <h1 id="course-title">
         <span id="course">
 0ATS410        </span>&nbsp;
         <span id="title">
@@ -175,10 +245,10 @@ th, td {padding-right:5px;border: 1px #808080 solid;background-color:#e5e5ff;}
                     1・2 年次,
             </span>
             <span id="timetable">
-春AB火7,8            </span>
+秋AB 火7,8            </span>
             <br>
             <span id="assignments">
-久野 譜也            </span>
+久野 譜也, 田邉 解            </span>
         </p>
     </div>
     <div id="summary-heading-summary-contents">
@@ -187,7 +257,7 @@ th, td {padding-right:5px;border: 1px #808080 solid;background-color:#e5e5ff;}
             
         </h2>
         <p id="summary-contents">
-健康増進政策とは何かを理解した上で、国、県、市町村における健康政策の現状と課題を把握する。さらに健康政策の具体的な策定方法における基礎的理解を深める。我が国及び諸外国における運動を中心としたヘルスプロモーションのための政策課題について概説し、その目的、内容、方法等の特徴を明らかにするとともに、我が国における今後のヘルスプロモーションの政策課題の方向性について講義する。        </p>
+健康増進政策とは何かを理解した上で、国、県、市町村、企業等における健康政策の現状と課題を把握する。さらに健康政策の具体的な策定方法における基礎的理解を深める。我が国及び諸外国における運動を中心としたヘルスプロモーションのための政策課題について概説し、その目的、内容、方法等の特徴を明らかにするとともに、我が国における今後のヘルスプロモーションの政策課題の方向性について講義する。        </p>
     </div>
     <div id="note-heading-note">
         <h2 id="note-heading">
@@ -206,331 +276,335 @@ th, td {padding-right:5px;border: 1px #808080 solid;background-color:#e5e5ff;}
 講義        </p>
     </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
-            <p id="style">
-知の活用力、マネジメント能力、国際性、研究力、専門知識、倫理観            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+知の活用力、マネジメント能力、国際性、研究力、専門知識、倫理観                </p>
+            </div>
     
-        <div id="style-heading-style">
-         		   <h2 id="style-heading">授業の到達目標(学修成果)</h2>
-            <p id="style">
-健康増進政策とは何かを理解した上で, 国, 県, 市町村における健康政策の現状と課題を把握する。さらに健康政策の具体的な策定方法における基礎的理解を深める。            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
+                <p id="style">
+健康増進政策とは何かを理解した上で, 国, 県, 市町村における健康政策の現状と課題を把握する。さらに健康政策の具体的な策定方法における基礎的理解を深める。                </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">キーワード</h2>
-            <p id="style">
-健康増進政策, ヘルスリテラシー, 健康日本21            </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+健康増進政策, ヘルスリテラシー, 健康日本21, 健康都市, データヘルス                </p>
+            </div>
     
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">授業計画</h2>
-            <div id="topics">
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第1回                                    </th>
-                                    <td>
-ヘルスプロモーションとは (I)<BR>(WHO オタワ憲章 健康日本 21 ソーシャルスキル)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第2回                                    </th>
-                                    <td>
-ヘルスプロモーションとは (II)<BR>(オンリーワン社会 ヘルシーカンパニー 健康家族)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第3回                                    </th>
-                                    <td>
-身体的・精神的に健康でない状態<BR>(身体的疾病 精神的病態)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第4回                                    </th>
-                                    <td>
-社会的に良好でない状態<BR>(個人 コミュニティ 地方 国)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第5回                                    </th>
-                                    <td>
-ヘルスプロモーションにおける健康教育の役割 (I)<BR>(健康観 指導観)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第6回                                    </th>
-                                    <td>
-ヘルスプロモーションにおける健康教育の役割 (II)<BR>(健康リテラシー)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第7回                                    </th>
-                                    <td>
-わが国の健康政策としての「健康日本 21」の理解 I. 日本の健康水準の現状分析と世界的潮流<BR>(平均寿命, 健康寿命, 健康価値観の多様化, 目標志向型健康増進施策)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第8回                                    </th>
-                                    <td>
-わが国の健康政策としての「健康日本 21」の理解 II. 基本戦略<BR> (展望, 理念, 目的, 目標)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第9回                                    </th>
-                                    <td>
-わが国の健康政策としての「健康日本 21」の理解 III. 目標の設定と評価の基準<BR>(健康課題, 健康サービスの有効性, 経済的効率)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第10回                                    </th>
-                                    <td>
-わが国の健康政策としての「健康日本 21」の理解 IV. 地方計画の策定と健康情報システムの確立<BR>(重点政策化, 実施主体の役割, マスメディア, 科学的根拠)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第11回                                    </th>
-                                    <td>
-わが国の健康政策としての「健康日本 21」の理解 V. 人生の各段階の課題 1<BR>幼年, 少年及び青年期<BR>(健康教育, 事故対策, 早世, 身体活動)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第12回                                    </th>
-                                    <td>
-わが国の健康政策としての「健康日本 21」の理解 VI. 人生の各段階の課題 2<BR>壮年, 中年及び高年期<BR>(生活機能, 生活習慣病, 防衛体力, 身体活動)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第13回                                    </th>
-                                    <td>
-自治体における健康政策の理解 I. 県での健康づくり戦略 (茨城県健康いばらき 21 プランを例にして)<BR>(茨城県の特性と課題, 支援機能, 県民運動)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第14回                                    </th>
-                                    <td>
-自治体における健康政策の理解 II. 先進的健康づくり実施市町村の健康政策<BR>1(茨城県大洋村)<BR>(超高齢社会, 医療費, 環境整備)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第15回                                    </th>
-                                    <td>
-自治体における健康政策の理解 III. 先進的健康づくり実施市町村の健康政策<BR>2(埼玉県小鹿野町)<BR>(介護制度, 疾病第一主義からの脱却)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第16回                                    </th>
-                                    <td>
-健康な地域づくりを達成する策定方法 I. 産・官・学・民における役割の整理と科学的根拠に基づく健康政策目標の立て方<BR>(自治体の総合計画, 関係部局・団体・機関との連携, 達成目標の共有化)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第17回                                    </th>
-                                    <td>
-健康な地域づくりを達成する策定方法 II. 自然科学的手法による健康政策の評価法<BR>(生活機能測定法, 身体活動量, 栄養摂取量)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第18回                                    </th>
-                                    <td>
-健康な地域づくりを達成する策定方法 III. 社会科学的手法による健康政策の評価法<BR>(事業への投入指標, 事業評価, 地域効果)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第19回                                    </th>
-                                    <td>
-健康な地域づくりを達成する策定方法 IV. 医療経済効果的視点による健康政策の評価法<BR>(医療費とヘルスプロモーションの関係, 医療費と運動教室, 費用効果分析)                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th valign="top" nowrap="nowrap">
-第20回                                    </th>
-                                    <td>
-健康な地域づくりを達成する策定方法 V. まとめ                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                    <td nowrap="nowrap">
-                                    </td>
-                                </tr>
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+ヘルスプロモーションとは (I)<BR>(WHO オタワ憲章 健康日本 21 ソーシャルスキル)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+ヘルスプロモーションとは (II)<BR>(オンリーワン社会 ヘルシーカンパニー 健康家族)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+身体的・精神的に健康でない状態<BR>(身体的疾病 精神的病態)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+社会的に良好でない状態<BR>(個人 コミュニティ 地方 国)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+ヘルスプロモーションにおける健康教育の役割 (I)<BR>(健康観 指導観)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6回                                        </th>
+                                        <td>
+ヘルスプロモーションにおける健康教育の役割 (II)<BR>(健康リテラシー)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第7回                                        </th>
+                                        <td>
+わが国の健康政策としての「健康日本 21」の理解 I. 日本の健康水準の現状分析と世界的潮流<BR>(平均寿命, 健康寿命, 健康価値観の多様化, 目標志向型健康増進施策)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第8回                                        </th>
+                                        <td>
+わが国の健康政策としての「健康日本 21」の理解 II. 基本戦略<BR> (展望, 理念, 目的, 目標)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第9回                                        </th>
+                                        <td>
+わが国の健康政策としての「健康日本 21」の理解 III. 目標の設定と評価の基準<BR>(健康課題, 健康サービスの有効性, 経済的効率)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第10回                                        </th>
+                                        <td>
+わが国の健康政策としての「健康日本 21」の理解 IV. 地方計画の策定と健康情報システムの確立<BR>(重点政策化, 実施主体の役割, マスメディア, 科学的根拠)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第11回                                        </th>
+                                        <td>
+わが国の健康政策としての「健康日本 21」の理解 V. 人生の各段階の課題 1<BR>幼年, 少年及び青年期<BR>(健康教育, 事故対策, 早世, 身体活動)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第12回                                        </th>
+                                        <td>
+わが国の健康政策としての「健康日本 21」の理解 VI. 人生の各段階の課題 2<BR>壮年, 中年及び高年期<BR>(生活機能, 生活習慣病, 防衛体力, 身体活動)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第13回                                        </th>
+                                        <td>
+自治体における健康政策の理解 I. 県での健康づくり戦略 (茨城県健康いばらき 21 プランを例にして)<BR>(茨城県の特性と課題, 支援機能, 県民運動)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第14回                                        </th>
+                                        <td>
+自治体における健康政策の理解 II. 先進的健康づくり実施市町村の健康政策<BR>1(茨城県大洋村)<BR>(超高齢社会, 医療費, 環境整備)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第15回                                        </th>
+                                        <td>
+自治体における健康政策の理解 III. 先進的健康づくり実施市町村の健康政策<BR>2(未鋳型県見附市など)<BR>(介護制度, 疾病第一主義からの脱却,健康無関心層対策)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第16回                                        </th>
+                                        <td>
+健康な地域づくりを達成する策定方法 I. 産・官・学・民における役割の整理と科学的根拠に基づく健康政策目標の立て方<BR>(自治体の総合計画, 関係部局・団体・機関との連携, 達成目標の共有化)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第17回                                        </th>
+                                        <td>
+健康な地域づくりを達成する策定方法 II. 自然科学的手法による健康政策の評価法<BR>(生活機能測定法, 身体活動量, 栄養摂取量)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第18回                                        </th>
+                                        <td>
+健康な地域づくりを達成する策定方法 III. 社会科学的手法による健康政策の評価法<BR>(事業への投入指標, 事業評価, 地域効果)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第19回                                        </th>
+                                        <td>
+健康な地域システム構築のための提案と総合討論<BR>（グループごとに発表し、討論）                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第20回                                        </th>
+                                        <td>
+健康な地域システム構築のための提案と総合討論<BR>（グループごとに発表し、討論）                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">履修条件</h2>
-                <p id="style">
-特になし                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+特になし                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">成績評価方法</h2>
-                <p id="style">
-レポートによる<BR><BR><BR>評価基準(A+, A, B, C又はD)                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+到達目標で挙げた項目に着目し、発表、討論内容、レポートを通して、達成度による成績評価をする。<BR>①	第19回、20回での発表および討論内容　50点満点<BR>②	最終課題レポートの提出　50点満点<BR>評価基準(A+, A, B, C又はD)                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
-                <p id="style">
-授業外における学修(予習・復習等)については、適宜担当教員より指示                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+①	予習・復習は必ず行うこと。授業後には、その時間の内容を復習し、次の時間までに理解できなかった点や疑問点をまとめておくこと。<BR>②	グループワークにおける授業外でのグループディスカッションを通して、課題発表の準備をすること                    </p>
+            </div>
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">教材・参考文献・配付資料等</h2>
-            <div id="topics">
-                    <p id="pretopics">
-テキスト:<BR>1)	保健指導に求められる個別運動プログラム作成・実践ガイド-専門職が指導するメ タボリックシンドローム・介護予防プログラムとは- 久野譜也 (編)、杏林書院<BR>2)	介護予防のための筋力トレーニング指導法 久野譜也 (編)、NAP<BR><BR>参考図書:<BR>1)	ウエルネスサポーター教本 久野譜也 (監), 日経 BP 社<BR>2)	地域における高齢者の健康づくりハンドブック 松田光生他 (編),NAP<BR>3)	健康遺伝子をオンにしよう! 久野譜也、サンマーク出版                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+テキスト:<BR>1)	保健指導に求められる個別運動プログラム作成・実践ガイド-専門職が指導するメ タボリックシンドローム・介護予防プログラムとは- 久野譜也 (編)、杏林書院<BR>2)	介護予防のための筋力トレーニング指導法 久野譜也 (編)、NAP<BR><BR>参考図書:<BR>1)	ウエルネスサポーター教本 久野譜也 (監), 日経 BP 社<BR>2)	地域における高齢者の健康づくりハンドブック 松田光生他 (編),NAP<BR>3)	健康遺伝子をオンにしよう! 久野譜也、サンマーク出版                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
     
-        <div id="style-heading-style">
-            		<h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
-            <div id="topics">
-                    <p id="pretopics">
-火曜日 17 時 30 分~18 時 15 分<BR>東京キャンパス 536 電話 03-3942-6382<BR>筑波キャンパス D309 電話 029-853-7335                    </p>
-                <div id="topic-assignments">
-                    <table summary="topsics">
-                                <tr>
-                                    <td>
-                                    </td>
-                                </tr>
-                    </table>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                        <p id="pretopics">
+火曜日 17 時 30 分~18 時 15 分<BR>東京キャンパス 536 電話 03-3942-6382<BR>筑波キャンパス D309 電話 029-853-7335                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     
-        <div id="style-heading-style">
-        		    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
-                <p id="style">
-積極的な受講態度を望みます。                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
+                    <p id="style">
+積極的な受講態度を望みます。とくに、論理的な発言を心掛けてください。                    </p>
+            </div>
     
     
-        <div id="style-heading-style">
-		            <h2 id="style-heading">他の授業科目との関連</h2>
-        </div>
-        <div id="topic-assignments">
-            <table summary="topsics">
-                        <tr>
-                            <th>
-0ATS411                            </th>
-                            <td>
-ヘルスプロモーション論演習1                            </td>
-                        </tr>
-                        <tr>
-                            <th>
-0ATS412                            </th>
-                            <td>
-ヘルスプロモーション論演習2                            </td>
-                        </tr>
-                        <tr>
-                            <th>
-0ATS413                            </th>
-                            <td>
-ヘルスプロモーション論実習                            </td>
-                        </tr>
-                        <tr>
-                            <th>
-0ATS464                            </th>
-                            <td>
-ヘルスプロモーション研究方法論IV                            </td>
-                        </tr>
-                        <tr>
-                            <th>
-0ATS465                            </th>
-                            <td>
-ヘルスプロモーション研究方法論V                            </td>
-                        </tr>
-            </table>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                            <tr>
+                                <th>
+0ATS411                                </th>
+                                <td>
+ヘルスプロモーション論演習1                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+0ATS412                                </th>
+                                <td>
+ヘルスプロモーション論演習2                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+0ATS413                                </th>
+                                <td>
+ヘルスプロモーション論実習                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+0ATS464                                </th>
+                                <td>
+ヘルスプロモーション研究方法論IV                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+0ATS465                                </th>
+                                <td>
+ヘルスプロモーション研究方法論V                                </td>
+                            </tr>
+                </table>
+            </div>
     
-        <div id="style-heading-style">
-                <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
-                <p id="style">
-無                </p>
-        </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+                    <p id="style">
+無                    </p>
+            </div>
     
     
     
@@ -539,6 +613,6 @@ th, td {padding-right:5px;border: 1px #808080 solid;background-color:#e5e5ff;}
 
 
 
-</object>
+
 </body>
 </html>
