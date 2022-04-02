@@ -29,7 +29,7 @@ function _get_code_list() {
   nendo="$(_get_nendo)"
   echo -e "[nendo]: ${nendo}" >&2
   # Archive data of previous year
-  if ! [ -d $((nendo-1)) ]; then
+  if ! [ -d "${DEST}/$((nendo-1))" ]; then
     mkdir "${DEST}/$((nendo-1))"
     mv "${DEST}/*.html" "${DEST}/$((nendo-1))"
   fi
