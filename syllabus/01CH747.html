@@ -23,27 +23,378 @@
 
 
 
-
-
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
    "http://www.w3.org/TR/html4/loose.dtd">
 
 <html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<meta http-equiv="Cache-Control" content="no-cache">
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
 
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
 
-    <title>筑波大学 教育課程編成支援システム</title>
-    <style type="text/css">
-      body {padding:15px;}
-      h1 {font-size:1.5em; font-weight:bold; line-height:1.5em;}
-    </style>
-  </head>
-  <body>
-  <h1>シラバスが見つかりません</h1>
-  <p>シラバス情報が見つかりませんでした。URLをご確認下さい。</p>
-  </body>
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+          
+          
+              <a href="/syllabi/2022/01CH747/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+              最終更新日：2022/04/03
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+01CH747        </span>&nbsp;
+        <span id="title">
+ICT社会イノベーション特論        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    2.0 単位,
+            </span>
+            <span id="grade">
+                    1・2 年次,
+            </span>
+            <span id="timetable">
+秋AB 木5,6            </span>
+            <br>
+            <span id="assignments">
+三末和男 他            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+この授業は、産業界から招いた講師による講義や演習を通して、ICTを活用して「イノベーションを起す人材」を育てることを目指すものである。授業は概説編と演習編から構成される。概説編では、国内外の様々なイノベーション事例を参考に、社会やビジネスにおいてイノベーションを起こすための鍵となる考え方や手法を学ぶ。演習編では、創造的なアイデアを生み出すためのデザイン思考のプロセスを習得する。グループワークを通して、身のまわりの課題に対して、フィールドワークからサービスモデルの提案までを実践する。<BR>このプログラムはNPO法人CeFIL　デジタルイノベーションセンター（DBIC）の支援を受けて実施する。DBICはデジタルトランスフォーメーション（DX）を推進する団体で、金融・保険・製造・IT・航空・郵便・鉄道など大手企業31法人が会員として名を連ねている。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+オンライン(同時双方向型)<BR>詳細はmanabaで確認すること．<BR>授業実施形態が変更になる場合はTWINS掲示板にて周知する．        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+知の活用力, マネジメント能力, コミュニケーション能力, チームワーク力, 研究力, 知識力                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標（学修成果）</h2>
+                <p id="style">
+・社会のデジタルネットワーク化及び持続的な成長の為に必要な課題解決モデルについての知識を深める。<BR>・デザイン思考の演習を通して、アイデア創出の手法の基礎を身につける。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+ICT, 社会イノベーション, デジタルトランスフォーメーション（DX）, 社会課題解決モデル, テクノロジー融合, チーム活動, アイデア創出, デザイン思考                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+・                                        </th>
+                                        <td>
+前半5週（概説編）:<BR>大手国内企業のDXやイノベーション活動の事例や国内外比較から見えてきたイノベーション創生モデルと、そのモデルで鍵となる知識や手法などを示す。特に、テクノロジーだけでなく、テクノロジーとビジネスとの関係、イノベーションを起こす為に必要なマネジメントや思考法、およびリベラルアーツの重要性などを解説する。<BR>具体的には、以下の内容で授業を実施する。<BR>・イノベーティブ人材像：イノベーションを起こすための人材には、テクノロジーの知識だけではなく、好奇心と自己認知が重要であることを解説する。<BR>・ソーシャルイノベーションとテクノロジーの融合の重要性：社会が直面する社会課題の解決にテクノロジーをどのように活用をすべきか、事例やアプローチを解説する。<BR>リベラルアーツとテクノロジーの関係と重要性：未来が想像出来ない時代には、リベラルアーツとテクノロジーの関係から未来を見通すことが重要である。今後の社会課題を解決するための、それらの関係性を解説する。<BR>・複数テクノロジーを融合した社会課題の解決モデル：今後の社会問題解決のためにはIoTやAI等の単一のテクノロジーでは十分ではない。今後必要となる、複数のテクノロジーを活用したモデルについて解説する。<BR>・マネージメントとテクノロジーの融合等：社会課題の解決やイノベーションにはマネジメントの進化も重要である。今後のマネジメントの在り方であるManagement 3.0を解説する。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+・                                        </th>
+                                        <td>
+後半5週（演習編）:<BR>イノベーションのためのアイデア創出演習をグループワークとして行う。身のまわりの課題に対してデザイン思考を用い、フィールドワークからサービスモデルの提案までを行う。演習を通じて、多様な専門性、考え方・意見を持つ人との協働を経験し、デザイン思考によるアイデア創出のプロセスを習得する。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+なし。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+課題に対するレポートおよびグループワークにおける活動状況により、総合的に評価する。<BR>それぞれ対応するコマ数の重みを乗じて総合点とする。たとえば、1コマの講義に対するレポートの成績配分は5%とする。<BR>満点の60%以上を単位取得の必要条件とする。A+〜Cの評語は総合点に基づいてつける。<BR>                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+講師に指示された予習を行うこと。また、授業外の時間に取り組むべき課題が、授業時間中に出題されるので、それらに取り組むこと。<BR>前半5週はコマ毎にレポート課題が出題される。後半5週は演習の進捗に沿った課題が出題される。レポート課題の締め切りは1週間後とする予定である。詳細は授業中に説明する。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+教材・参考文献・配布資料等<BR>教科書は使用しない。<BR>講義資料をManabaで配布する。また参考資料の所在(URL等)を知らせる。<BR><BR>デジタルイノベーションセンター（DBIC）「Vision Paper」<BR>　　https://www.dbic.jp/resources/<BR>                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
+                <div id="topics">
+                        <p id="pretopics">
+三末和男（misue.kazuo.ft@u.tsukuba.ac.jp）<BR>火曜日 6時限<BR>事前にメールでアポを取ることを勧める。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
+                    <p id="style">
+各自が社会課題の現場を意識し、事前に準備(調査・考察)を行った上で講義に参加することが期待される。遅刻や欠席をすべきでないことは他の授業も同じであるが、特にこの授業は後半5週にグループワークを行うため、遅刻や欠席は他のメンバーに迷惑をかけることになることに注意すること。                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
+                    <p id="style">
+王 瑞赟                    </p>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+</body>
 </html>
