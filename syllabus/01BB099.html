@@ -23,27 +23,670 @@
 
 
 
-
-
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
    "http://www.w3.org/TR/html4/loose.dtd">
 
 <html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<meta http-equiv="Cache-Control" content="no-cache">
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
 
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
 
-    <title>筑波大学 教育課程編成支援システム</title>
-    <style type="text/css">
-      body {padding:15px;}
-      h1 {font-size:1.5em; font-weight:bold; line-height:1.5em;}
-    </style>
-  </head>
-  <body>
-  <h1>シラバスが見つかりません</h1>
-  <p>シラバス情報が見つかりませんでした。URLをご確認下さい。</p>
-  </body>
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+          
+          
+              <a href="/syllabi/2022/01BB099/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+              最終更新日：2022/04/13
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+01BB099        </span>&nbsp;
+        <span id="title">
+数理論理学        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    3.0 単位,
+            </span>
+            <span id="grade">
+                    1・2 年次,
+            </span>
+            <span id="timetable">
+春ABC 火5,集中            </span>
+            <br>
+            <span id="assignments">
+坪井 明人, 竹内 耕太, 塩谷 真弘            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+順序数、基数の概念を直観的に導入し、数理論理学の基礎定理を証明する。特にコンパクト性定理を厳密に証明する。応用として，可算範疇性と非可算範疇性の判定条件について解説する。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+0AJAD02と同一。<BR>オンライン(オンデマンド型)        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+数理論理学における基礎的な概念を数学的に理解することにより,広い視野と論理的な思考力を得て,変化する社会に対応できる能力をつける.                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標（学修成果）</h2>
+                <p id="style">
+数理論理学の主要な研究分野の一つであるモデル理論の基礎を理解し応用できるようになること。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+集合論, モデル理論, 数理論理学, 数学基礎論, 情報数学                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+モデル理論は数理論理学の一分野である．数学的構造の一般論を展開する研究分野であるが，そこでの議論は個別の数学的構造を解析するためにも有用であり，多くの応用がある．<BR>本講義では，数理論理学を知らない学生にも理解できるように，素朴集合論の復習を行った後に，数理論理学の基礎概念の説明を行う．<BR>モデル理論で重要となるのは，形式とその意味を分離することである．初学者にとっては，このことの理解が難しい場合があり，受講者の理解の度合いに応じて授業を進めてゆくので，以下に記述する授業計画とは必ずしも進行速度，解説の順序は一致しない場合もある．                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+導入(授業の方法,課題,成績の付け方など)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+素朴集合論の復習1                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+素朴集合論の復習2                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+数理論理学の基礎概念1                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+数理論理学の基礎概念2                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6回                                        </th>
+                                        <td>
+集合論とモデル理論の基礎概念                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第7回                                        </th>
+                                        <td>
+形式言語1                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第8回                                        </th>
+                                        <td>
+形式言語2                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第9回                                        </th>
+                                        <td>
+構造とモデル1                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第10回                                        </th>
+                                        <td>
+構造とモデル2                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第11回                                        </th>
+                                        <td>
+モデルの拡大とタイプ                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第12回                                        </th>
+                                        <td>
+飽和構造1                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第13回                                        </th>
+                                        <td>
+飽和構造2                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第14回                                        </th>
+                                        <td>
+同型写像                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第15回                                        </th>
+                                        <td>
+Elementary Chain Theorem 1                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第16回                                        </th>
+                                        <td>
+Elementary Chain Theorem 2                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第17回                                        </th>
+                                        <td>
+量化子消去1                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第18回                                        </th>
+                                        <td>
+量化子消去2                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第19回                                        </th>
+                                        <td>
+モデル完全性1                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第20回                                        </th>
+                                        <td>
+モデル完全性2                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第21回                                        </th>
+                                        <td>
+安定性と順序性                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第22回                                        </th>
+                                        <td>
+安定性1                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第23回                                        </th>
+                                        <td>
+安定性2                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第24回                                        </th>
+                                        <td>
+安定性3                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第25回                                        </th>
+                                        <td>
+範疇性                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第26回                                        </th>
+                                        <td>
+範疇性とLowenheim-Skolemの定理                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第27回                                        </th>
+                                        <td>
+可算範疇性                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第28回                                        </th>
+                                        <td>
+非可算範疇性1                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第29回                                        </th>
+                                        <td>
+非可算範疇性2                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第30回                                        </th>
+                                        <td>
+まとめ                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+素朴集合論の基礎を理解していること                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+レポートによる                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+復習を中心に学習する                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
+                <div id="topics">
+                        <p id="pretopics">
+授業の終わった後                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
+                    <p id="style">
+ごく基礎的な事柄から説明をするので,毎回復習をしてほしい.                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                            <tr>
+                                <th>
+01B6371v2000                                </th>
+                                <td>
+情報数学概論                                </td>
+                            </tr>
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+</body>
 </html>
