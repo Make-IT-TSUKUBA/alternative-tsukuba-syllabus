@@ -1,0 +1,518 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2023/1402011/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+1402011        </span>&nbsp;
+        <span id="title">
+比較文化の探求ー名著のすすめー        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    1.0 単位,
+            </span>
+            <span id="grade">
+                    3・4 年次,
+            </span>
+            <span id="timetable">
+春AB 月2            </span>
+            <br>
+            <span id="assignments">
+江藤 光紀            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+人文・文化研究において, 文献との出会いは重要である。感銘を受け, 学問的に刺激された文献は, 研究上のみならず, その人の生き方にも影響を与えることがある。本講義では, グローバル時代において比較文化を探求する教員が自ら選んだ, 学生必読の文献を紹介しつつ, 高度かつ専門的な視野から文化を読み解く方法を考えていく。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+【事前登録対象】【定員120名】(比文開設)<BR>対面        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義        </p>
+    </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">科目群</h2>
+                <p id="style">
+                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+「批判的・創造的思考力」「広い視野と国際性」に関連する。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
+                <p id="style">
+1. これまで関心のなかった領域の文献を実際に手にとって読み、自分の専門領域とのつながりを見出すことにより、広い視野と国際性を養う。<BR>2. 継続的に文献探索を行い、自らの研究を導いていくような一冊と出会うことを通して、批判的・創造的思考力を高める。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+文化、文化研究、名著                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+この科目ではmanabaを使い、オンデマンド授業を行います。オンライン授業に参加するための詳細な情報はmanabaの当該科目コースに掲載します。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+日時：4月17日（月）<BR>題目（文献）：椹木野衣『戦争と万博』（美術出版社）<BR>概要：1970年の大阪万博は高度経済成長の果実として、戦後日本人の集団的な記憶に深く刻まれているが、本書は幻に終わった皇紀2600年の万博と大阪博をつなぎ、そこから建築・美術・サブカルチャーの戦後史を読み直した。本書を通じて、戦前と戦後の分断と連続を考えてみたい。                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+江藤 光紀                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+日付：4月24日（月）<BR>題目(文献)：『アラビアン・ナイト』（平凡社東洋文庫、全18巻+別巻１、1985-1992年）ほか。<BR>概要：&ldquo;アラビアン・ナイト&rdquo;の名で広く知られる『千夜一夜物語』は、インド、ペルシア、アラブ世界、ヨーロッパを経ることで発展し、世界的に親しまれてきた。時空を超え、作品という概念をも超えたこの不思議な物語集をもとに、文学の可能性を改めて考えてみる。                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+青柳 悦子                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+日付：5月8日（月）<BR>題目（文献）：宮崎駿『風の谷のナウシカ』（徳間書店全７巻、『アニメージュ』1982年2月号～1994年3月号連載）<BR>概要：アニメーション映画で知られる「風の谷のナウシカ」だが、原作漫画は今日のパンデミックと戦争を予言するような物語として進み、映画とはまったく異なる結末を迎える。ここにペシミズム、（仏教的）厭世観を見る読者は多い。仏教学者（という私の）立場からの見方を含め、現代と未来を考えさせる作品として薦めたい。                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+吉水 千鶴子                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+日付：5月15日（月）<BR>題目（文献）：小出裕章『原発のウソ』（扶桑社新書）<BR>概要：原子力工学者として原子力ムラの内部から原発の廃止を唱えてきた小出裕章氏が福島第一原発事故後に出版した本書は、原発と原発事故に関する基本知識を平易に解説している。本書を通じて、原発と社会の関係について考察する。                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+佐藤 嘉幸                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+日付：5月22日（月）<BR>題目（文献）：『ギリシャ神話』（新潮文庫、など）、オウィディウス『変身物語』（岩波文庫、など）<BR>概要：数々の古代ギリシャ・ローマの神々の中から、コントラストのよく効いたアポロとディオニュソス（バッカス）に注目し、神話が現在に至るまでの様々な学問や芸術の中でどのように生き続けてきたのかという点について、具体例に触れながら考える。                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+馬籠 清子                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6回                                        </th>
+                                        <td>
+日付：5月29日（月）<BR>Robert Louis Stevenson&rsquo;s &ldquo;Strange Case of Dr. Jekyll and Mr. Hyde&rdquo; - <BR> Converging Discourses of the 19th Century: Literature, Psychoanalysis, Criminology, Immunology                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+ヘーゼルハウス, ヘラト                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第7回                                        </th>
+                                        <td>
+日付：6月5日（月）<BR>題目（書名）：サミュエル・ベケット『名づけられないもの』（河出書房新社、白水社など）<BR>概要：小説三部作の最後の作品である『名づけられないもの』の考察を通して、ベケットにとって、書くとは、芸術を創造するとはどのような経験だったのかについて考える。                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+対馬 美千子                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第8回                                        </th>
+                                        <td>
+日付：6月12日（月）<BR>題目（文献）：『定本 想像の共同体ーナショナリズムの起源と流行』（書籍工房早山、2007年）<BR>概要：『想像の共同体』を通してメディアとナショナリズムについて考える。<BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+白戸 健一郎                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第9回                                        </th>
+                                        <td>
+日付：6月19日（月）<BR>題目（文献）：福永光司『老子』（筑摩文庫、など）、中島隆博『荘子』（岩波文庫、など）、M.カルタンマルク著、井川訳『老子と道教』（人文書院）<BR>概要：他人との比較で自分の幸福・不幸を計る現代、ヘーゲル、トルストイ、ハイデガー等に関心をもたれ、アジアの文献中、欧米～全世界での翻訳数最多の『老子』や『荘子』に注目し、美醜、生死などを超越した絶対性が、実は最もわれわれの身近にあると説く道教の思想について、具体例に触れながら考察する。                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+井川 義次                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第10回                                        </th>
+                                        <td>
+日付：6月26日（月）<BR>題目（文献）：ティム・インゴルド『ラインズ⏤線の文化史』工藤晋訳（原著2007年、左右社、2014年）<BR>概要：イギリスの文化人類学者インドルドは、人の営みを「ラインline」による編み物として捉えている。直線的な思考が支配する現代社会に対して、インゴルドは、蛇行するラインが織りなすありように人本来の営みのあり方を探っている。立ち止まり、両手を広げ、深呼吸する。その大切さを人類学、芸術、文学、音楽、考古学、建築学を横断して考える一冊です。                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+山口 恵里子                                         </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+とくになし。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+期末試験（60%）、授業内提出物（40%）。<BR>なお、3分の1以上（4回以上）欠席した場合には欠格となる。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+講義（100%）。予復習時に配布資料および参考文献等を精読し、専門用語の意味を正確に理解しておくこと。<BR><BR>                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+教材は、とくに指定しない。参考文献は各回の担当教員から適宜、紹介する。<BR>*比較文化学類HP「お薦め図書リスト」ここには比較文化学類の各コース向けの推薦図書とともに、全学学生向けの推薦図書も記載されています。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
+                    <p id="style">
+単に授業を聞くだけではなく、履修者自らが問題意識を持ち、自ら問題に対する考察を深めること。                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+                    <p id="style">
+配置予定。                    </p>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+</body>
+</html>
