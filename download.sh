@@ -15,7 +15,7 @@ function _get_nendo() {
 # Get the file name of the latest syllabus data
 function _get_latest_csv() {
   curl -s -H "Accept: application/vnd.github.v3+json" \
-    "https://api.github.com/repos/${ALTKDB_REPO}/git/trees/master?recursive=1" |
+    "https://api.github.com/repos/${ALTKDB_REPO}/git/trees/main?recursive=1" |
     tac | grep -m1 '"path": .*/csv/kdb-.*csv"' | awk -F '"' '$0=$4'
 }
 
@@ -35,7 +35,7 @@ function _get_code_list() {
   fi
 
   echo "[urls]:" >&2
-  curl -sL "https://github.com/${ALTKDB_REPO}/raw/master/${latest_csv}" |
+  curl -sL "https://github.com/${ALTKDB_REPO}/raw/main/${latest_csv}" |
     awk -F '[,"]' 'NR > 1 && $2 != "" {
       print "https://kdb.tsukuba.ac.jp/syllabi/"y"/"$2"/jpn/"
     }' y="$nendo"
