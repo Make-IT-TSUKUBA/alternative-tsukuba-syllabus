@@ -1,0 +1,446 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2024/0ATV106/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+              最終更新日：2024/04/10
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+0ATV106        </span>&nbsp;
+        <span id="title">
+無形遺産論        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    1.0 単位,
+            </span>
+            <span id="grade">
+                    1・2 年次,
+            </span>
+            <span id="timetable">
+春C 集中            </span>
+            <br>
+            <span id="assignments">
+池田 真利子            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+UNESCO無形文化遺産保護条約の概念，体制やその変遷，また国内外の無形文化遺産の事例に関する知識の習得を通して，無形遺産への理解を深化させ，無形遺産が持つ文化的価値について考究する。偶数年度である2024年度は，東京文化財研究所において実務の立場から研究に従事する２名の先生を講師としてお招きし，授業の一部を東京文化財研究所において実施する。<BR><BR>【授業スケジュール詳細】<BR>7月6日（土）＠筑波大学人文社会科学系棟B218<BR>講師：石村智先生（東京文化財研究所など）<BR>時間：未定<BR><BR>7月7日（日）＠東京文化財研究所https://www.tobunken.go.jp/japanese/navi/map.html<BR>講師：石村智先生（東京文化財研究所など）<BR>時間：未定<BR><BR>7月24日（水）＠筑波大学人文社会科学系棟B218<BR>講師：宮田繁幸先生（東京福祉大学，東京文化財研究所）<BR>時間：3限・4限・5限<BR><BR>7月25日（木）＠筑波大学人文社会科学系棟B218<BR>講師：宮田繁幸先生<BR>時間：3限・4限<BR>        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+日本語運用能力があることが望ましい。<BR>非常勤講師：宮田繁幸，石村智<BR><BR>7/6,7/7,7/24,7/25<BR>含野外調査<BR>実務経験教員<BR>対面<BR>2024年度は対面講義を予定する。<BR><BR>        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+知の活用力・コミュニケーション能力・共通知の活用力・専門知の活用力・共通技能の活用力・専門技能の活用力                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標（学修成果）</h2>
+                <p id="style">
+UNESCO無形文化遺産保護条約の概念，体制やその変遷，また国内外の無形文化遺産の事例に関する知識の習得を通して，無形遺産への理解を深化させ，無形遺産が持つ文化的価値について理解を深めることができる。また，国内外の無形文化遺産の保護や方策に関して，様々な学術的見解を踏まえ，主体的に意見を述べることができるようになる。<BR>                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+無形文化遺産, 有形と無形，東京文化財研究所                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+【2024年度の授業スケジュール詳細】<BR>7月6日（土）＠筑波大学人文社会科学系棟B218<BR>講師：石村智先生（東京文化財研究所など）<BR>時間：１～３限<BR><BR>7月7日（日）＠東京文化財研究所　※集合場所等の詳細は7/6の講義にて説明します<BR>　　　　　　　https://www.tobunken.go.jp/japanese/navi/map.html<BR>講師：石村智先生（東京文化財研究所など）<BR>時間：１～２限<BR><BR>7月24日（水）＠筑波大学人文社会科学系棟B218<BR>講師：宮田繁幸先生（東京福祉大学，東京文化財研究所）<BR>時間：3限・4限・5限<BR><BR>7月25日（木）＠筑波大学人文社会科学系棟B218<BR>講師：宮田繁幸先生<BR>時間：3限・4限<BR><BR>                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                        <p id="pretopics">
+7月6日（土）＠筑波大学人文社会科学系棟B218<BR>講師：石村智先生（東京文化財研究所など）<BR><BR>無形文化遺産とは何か？有形と無形の違いは？「無形文化遺産」は「世界遺産」の無形版？なぜ「和食」が無形文化遺産なの？知られているようで知られていない、無形文化遺産とは何かということを学ぶことを第一の目標とする。<BR>①有形と無形の文化遺産の違いについて学ぶとともに、有形と無形はそれぞれ別物ではなくたがいに関連していることを、文化的景観や文化財保存技術の事例などから理解する。<BR>②「和食」や「モダンダンス」など、無形文化遺産が対象とする範囲は近年広がりを見せている。無形文化遺産という概念が持つ広がりについて、いくつかの具体例を通じて理解する。<BR>③学生たちによるグループ・ディスカッションを行う。各グループは、自分たちが「推したい」無形文化遺産をひとつ選び、なぜそれを守る必要があるのか、そしてそれを守ることは国や世界にとってどのような良い影響があるのか、についてプレゼンテーションを行う。それによって無形文化遺産とは何か、それを守る意味は何か、について自発的に学ぶことが出来る。<BR><BR>7月7日（日）＠東京文化財研究所https://www.tobunken.go.jp/japanese/navi/map.html<BR>講師：石村智先生（東京文化財研究所など）<BR><BR>東京文化財研究所が行っている無形文化遺産の調査研究の様子を学ぶ。実際に東京文化財研究所の施設を見学し、そこで実践されている事例を学ぶとともに、実際に業務に携わってきた講師の体験を聞くことによって、無形文化遺産の調査研究の現状と課題についての理解を深める。<BR>①東京文化財研究所の施設見学。主に芸能の記録を行う実演記録室や、無形文化遺産を記録したマルチメディア（SPレコード、オープンリールテープ等）を保管している資料庫などを見学することにより、無形文化遺産の調査研究の実際の様子を学ぶ。<BR>②東京文化財研究所が作成した無形文化遺産の記録映像（芸能、工芸技術、民族技術など）を視聴し、実際に記録撮影に携わった講師の体験を聞くことによって、無形文化遺産の調査研究の実際の様子を学ぶ。<BR><BR>7月24日（水）＠筑波大学人文社会科学系棟B218<BR>講師：宮田繁幸先生（東京福祉大学，東京文化財研究所）<BR>無形文化遺産の概念、保護の体制、遺産保護の事例を通して、無形遺産への理解を深め、無形遺産が持つ文化的価値について考究する。文化財保護法における無形遺産と、ユネスコ無形文化遺産条約における無形文化遺産の違い、無形文化遺産を保護するための国際的・国内的政策と地域の取り組みについても学ぶ。<BR>①我が国における無形文化遺産保護制度の変遷：我が国における文化財保護制度の歴史の中で、無形文化遺産保護制度がどのように変遷してきたのかを理解し、現状と課題を把握する。<BR>②我が国における無形文化遺産の指定等：我が国の文化財保護の根幹である指定制度について、その理念・実務・問題点等を把握し、無形文化遺産における国の指定の意義を理解する。<BR>③我が国における無形文化遺産の保護とは：我が国における無形文化遺産の保護の具体的姿を理解し、その問題点等について把握する。<BR><BR>7月25日（木）＠筑波大学人文社会科学系棟B218<BR>講師：宮田繁幸先生<BR>①無形文化遺産保護における国際的枠組み：ユネスコ無形文化遺産保護条約をはじめとする無形文化遺産保護の国際的枠組みを理解し、その現状や課題について考察する。<BR>②まとめ：前4回の講義をまとめ、受講者を交えた質疑応答・ディスカッションをおこなう。<BR>                        </p>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+講義は日本語で実施する。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+授業中の発表（100%）に基づき，授業で示された内容等の理解度や，授業目標への到達状況に基づき，学位Pの成績評価基準と照合しながら評価する。なお，出席数が全体の7割に達しない場合には，発表を行っても成績評価の対象としない。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+本科目は１単位の設定であり，合計15時間の授業があるが，授業外の復習予習，レポート作成等で15時間分相当の学修が必要となる。<BR>授業外では，各回の講義内容を復習し，専門用語の意味等を理解する，あるいは，授業で扱ったテーマ・事象に関して，ニュースや学術ジャーナル等で最新の情報等を収集すること。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+事前に石村智先生・宮田繁幸両先生の著作物に目を通し，事前学習をしておくことをお勧めします。<BR><BR>                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
+                <div id="topics">
+                        <p id="pretopics">
+現時点では設定の予定がない。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
+                    <p id="style">
+講義は日本語で実施する。なお，本科目は隔年で内容を変更するため，無形遺産に関心のある学生は次年度も聴講することを推奨する。                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
+                    <p id="style">
+TAは世界遺産学学位プログラム博士後期課程学生を予定する（2024年5月頃にお知らせします）。レスポン番号や授業日程等に関しては，TAに連絡すること。                    </p>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>
