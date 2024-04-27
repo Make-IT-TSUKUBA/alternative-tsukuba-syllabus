@@ -1,0 +1,538 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2024/8050111/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+              最終更新日：2024/03/29
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+8050111        </span>&nbsp;
+        <span id="title">
+ジェンダーとグローバル共生        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    1.0 単位,
+            </span>
+            <span id="grade">
+                    1 - 4 年次,
+            </span>
+            <span id="timetable">
+秋AB 火4            </span>
+            <br>
+            <span id="assignments">
+黄 順姫            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+本科目では、個人が当該社会での社会化を通していかに身体管理を行い、他者と共生しながらキャリア、ライフスタイルを構築していくのかについて学ぶ。少子化・高齢化・生産能力人口が急激に減少する現代では、過去のように男性は仕事、女性は家族の世話というジェンダー役割が見直されているが、当該社会の影響を受けている。他方、IT化、グローバル化の進展に伴いグローバル、グローカルな現実社会の影響をうけて生きざるをえない。従って、今後のキャリア、生き方の構築に参考になるように、1）ジェンダー、グローバル・グローカル共生をキーワードに、比較社会・文化論の視点からテキストに準じて講義を行う。2）また、各方面の企業人、社会人の講師を招聘し、実践的な知見を提供する。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+2024年度開講せず。<BR>テキスト<BR>黄順姫、2019、『身体文化・メディア・象徴的権力：化粧とファッションの社会学』学文社        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+1. 汎用コンピテンス:知の活用力、マネジメント能力、国際性。<BR>2. 学位プログラム・コンピテンス:専門知識、研究力、倫理観。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標（学修成果）</h2>
+                <p id="style">
+ジェンダー、グローバル・グローカル共生をキーワードに、今後のキャリア及び生き方に刺激を与える。1）日本社会におけるジェンダーを巡る現象について、社会学の観点からテキストを通して理論を学ぶ。2）「Society5.0」時代に求められる、筑波大学がある茨城県の魅力、ジェンダーとダイバーシティのSDGs及び豊かな未来を切り拓くための新しい生き方について、政界・財界・学界等のトップリーダーを講師から実践を学ぶ。したがって、本授業は汎用コンピテンスと学位プログラム・コンピテンスの体得を目的とする。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+ジェンダー, ダイバーシティ, SDGs, Sociery5.0, キャリア形成, グローバル, グローカル, ローカル, 日本社会の構造, ライフワークバランス, ライフスタイル, 「筑波大学メンター会」, 政界・財界・学界等のトップリーダー                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+本科目は、グローバルな実社会の専門的知識・情報、実践・予測を多様な領域から、就職活動、及び就職後にも必要な知識・情報、実践を提供する。個人が当該社会での社会化を通していかに身体管理を行い、他者と共生しながらキャリア、ライフスタイルを構築していくのかについて学ぶ。少子化・高齢化・生産能力人口が急激に減少する現代では、過去のように男性は仕事、女性は家族の世話というジェンダー役割が見直されているが、当該社会の影響を受けている。他方、IT化、グローバル化の進展に伴いグローバル、グローカルな現実社会の影響をうけて生きざるをえない。従って、ジェンダー、グローバル・グローカル共生をキーワードに、今後のキャリア及び生き方に刺激を与える。1）日本社会におけるジェンダーを巡る現象について、社会学の観点からテキストを通して理論を提供する。2）「Society5.0」時代に求められる、筑波大学がある茨城県の魅力、ジェンダーとダイバーシティのSDGs及び豊かな未来を切り拓くための新しい生き方について、政界・財界・学界等のトップリーダーを講師として招聘し、実践的な学びを提供する。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+10/4<BR>【理論編】<BR>講義担当者：黄順姫（筑波大学人文社会系教授）<BR>講義題目：以下のテキストを用い、ジェンダー社会学の理論を学ぶ。<BR>テキスト：黄順姫著『身体文化・メディア・象徴的権力』学文社,2019年<BR>講義概要：教材を準備し、10月11日までに、第1章を輪読してください。<BR>最初の講義は10月11日（火、4時限13：45～）に、オンラインで行います。（Zoom）<BR><BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+10/11<BR>【理論編】<BR>講義担当者：黄順姫（筑波大学人文社会系教授）<BR>講義題目：以下のテキストを用い、ジェンダー社会学の理論を学ぶ。<BR>テキスト：黄順姫著『身体文化・メディア・象徴的権力』学文社,2019年<BR>講義概要：教材の第1章をオンライン（Zoom）にて講義をします。テキストの第1章（12～55頁）を読んできてください。オンラインのリンクは10月8～9日に、manabaで掲載します。<BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+10/18<BR>【実践編】<BR>講義担当者：塚本一也(茨城県議会議員)、長谷川重幸（茨城県議会議員）<BR>講義題目：都市の環境システム、感受性の共感、女性の活躍<BR><BR>講義概要1：筑波研究学園都市の歩みと地方政治の変遷について、県議会議員の視点から解説し、さらに当該地域において都市化と共に進展したジェンダー社会がどのように影響してきたかも解説する。<BR><BR>講義概要2：花の生産に関わって50年。人間生活に美しいまたは愛おしいという心の豊かさを与えている花々たち。そんな花の生産販売を通じて、人間にとって必要な感受性を育てる役割を担ってきたと自負している。こんな時代だからこそ必要な感性について話したい。<BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+10/25：対面授業（1H201）<BR>【実践編】<BR>講義担当者：大井川和彦（茨城県知事）<BR>講義題目：ポストコロナ時代の茨城県政<BR>―茨城のこれからの方向―<BR><BR>講義概要：ポストコロナ時代こそ、自らを差別化し成長していくチャンスであるとの視点の下、これまでの県政運営と今後の茨城県政の方向性について講義を行う。<BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+11/1<BR>【実践編】<BR>講義担当者：篠原聡子（日本女子大学学長･理事長）<BR>講義題目：大学で女性を教育すること、及び男女のジェンダー・ダイバーシティ<BR><BR>講義概要：「ダイバーシティと建築、そして大学」<BR>近代の建築の流れは、多様性を排除する歴史であり、大学の空間の歴史もまた、同様である。建築がいかに社会の多様性に貢献しうるかを、考えてみる。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6回                                        </th>
+                                        <td>
+11/8<BR>【実践編】<BR>講義担当者：蓮見孝（元札幌市立大学理事長･学長、札幌市立大学名誉教授、筑波大学名誉教授）、小椋敦子様（化粧品会社、株式会社コーセー　執行役員　研究所長）<BR>講義題目：女性のためのセンス・女性によるセンス<BR><BR>講義概要1：「女性のためのセンス・女性によるセンス」<BR>世界規模の大きな社会変革の中で活躍が期待される女性の感性（センス）に焦点を当て、「デザイン思考」の観点から、次世代に求められる新たな価値と社会観について論じる変化に適応するために必要な大学での学び方のあり方について、学生のみなさんとディスカッションしたい。<BR><BR>講義概要2：「コーセーの企業文化と女性活躍」<BR>コーセーは創業75年を超える化粧品メーカーであり、女性の生活に寄り添って発展してきた。それを可能としてきた当社の企業文化や女性活躍について紹介する。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第7回                                        </th>
+                                        <td>
+11/15<BR>【実践編】<BR>講義担当者：大沼義彦（日本女子大学、人間社会学部、現代社会学科教授）、海老島均（成城大学教授）<BR>講義題目：女性の活躍とダイバーシティ①<BR><BR>講義概要1：日本における女性の体育は、どのように構想、実施されたのであろうか。1901年創立の日本女子大学校では、当初より体育が重視されていた。それは既存女子教育に対する一つの挑戦でもあった。かかる挑戦を通じ、高等教育と女性、女性と体育・スポーツ、またその現代的意義について考える。<BR><BR>講義概要2：生活のなかでの身体活動・スポーツとジェンダーの変化。たとえば、ジョギングを取り上げて、女性がジョギングをすることへの世間の社会的視線や当事者の意識の変化について、オーストラリアと日本の事例を取り上げ、生活のなかのスポーツとジェンダーについて講義を行う。<BR><BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第8回                                        </th>
+                                        <td>
+11/22<BR>【実践編】<BR>講義担当者：小濵裕正（株式会社カスミ元代表取締役会長、現相談役）、小笠原宏司（市進代表取締役会長）<BR>講義題目：女性の活躍とダイバーシティ②<BR><BR>講義概要1：「小売業界における女性の活躍とダイバーシティ」<BR>食料品、家庭用品、衣料品等の小売販売を行うスーパーマーケット事業のなかで、女性が活躍できる環境作り、制度、組織の整備に卓越な業績を残していることについてジェンダーとダイバーシティの観点から講義する。<BR><BR>講義概要2：「教育産業における女性の活躍とダイバーシティ」<BR> 少子化、グローバル化の中で、次代を担う子供たちを育てる現代の教育産業で働く人材に男女問わず要求されることについて講義する。加えて、新しい教育形態として「AIと共存する世代の脳育」を掲げ、ジェンダー規範に囚われない進学とキャリア形成について、最近の動向を紹介する。筑波大学のメンター会活動、及び筑波大学への寄付活動等にも触れる。<BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第9回                                        </th>
+                                        <td>
+12/6<BR>【理論編】<BR>講義担当者：黄順姫（筑波大学人文社会系教授）<BR>講義題目：以下のテキストを用い、ジェンダー社会学の理論を学ぶ。<BR>テキスト：黄順姫著『身体文化・メディア・象徴的権力』学文社,2019年<BR>講義概要：教材・テキストを用いて講義を行う。扱うテキスト箇所は、前もってmanabaで掲示する。<BR><BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第10回                                        </th>
+                                        <td>
+12/13<BR>【理論編】<BR>講義担当者：黄順姫（筑波大学人文社会系教授）<BR>講義題目：以下のテキストを用い、ジェンダー社会学の理論を学ぶ。<BR>テキスト：黄順姫著『身体文化・メディア・象徴的権力』学文社,2019年<BR>講義概要：1. 教材・テキストを用いて講義を行う。扱うテキスト箇所は、前もってmanabaで掲示する。<BR>2. 期末課題のレポート提出。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+本授業は、1 - 4年次を対象にしている。4年次ですでに就職が決まった学生でも、卒業する前に受講することで、ジェンダー、自らの将来のキャリアの形成とライフワークバランスという、自分自身の生き方、ライフスタイルについて深く考える良いきっかけになる。筑波大学メンター会の企業人と大学教員による、仕事、ジェンダー、キャリア、グローバル・グローカルな考え方、人生哲学を聞くことができ、参考になる。講義はオンデマンドおよびオンラインでの受講とする。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+出席、各授業の質疑応答、【理論編】の感想文、レポートによる評価。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+黄順姫著『身体文化・メディア・象徴的権力』学文社,2019年                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
+                    <p id="style">
+授業形式:オンライン・オンデマンド型・同時双方型。 毎回、manabaを確認してください。課題レポートは、フォーマットに沿って記入し、manabaにアップロードしてください。                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>

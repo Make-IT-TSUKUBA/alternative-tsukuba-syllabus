@@ -1,0 +1,449 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2024/1227021/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+              最終更新日：2024/03/26
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+1227021        </span>&nbsp;
+        <span id="title">
+学問への誘い        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    1.0 単位,
+            </span>
+            <span id="grade">
+                    1 年次,
+            </span>
+            <span id="timetable">
+春A 水5,6            </span>
+            <br>
+            <span id="assignments">
+清水 克志            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+本講義は,本学の学士課程教育への導入を担う。大学における学問の方法論へ誘(いざな)い、自らが専攻する学問分野への理解や、関連する諸分野との関係性も理解できる能力を涵養する。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+人文2クラス対象<BR>CDP<BR>オンライン(オンデマンド型)        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義        </p>
+    </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">科目群</h2>
+                <p id="style">
+                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+本講義は、学群スタンダードに示す汎用コンピテンス(学士課程)のなかの、2.批判的・創造的思考力、および、4.広い視野と国際性、に関する能力の涵養に強く関連する。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
+                <p id="style">
+(1) 自分の知的好奇心や問題意識に密接に関連する学問分野と、その周辺で関連する学問分野の関連性を説明できる。またその関連性において適切な履修計画をたてることができる。<BR>(2) 自らが選択した学問分野への、自らの選択方針とその選択にいたった過程を具体的に説明できる。(以上は必須とする。以下は受講生に対しさらに期待する目標とする。)<BR>(3) 大学入学までの勉強方法と対比して、大学で実践されている学問の方法論が説明でき、大学での学問の方法に則る学修をスタートすることができる。<BR>(4) 大学において学修してゆく様々な知識は、先人たちのたゆまぬ思索や実践によって裏打ちされたものであることを、実例を挙げて説明できる。このゆえに、知識が関連する知識をつなぎ、これが連鎖する様子を自らの視点で多面的に検討できる。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+学問, リベラルアーツ, 一般教養                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+本講義はmanabaコースである、<BR>（１）コース名：春学期「学問への誘い」講義動画視聴用コース<BR>（２）コース名：学問への誘い<BR>の２つのコースを用いてオンライン（オンデマンド型）で実施する。<BR>manabaにログインすると、春学期「学問への誘い」講義動画視聴用コースと学問への誘いの2つのコースが表示される。後者の学問への誘いは、課題提出用のコースとなる。最初に春学期「学問への誘い」講義動画視聴用コースにおいて履修方法を確認し、このコースで各講義動画の視聴を行い、講義動画を視聴したら、学問への誘いのコースにアクセスし、課題を提出すること。<BR>履修にあたっては、ワークブックやコースニュース等をよく確認すること。<BR><BR>本講義は導入講義、および各学群の学問内容を紹介する講義の全10種類の講義動画で構成されている。<BR><BR>導入講義 学問の成り立ち、問題解決の視座<BR>大学入学までの学びと大学での学びの類似点や相違点を指摘し、「学問」のとらえ方の一端を紹介することにより、学問が、まずは自らの問いを発するところからはじまり、その問いに対する答えを求めようとする営みであることを示す。また、本学における教養教育の理念や意義を説明し、教育方針や教育モデルの全体像を示すことにより、大学における学びと学問の世界へ誘う。<BR><BR>各学群講義<BR>各学群・学類が主にカバーしている学問的問題意義を説明し、その問題解決アプローチを、各学群・学類の学問分野がどうカバーするのかを紹介する。特に本学が社会に対して大きく貢献した業績があればそれも紹介する。問題&rarr;解決&rarr;分野&rarr;学群/学類 という流れでの説明を心がけ、多くの問題が複数の学群・学類の専門分野にまたがることも伝える。必要に応じ、他学群・学類との相互関係も紹介する。各回の講義を聴講することにより、本学で営まれている学問的研究の全貌が見渡せるとともに、その中で受講生が選択した学問分野を俯瞰でき、さらに様々な視点からその分野を複眼的にみることができるようになる。<BR>導入講義、および各学群講義は、オンライン（オンデマンド型）にて4月17日15時15分から5月29日23時59分まで配信する。導入講義は必ず最初に視聴すること。導入講義視聴後の各学群講義の視聴順序は自由とする。<BR><BR>●導入講義および各学群講義時間<BR>導入講義（95分）、人文・文化学群（75分）、社会・国際学群（50分）、人間学群（75分）、生命環境学群（75分）、理工学群（150分）、<BR>情報学群（75分）、医学群（65分）、体育専門学群（45分）、芸術専門学群（45分）<BR>                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+本講義は、本学学士課程に入学した直後の学生を対象として内容をまとめている。<BR>ただし、平成30年度以前入学者は本科目を履修できない。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+P(合格)/F(不合格)評価とする。&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<BR>全講義を視聴し、manabaコース「学問への誘い」の「小テスト」機能から、各講義の課題及び最終課題を提出すること。提出された解答すべてを評価対象とし、これ以外に評価対象とする提出物等はない。 <BR><BR>※manabaコース「春学期『学問への誘い』講義動画視聴用コース」は、講義動画の視聴、電子版ワークブックのダウンロード、その他コースニュースの確認等のために使用し、課題への解答の提出には使用しません。<BR>                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+この講義での学修の流れは以下の通りです。①各動画を視聴する前の予習、②各動画の視聴、③視聴後の復習と課題への解答作成、を繰り返します。また、⓪動画の視聴計画の作成をまず行うことをお勧めします。<BR><BR>⓪視聴計画の作成　ワークブックを参考に、各動画の視聴計画を作成します。その視聴計画をもとに、各動画の視聴ごとに次の①～③の手順を繰り返すことをお勧めします。<BR>①予習　導入講義の視聴には、初年次学修ガイド2024の6ページ～15ページをよく読んでおきましょう。<BR>各学群の講義の視聴には、その視聴しようとする学群の学群スタンダードの内容や開設授業科目一覧にある科目名と授業概要などを参照しておきましょう。その参照を通じてその学群と関係の深い学問分野やその広がりを想像しておきます。<BR>②各動画の視聴　この動画の視聴が、授業学修に相当するものとなります。ワークブックの当該場所を開いてメモを取りましょう。<BR>③復習　動画の内容やワークブックに取ったメモを参考に各学群の学問分野の広がりの自分なりの理解や、自分自身の興味の度合いなどをさらにメモしましょう。自分が志望する専門分野の何かと関係しそうに思えたら、それもメモをしておきましょう。課されている課題への解答をしましょう。最終課題への解答も最後に必要です。<BR><BR>本講義では、講義動画による一方通行的な学修だけではなく、受講者と教員の双方向の対話によりさらに理解を深められる機会を用意しています。この活動を「『学問への誘い』インタラクティブ」と称しています。詳細はmanaba上の「学問への誘い（受講用コース）」をご覧ください。こちらへの参加もお勧めします。<BR><BR>ちなみに，大学設置基準上は，1単位の取得のために，講義と予習復習を含めて45時間の学修活動が必要になることが標準とされています．講義動画は合計で15時間相当分を用意してあります。視聴計画の作成や予習復習（上記⓪①③）、講義動画を一時停止してメモをとるなどの学修に、残りの合計30時間の学修相当分をあててください。<BR>                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+入学時に、本講義に関する資料を含む冊子「初年次学修ガイド～学問への誘い～」を配布する。その冊子に記載されている文献やURLのリンク先にある情報が本講義に関連する参考文献となる。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                        <p id="pretopics">
+春Aモジュール 水曜5～6限（15：15～18：00）<BR>世話人教員:坪内孝司(システム情報系教授)、 随時(メールで連絡下さい) <BR>連絡先 izanai-2024@ml.cc.tsukuba.ac.jp<BR>※問い合わせ対応は原則オフィスアワー内で行います。回答までに数日程度かかる可能性がありますので予めご了承ください。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
+                    <p id="style">
+　本学入学までに学び体験してきたすべての内容が受講前に仮定する知識となります。さらに、本講義は卒業までの本学でのすべての学修の礎ともなります。学士基盤科目のなかから選択する総合科目や、自己の属する学類とは異なる学類で開設された専門導入科目・専門科目の履修(学問としての学びの「水平展開」として位置付けられる)と、自らの専門分野に関する科目の履修(その学びの「垂直展開」として位置付けられる)の結び目として、本学でこれから履修してゆく科目のすべての入口となる講義として本講義は関連づけられます。<BR>　本講義を受講することにより様々な学問分野に広がる広い視野を養ってください。本学で扱われている学問分野のそれぞれが、学問の沃野にタワー的に建っているのではなく、それをサポートする学問分野へと裾野が極めて広くひろがっていることをよく理解してください。世の中にある様々な問題解決にあたっては、その問題の背景にある様々な広がりに気がつき、そこから関連する様々な知識を動員する必要のあること、がさらに理解できるとよいでしょう。その一助となるように、本学の教育理念の説明や、学群・学類で提供される学問分野の位置づけ・相互関係を概観する内容を本講義では含みます。自ら学んで行く専門分野や、それと関連する学問分野の体系をみながら、幅広い視野からみた自分の分野の位置づけが理解できることを期待します。                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+                    <p id="style">
+なし                    </p>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>

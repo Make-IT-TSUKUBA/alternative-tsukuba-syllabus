@@ -1,0 +1,759 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2024/EB61011/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+EB61011        </span>&nbsp;
+        <span id="title">
+生物物理学I        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    1.0 単位,
+            </span>
+            <span id="grade">
+                    2・3 年次,
+            </span>
+            <span id="timetable">
+春AB 金3            </span>
+            <br>
+            <span id="assignments">
+伊藤 希            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+生命現象を支える分子集合状態の巧妙で温和な反応系の散逸緩和過程について,情報とエネルギーの流れの観点から述べる. CC-BY-ND 4.0        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+FCC3901と同一。<BR>情報コース<BR>対面<BR>指定された課題を事前にこなしていることを前提に，討論を中心として実施する予定である．FC13801修得者の履修は認めない。内容的に生物物理学IIとは互いに独立であり,生物物理学IIのみを履修しても支障はない.        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義        </p>
+    </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業目的</h2>
+                <p id="style">
+生命現象に対する物理学的アプローチの基本を修得する.                </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業内容</h2>
+                <div id="topics">
+                        <p id="pretopics">
+各回内容は目安であり,受講状況等に応じ順序の変更ならびに取捨選択があり得る.                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+生物物理のスコープ (配布テキスト 1.1 節，教科書第 1 章)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+生物物理のスケール (配布テキスト 1.2 節，教科書第 1 章)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+非平衡熱力学 (配布テキスト 2 章，教科書 2, 8 章)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+反応速度論/力学系                                         </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+マルコフジャンプ過程/熱ゆらぎと拡散現象                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6回                                        </th>
+                                        <td>
+分子と相互作用                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第7回                                        </th>
+                                        <td>
+分子機械とその速度論                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第8回                                        </th>
+                                        <td>
+情報複製                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第9回                                        </th>
+                                        <td>
+細胞の制御・動的構造                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第10回                                        </th>
+                                        <td>
+微生物の遊泳と集団運動                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">前提科目・履修上の注意事項</h2>
+                    <p id="style">
+理系大学初年度程度の数学ならびに物理学に触れていることが望ましい. 指定範囲の予習を前提として所謂「反転授業」形式で実施する．                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">単位取得条件・成績評価基準</h2>
+                    <p id="style">
+事前提出課題の得点と期末課題の得点の加重平均に，授業中の積極性を加味して評価する．                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">準備学習・事後学習</h2>
+                    <p id="style">
+配布するテキストの課題ならびに教科書の指定範囲の要約を事前に提出すること．範囲等については別途指示する．第4回以降は教科書に沿って進めるので，微分方程式についてはそれまでに必要な範囲で習熟しておくこと．生命現象の背後にある物理法則や生体の構造等について授業時間中に詳細を説明するのは到底不可能であるので,必要に応じ各自補なうこと．                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">指定教科書</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th>
+1. 鳥谷部祥一 生物物理学 (2022) 日本評論社                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784535789722" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784535789722                                                    </a>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">参考書</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th>
+1. 大槻義彦 アッという間に解ける微分方程式 (1977) 共立出版 <BR>物理学ないし生物学に必要な範囲の微分方程式について手早く一覧するのに便利．                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:4320033159" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:4320033159                                               </a>
+                                    </td>
+                                </tr>
+                                    <tr>
+                                        <th>
+2. 千葉逸人 解くための微分方程式と力学系理論 (2021) 現代数学社<BR>前半では解けるものを解く方法，後半では解けないものを解かずに済ませる方法を述べている．                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784767805704" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784767805704                                               </a>
+                                    </td>
+                                </tr>
+                                    <tr>
+                                        <th>
+3. 前野昌弘 よくわかる熱力学 (2020) 東京図書, <BR>力学を拡張する形で熱力学を導入する点がユニーク．現時点で日本語の熱力学入門書としては最良といえよう．                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784489023415" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784489023415                                               </a>
+                                    </td>
+                                </tr>
+                                    <tr>
+                                        <th>
+4. 清水明 熱力学の基礎 第2版 (2021) 東京大学出版会 <BR>一般的な教程とは大きく異なるが,見通しが良い.熱力学に挫折した人の再挑戦にも.                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784130626224" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784130626224                                               </a>
+                                    </td>
+                                </tr>
+                                    <tr>
+                                        <th>
+5. カチャルスキー, A., カラン,ピーター F. 著,青野修,木原裕,大野宏樹共訳 生物物理学における非平衡の熱力学 (1975) みすず書房<BR>古典的教科書であるが,最近新装版が出版され入手しやすくなった.                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784622086086" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784622086086                                               </a>
+                                    </td>
+                                </tr>
+                                    <tr>
+                                        <th>
+6. グランスドルフ/プリゴジン著,松本元,竹山協三訳 構造・安定性・ゆらぎ―その熱力学的理論 (1977) みすず書房<BR>授業では十分に触れられない散逸構造について学ぶのに良い.                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:4622025310" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:4622025310                                               </a>
+                                    </td>
+                                </tr>
+                                    <tr>
+                                        <th>
+7. Forland 他著,伊藤靖彦監訳 わかりやすい非平衡熱力学 (1992) オーム社 <BR>工学的な例を用いて非平衡熱力学の応用を具体的に説明している.生物過程に関する章あり.                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:4274129160" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:4274129160                                               </a>
+                                    </td>
+                                </tr>
+                                    <tr>
+                                        <th>
+8. 大野克嗣 非線形な世界 (2009) 東京大学出版会<BR>生物物理学と直接的接点はないが,考え方の考え方を知るのによい.概念分析と現象論に重点を置いている.                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784130633529" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784130633529                                               </a>
+                                    </td>
+                                </tr>
+                                    <tr>
+                                        <th>
+9. Oono, Yoshitsugu The Nonlinear World Conceptual Analysis and Phenomenology (2013) Springer <BR>「非線形な世界」の英語版.図は日本語版の方が見やすい.                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784431540281" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784431540281                                               </a>
+                                    </td>
+                                </tr>
+                                    <tr>
+                                        <th>
+10. 太田隆夫 非平衡系の物理学 4 版 (2005) 裳華房<BR>初学者向けに書かれており,生物物理学の授業でなければ教科書に採用した.確率共鳴の説明がある.                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:4785320923" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:4785320923                                               </a>
+                                    </td>
+                                </tr>
+                                    <tr>
+                                        <th>
+11. Glaser, Roland Biophysics an Introduction (2012) Springer<BR>生物物理学全般を広くカバーしている.やや厚くて高いのが難点.                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9783642252112" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9783642252112                                               </a>
+                                    </td>
+                                </tr>
+                                    <tr>
+                                        <th>
+12. 大木和夫 宮田英威 生物物理学 (2010) 朝倉書店<BR>後半は分子から運動について測定法も含め述べられている.                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784254137880" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784254137880                                               </a>
+                                    </td>
+                                </tr>
+                                    <tr>
+                                        <th>
+13. 谷下一夫 山口隆美 (編) 生物流体力学 (2012) 朝倉書店<BR>流体力学の概略を含んでおり,概観に便利.                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784254231335" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784254231335                                               </a>
+                                    </td>
+                                </tr>
+                                    <tr>
+                                        <th>
+14. Phyllips, Rob ほか著,笹井理生ほか訳 細胞の物理生物学 (2011) 共立出版<BR>英語原著は新版あり.<BR>生物学的な基本事項を含め広くカバーしている反面,物理の基本から知りたい向きは他で補う必要がある.厚くて重いのが欠点.                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784320057166" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784320057166                                               </a>
+                                    </td>
+                                </tr>
+                                    <tr>
+                                        <th>
+15. Phyllips, Rob, et al. Physical Biology of the Cell 2nd ed. (2012) Garland Science<BR>Molecular Biology of the Cell の物理版と言って良い.                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9780815344506" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9780815344506                                               </a>
+                                    </td>
+                                </tr>
+                                    <tr>
+                                        <th>
+16. 渡辺純二 物理学入門―自然・生命現象の基本法則― (2011) 朝倉書店<BR>物理学の教科書は多数あるが,生物研究者を念頭に書かれている一冊.                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784254177442" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784254177442                                               </a>
+                                    </td>
+                                </tr>
+                                    <tr>
+                                        <th>
+17. 久保亮五 統計力学 (1951初版/1971改訂版/2003新版) 共立出版<BR>古い本だが名著である．                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784320034235" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784320034235                                               </a>
+                                    </td>
+                                </tr>
+                                    <tr>
+                                        <th>
+18. 大沢文夫 大沢流手づくり統計力学 (2011) 名古屋大学出版会<BR>後半が生物指向の内容.                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784815806743" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784815806743                                               </a>
+                                    </td>
+                                </tr>
+                                    <tr>
+                                        <th>
+19. 戸田盛和他 現代物理学の基礎5 統計物理学 2 版 (1978) 岩波書店<BR>非平衡を含む統計物理をとりあげている.                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784007304156" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784007304156                                               </a>
+                                    </td>
+                                </tr>
+                                    <tr>
+                                        <th>
+20. 関本謙 ゆらぎのエネルギー論 (2004) 岩波書店<BR>所謂分子機械とゆらぎの関係の理解に.                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784007303463" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784007303463                                               </a>
+                                    </td>
+                                </tr>
+                                    <tr>
+                                        <th>
+21. Sekimoto, Ken Stochastic Energetics (2010) Springer<BR>「ゆらぎのエネルギー論」の英語版であるが,その後の進展が追加されている.                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9783642054105" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9783642054105                                               </a>
+                                    </td>
+                                </tr>
+                                    <tr>
+                                        <th>
+22. 大矢雅則, 原利英 数理物理と数理情報の基礎 (2016) 近代科学社<BR>授業で扱う範囲の数学がコンパクトにまとめられている.                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784764905030" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784764905030                                               </a>
+                                    </td>
+                                </tr>
+                                    <tr>
+                                        <th>
+23. 香取眞理 非平衡統計力学 3 版 (2007) 裳華房<BR>コンパクトにまとめられているので,とりあえずの通覧に適する.                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784785320867" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784785320867                                               </a>
+                                    </td>
+                                </tr>
+                                    <tr>
+                                        <th>
+24. 沙川貴大 非平衡統計力学 (2022) 共立出版<BR>非平衡統計力学の最近の展開を，平易さを旨として解説している．                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784320035485" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784320035485                                               </a>
+                                    </td>
+                                </tr>
+                                    <tr>
+                                        <th>
+25. 齊藤圭司 SGCライブラリ132 ゆらぐ系の熱力学 (2022) サイエンス社<BR>分子モーターを扱っている．                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784781915630" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784781915630                                               </a>
+                                    </td>
+                                </tr>
+                                    <tr>
+                                        <th>
+26. 金子邦彦, 澤井哲, 高木拓明, 古澤力 細胞の理論生物学 (2020) 東京大学出版会<BR>細胞レベルの力学系扱っている                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784130626217" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784130626217                                               </a>
+                                    </td>
+                                </tr>
+                                    <tr>
+                                        <th>
+27. 望月敦史 理論生物学概論 (2021) 共立出版<BR>ネットワークの扱いに特徴がある                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784320058309" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784320058309                                               </a>
+                                    </td>
+                                </tr>
+                                    <tr>
+                                        <th>
+28. 石本健太 微生物流体力学 (2022) サイエンス社<BR>コンパクトながら流体力学の基本からカバーしている．                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784781915593" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784781915593                                               </a>
+                                    </td>
+                                </tr>
+                    </table>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+伊藤 希 　特に定めない。事前連絡が望ましい。　生物農林学系棟 B811 4768                                                        <br>
+                                                                <span class="officehour-address">
+1001620                                                                </span>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">備考 (受講生に望むこと)</h2>
+                    <p id="style">
+質問や討論を含め,授業への積極的参加を期待する．.初回授業で授業の目標と方法の説明，及び，成績評価に関する詳細な解説を行なうので，担当教員の芸風との相性確認も兼ね，初回授業に出席することを強く勧める．                    </p>
+            </div>
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>

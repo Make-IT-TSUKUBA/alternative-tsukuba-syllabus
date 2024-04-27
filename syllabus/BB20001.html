@@ -1,0 +1,445 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2024/BB20001/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+BB20001        </span>&nbsp;
+        <span id="title">
+法学概論        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    2.0 単位,
+            </span>
+            <span id="grade">
+                    1 年次,
+            </span>
+            <span id="timetable">
+春AB 火5,6            </span>
+            <br>
+            <span id="assignments">
+木山 幸輔            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+法に対する基本的な考え方を導入する。法の歴史を導入する。法学と他社会科学領域の関係を考えるための導入を行う。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+▼社会・国際学群 コア・カリキュラム<BR>BC51151と同一。<BR>対面<BR>社会学類・国際総合学類・総合学域群・教職課程履修者以外の学生については履修制限をすることがある。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+以下の汎用コンピテンスと関連する。「2批判的・創造的思考力、4広い視野と国際性、5心身の健康と人間性・倫理性、6協働性・主体性・自律性」。<BR>以下の専門コンピテンスと関連する。「1社会科学の基礎、2社会科学の素養、3社会問題の発見、4社会的事象の理解・分析、5社会問題の解決、6社会科学的な表現・議論、7実社会での応用」<BR>                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標（学修成果）</h2>
+                <p id="style">
+法学の入門的・基本的知識を身につけ説明することができる。法学の基本的な考え方（法的三段論法・法解釈学や法価値論の基本的な考え方）について説明することができる。法学に関連するトピックについて自ら問いを立て調べることができる。国際的な視点から法の多様なあり方について考察することができる。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+法学の学び、法源、法継受、法的三段論法、法解釈技法、法と社会、法価値論、法学と政治学・経済学・社会学、憲法の基礎、刑法の基礎                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+以下は一応の予定であり、特に進行順序の点を中心に変更の可能性がある。<BR>1回　イントロダクション：法学の学びと六法導入　法価値論：導入　4/18<BR>2回　六法と法の歴史・法継受　　　　　　　　	法価値論：功利主義　4/25<BR>3回　法源と法の区分／中間・期末レポート説明　　法価値論：義務論&nbsp;&nbsp;5/2<BR>4回　裁判と法的三段論法　　　　　　　　　　　　法価値論：徳倫理学 5/9<BR>5回　法解釈・法解釈技法　　　　　　 　　 法価値論：資源配分について簡単に&nbsp;&nbsp;5/16<BR>6回　中間レポート・試験への省察　　　　　法価値論：ロールズとノージック　5/30<BR>7回　裁判の機能　　　　　法学（法価値論）と政治学：デモクラシー（ないしゲスト）　6/6<BR>8回&nbsp;&nbsp;法システムと法の機能（ビジネスと人権）　　法学（法価値論）と経済学：行動・開発経済学						6/13<BR>9回　憲法・刑法の基礎（ないしゲスト）　　　　法学（法価値論）と社会学：見田宗介の社会構想						6/27<BR>10回 価値に関する思考と実定法学　　　予備日ないし実務と法（ゲスト講師予定）　7/4<BR>                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                        <p id="pretopics">
+なお、講義担当者は、本授業日の前日に埼玉県にて用務がある場合が多く、片道4時間程度の移動となる。移動ストレスが大きく体力面で支障がある場合、本学規定に従いつつ、zoomでのオンライン講義とする回を設けることがありうる。なお、講義担当者は、対面授業よりzoom講義の方が教育効果が高い場合が多いと考えている。                        </p>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+法について学びたいと考えていること。自ら学ぶ態度をもっていること。二度のテスト兼レポートを提出する余裕があること。なお、カリキュラム上における本科目の位置付けについては、学生それぞれの所属等に応じて異なるので、自身で確認すること。<BR>                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+・中間テスト兼レポートへ向けた準備（30%）<BR>　前半に関して：キーワードの理解に関するテスト。レポートに備える：『論文の教室』から学ぶ。<BR>&nbsp;&nbsp;&nbsp;双方を1つのファイルとし、ワードファイルの形式で提出してもらう予定である。<BR><BR><BR>・期末テスト兼レポート（70%）<BR>　前半：キーワードの理解に関するテスト。後半：レポート（問いを立て、論ぜよ）。<BR>　双方を1つのファイルとし、ワードファイルの形式で提出してもらう予定である。<BR>                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+第1回および第3回で説明するように戸田山和久『論文の教室』新版ないし最新版NHK出版を読み、レポートを書く上で自身が意識化すべきところを言葉の形にする。その上で、期末レポートへ向けて準備する。<BR>ハンドアウト記載のキーワードについて理解が十分でなかったり異なる説明を得たかったりする場合、準教科書として指定している書籍から学習する。<BR>ハンドアウト記載の文献や、その他の関連文献・基本文献を関心に従って渉猟する。講義の中で生じた違和感や関心をもとに問いを作り、関連する文献を読み考える。<BR><BR>履修要覧に記載のあるとおり、各授業1時限分の前後において、それぞれ1.5時間分の自習を必要とする。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+講義資料についてはハンドアウトを教員が用意する。<BR>全員に、戸田山和久(2012)『論文の教室［新版］』NHK出版あるいは戸田山和久(2022)『最新版 論文の教室』NHK出の購入を求め、中間テスト時に自身が気をつける点を記入してもらう。<BR>後半授業について、木山幸輔(2022)『人権の哲学：基底的価値の探究と現代世界』東京大学出版会を背景とする内容が多い。購入を必ず求めるものではないが、ぜひ購入してほしい。<BR>準教科書として、以下の書籍を推薦する。購入するか否かは学生に委ねるが、法学を概観する、あるいは道案内する書籍として、できれば好みのものを1冊以上購入して欲しい。<BR>1. 基礎法学、特に法哲学に近いもの<BR>：田中成明([2005]2016)『法学入門［新版］』有斐閣（少し難解）（第3版も2023年に出るとのこと）。<BR>那須耕介・平井亮輔編(2020)『レクチャー法哲学』法律文化社（上より平易）。<BR>2. 実定法学を中心とするもの：<BR>原田大樹(2017)『現代実定法入門：人と法と社会をつなぐ』弘文堂。<BR>3. 多様な法学の領域を紹介するもの：<BR>南野森編(2019)『新版法学の世界』日本評論社。<BR>南野森編(2016)『ブリッジブック法学入門第２版』信山社。<BR>その他、参考となる書籍について講義中で適宜紹介し文献を挙示する。<BR><BR>なお、実定法を学ぼうとすでに決意している学生は、「六法」（『ポケット六法』など）を購入しておくと良いだろう。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
+                <div id="topics">
+                        <p id="pretopics">
+オフィスアワーは特に定めない。事前にメールで予約を取ること。学習上のことであれば気構えずに相談してほしい。ただし、単純に迷惑メールに入ってしまったり、メールの趣旨の確認に時間と労力がかかるので、「大学教員　メールの書き方」などと検索して、フォーマルな書き方でメールを送って欲しい。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+木山 幸輔 　                                                        <br>
+                                                                <span class="officehour-address">
+100003513                                                                </span>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
+                    <p id="style">
+「民事法」と呼ばれる法の分野については、「民事法概論」が開設されている。当該分野について学ぶ場合はそちらも履修してほしい。（カリキュラム上における当該科目の位置付けについては、学生それぞれの所属等に応じて異なるので、自身で確認すること。）<BR>また、しばしばある誤解だが、法学は暗記を中心とする科目ではない。種々の思考することが法学の核心である。中でも論理的思考が苦手な学生は、『論文の教室』に加え、アンソニー・ウェストン（2019）『論証のルールブック（第５版）』ちくま学芸文庫などを読むとよいだろう。                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>

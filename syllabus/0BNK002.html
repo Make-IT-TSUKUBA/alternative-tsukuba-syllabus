@@ -1,0 +1,734 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2024/0BNK002/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+              最終更新日：2024/03/19
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+0BNK002        </span>&nbsp;
+        <span id="title">
+生物圏資源科学講究II        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    1.0 単位,
+            </span>
+            <span id="grade">
+                    2 年次,
+            </span>
+            <span id="timetable">
+通年 応談            </span>
+            <br>
+            <span id="assignments">
+菅谷 純子, 松倉 千昭, 柴 博史, 草野 都, 木下 奈都子, 王 寧, 津田 吉晃, ブザス ディアナ, ロンバルド ファビエン, 谷 尚樹, 田村 憲司, 野村 港二, 江面 浩, 加藤 盛夫, 阿部 淳一, 福田 直也, 上條 隆志, 清野 達之, 古川 誠一, 山路 恵子, 瀬古澤 由彦, 川田 清和, 野中 聡子, 浅野 眞希, 津村 義彦, 岡根 泉, 浅野 敦之, 康 承源, 藤田 泰成, 吉岡 洋輔, 松井 哲哉, 作本 亮介, 田端 純, 南川 和則, 藏滿 司夢, 髙山 真理子            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+人類の生存に必要不可欠な生物資源の生理機能・生態・遺伝的制御の解明とその持続的な生産、利用などに関わる生物圏資源生産学分野、生物圏環境科学分野および森林生態環境学分野に関する学術論文等を通して既存研究の内容を理解して専門知識を広め、研究動向を把握できるように指導する。さらに、実験の進め方、得られた結果のまとめ方、結果に基づく考察・討論の進め方、英語の原著論文および学位論文の作成方法について具体的指導を行う。<BR> 講究IIにおいては、主として考察および討論の深化の手法、それを反映した研究計画の修正等の方法論を中心に指導する。研究倫理に関するより具体的な指導を行う。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+演習及び実習･実験･実技        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+本講究を通じて、マネージメント能力、コミュニケーション能力、リーダーシップ力、国際性、専門知識と運用力、さらに研究成果の社会実装力の涵養を図る。<BR>生物圏資源科学に関する専門知識と運用力並びに研究成果の社会実装力を習得できる。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標（学修成果）</h2>
+                <p id="style">
+講究IIにおいては、主として考察および討論の深化の手法、それを反映した研究計画の修正等の方法論を中心に指導する。研究倫理に関するより具体的な指導を行う。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+生物圏資源生産学, 生物圏環境科学, 森林生態環境学, マネージメント能力, コミュニケーション能力, リーダーシップ力, 国際性, 専門知識と運用力, 研究成果の社会実装力                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+人類の生存に必要不可欠な生物資源の生理機能・生態・遺伝的制御の解明とその持続的な生産、利用などに関わる生物圏資源生産学分野、生物圏環境科学分野および森林生態環境学分野に関する学術論文等を通して既存研究の内容を理解して専門知識を広め、研究動向を把握できるように指導する。さらに、実験の進め方、得られた結果のまとめ方、結果に基づく考察・討論の進め方、英語の原著論文および学位論文の作成方法について具体的指導を行う。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+第1回―第5回：関連研究分野における重要論文の読解及び既存研究のレビュー                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+第6回―第14回：関連研究分野における基礎的および先端的研究手法の修得                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+第15回：研究進捗報告と計画検討・ディスカッション                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+第16回―第18回：学術集会における研究発表手法の修得                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+第19回―第28回：関連研究分野における基礎的および先端的研究手法の修得                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6回                                        </th>
+                                        <td>
+第29回―第30回：研究進捗報告と計画検討・ディスカッション                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+本講究担当教員を指導教員とすること                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+本講究への取り組み [既存研究論文のレビュー、研究進捗報告、研究計画立案等；50％] および研究進捗状況の評価 [学術集会（学会、シンポジウム等）における研究発表, 学術誌・著書（国内誌及び国際誌）への投稿・掲載状況、受賞・表彰等；50％] をもとに評価を行う。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+生物圏資源科学研究に関連する分野の論文を読んで、内容を理解し、解説や批評等を行う。また、関連する国際および国内学会に参加して、自分の研究内容を発表し、他の参加者と質疑応答や 討論を行う。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+教材・参考文献・配付資料等については指導教員が適宜指示する。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+菅谷 純子 　                                                        <br>
+                                                                <span class="officehour-address">
+1001634                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+松倉 千昭 　                                                        <br>
+                                                                <span class="officehour-address">
+1002323                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+柴 博史 　                                                        <br>
+                                                                <span class="officehour-address">
+100000088                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+草野 都 　生物・農林学系B棟 
+代謝ネットワーク科学研究室                                                         <br>
+                                                                <span class="officehour-address">
+100000089                                                                </span>
+                                                                <a href="https://www.metabolic-network-biology-lab.com/" target="_blank">https://www.metabolic-network-biology-lab.com/</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+木下 奈都子 　                                                        <br>
+                                                                <span class="officehour-address">
+100000090                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+王 寧 　                                                        <br>
+                                                                <span class="officehour-address">
+100000121                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+津田 吉晃 　                                                        <br>
+                                                                <span class="officehour-address">
+100001004                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+ブザス ディアナ ミハエラ　                                                        <br>
+                                                                <span class="officehour-address">
+100001238                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+ロンバルド ファビエン クロード レノー　                                                        <br>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+田村 憲司 　                                                        <br>
+                                                                <span class="officehour-address">
+1001156                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+野村 港二 　                                                        <br>
+                                                                <span class="officehour-address">
+1001167                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+江面 浩 　                                                        <br>
+                                                                <span class="officehour-address">
+1001182                                                                </span>
+                                                                <a href="http://www.gene.tsukuba.ac.jp/Plant/MolecularBreeding/" target="_blank">http://www.gene.tsukuba.ac.jp/Plant/MolecularBreeding/</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+加藤 盛夫 　                                                        <br>
+                                                                <span class="officehour-address">
+1001342                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+阿部 淳一 ピーター　生物農林学系棟C404 
+029-853-4791                                                        <br>
+                                                                <span class="officehour-address">
+1001660                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+福田 直也 　                                                        <br>
+                                                                <span class="officehour-address">
+1001758                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+上條 隆志 　                                                        <br>
+                                                                <span class="officehour-address">
+1001801                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+清野 達之 　八ヶ岳演習林                                                        <br>
+                                                                <span class="officehour-address">
+1001994                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+古川 誠一 　.　生物・農林学系C棟 C406 4706                                                        <br>
+                                                                <span class="officehour-address">
+1002235                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+山路 恵子 　メールでお問い合わせください。　生農F103                                                        <br>
+                                                                <span class="officehour-address">
+1002343                                                                </span>
+                                                                <a href="http://www.envr.tsukuba.ac.jp/~somosomo/index.html" target="_blank">http://www.envr.tsukuba.ac.jp/~somosomo/index.html</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+瀬古澤 由彦 　                                                        <br>
+                                                                <span class="officehour-address">
+1002493                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+川田 清和 　10:00-17:00　総合研究棟A510                                                        <br>
+                                                                <span class="officehour-address">
+1002533                                                                </span>
+                                                                <a href="http://www.u.tsukuba.ac.jp/~kawada.kiyokazu.gu/" target="_blank">http://www.u.tsukuba.ac.jp/~kawada.kiyokazu.gu/</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+野中 聡子 　8:40から18:00まで　（ただし要事前相談）　遺伝子実験センター308号室 
+029-853-7726                                                        <br>
+                                                                <span class="officehour-address">
+1002612                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+浅野 眞希 　                                                        <br>
+                                                                <span class="officehour-address">
+1002636                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+津村 義彦 　総合A棟512 029-853-4629                                                        <br>
+                                                                <span class="officehour-address">
+1006989                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+岡根 泉 　事前にメールまたは電話にて連絡ください。　生物農林学系棟C405 6687 / 生物農林学系棟E305 4707                                                        <br>
+                                                                <span class="officehour-address">
+1011079                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+浅野 敦之 　                                                        <br>
+                                                                <span class="officehour-address">
+23051002                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+康 承源 　生物・農林学系B棟 Sei-No B706 4807                                                        <br>
+                                                                <span class="officehour-address">
+23051072                                                                </span>
+                                                                <a href="https://kanglabo.wixsite.com/main" target="_blank">https://kanglabo.wixsite.com/main</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+吉岡 洋輔 　随時(事前にe-mail等で連絡すること)　                                                        <br>
+                                                                <span class="officehour-address">
+23051886                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+藏滿 司夢 　生物農林学系棟C409, E407, 029-853-4806                                                        <br>
+                                                                <span class="officehour-address">
+100004580                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+髙山 真理子 　                                                        <br>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
+                    <p id="style">
+年度末に、manabaを活用して授業評価および授業の修得度に関する自己評価を含めたアンケートを行う。アンケートの回答を以って受講完了とする。<BR>                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>

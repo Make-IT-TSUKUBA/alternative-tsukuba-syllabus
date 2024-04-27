@@ -1,0 +1,437 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2024/AB61C71/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+AB61C71        </span>&nbsp;
+        <span id="title">
+哲学史IV-a        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    1.0 単位,
+            </span>
+            <span id="grade">
+                    2 - 4 年次,
+            </span>
+            <span id="timetable">
+春AB 火3            </span>
+            <br>
+            <span id="assignments">
+檜垣 良成            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+西洋哲学史上の諸問題をテクストに即して極める(他専攻・他学類歓迎。ただし電子シラバス熟読のこと)。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+対面(オンライン併用型)        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+「2. 批判的・創造的思考力」に関連する                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
+                <p id="style">
+古代ギリシア以来の西洋哲学史上のOntologiaの知識を習得すると同時に文献を読み解くスキルを向上できる。<BR>哲学的思考力を向上できる。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+存在、実在性、明証性                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+自分ひとりで文献を読むだけでは達することのできない正確な読解力を身につけるために、まずは自分で読み、他者に理解を披露し、〈対話〉して理解を深めてゆく。<BR>対面とオンライン併用であるが、「哲学する」ことを体感するには、リアルタイムの〈対話〉が不可欠なので、オンラインでもZoom双方向を用いる。詳細をmanabaでこの授業のコースへ自己登録して確認のこと(自己登録キー)。授業直前まで変更の可能性があるので、確認をお願いします。<BR><BR>この授業の射程は以下の全文献に及ぶ。<BR>・アリストテレス『カテゴリアイ』、『形而上学』<BR>・トマス・アクィナス『有と本質』(1252-56年頃)、『対異教徒大全』(1260年頃)<BR>・デカルト『神の存在と人間の魂の身体からの区別を論証する第一哲学についての省察』(第2版1642年)、『哲学の原理』(1644年)<BR>・スピノザ『幾何学的秩序に従って論証されたエチカ』(1677年)<BR>・ロック『人間の知性に関するエッセイ』(1690年)<BR>・ライプニッツ『認識、真理、観念についての省察』(1679年)、『人間の知性に関する新しいエッセイ』(1700年頃)、『 モナド論』(1714年)<BR>・カント『神の現存在の論証のための唯一可能な証明根拠』(1763年)、『純粋理性の批判』(1781年)<BR><BR>本学期、理解のベースとする文献はデカルト『省察』である。<BR>以下は予定です。学生さんとの関係のなかで適宜修正されます。<BR><BR>第1回 ontologiaとはなにか？<BR>第2回 アリストテレスのウーシア<BR>第3回 トマス・アクィナスのエッセ<BR>第4回 近世理性主義の実在性<BR>第5回 cogito ergo sum<BR>第6回 明証性の規則<BR>第7回 第五省察<BR>第8回 三角形の内角の和<BR>第9回 神の存在<BR>第10回 総括                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+毎回の〈対話〉で真理の探求(この意味を授業にて確認せよ)を深めてゆき、その成果を集⼤成した最終投稿で成績を評価する。<BR>各回のリアクション、発⾔等は、この探求の過程であるので、皆に特に際⽴った貢献をしたものを除いては直接評価の対象とはしないので、忌憚のない発⾔等をお願いします(ただし、投稿機会の3分の2以上の投稿があることを成績評価の前提条件とする)。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+授業前に担当者はレジュメを投稿する。ほかの参加者は、課題テクスト・レジュメを熟読し、考えをまとめてくる。<BR>授業後に公開リアクションを提出する。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+1. Aristoteles, Categoriai<BR>(The Loeb classical Library, Aristoteles Latinus, Philosophische Bibliothek)<BR>2. Thomas Aquinas, De ente et essentia<BR>(Concerning Being And Essence translated by George G. Leckie, Aquinas Press 2007)<BR>3. Thomas Aquinas, Summa contra Gentiles<BR>(Of God And His Creatures: An Annotated Translation Of The Summa Contra Gentiles Of Saint Thomas Aquinas translated byJoseph Rickaby, Kessinger Publishing 2006)<BR>4. Rene Descartes, Meditationes de prima philosophia, in quibus Dei existentia, et animae humanae a corpore distinctio,demonstrantur, Principia Philosophicae, J. Vrin 1996<BR>(The philosophical writings of Descartes Vol.1, 2, Cambridge University Press 1985,1984)<BR>5. Benedictus de Spinoza, Ethica ordine geometrico demonstrata<BR>(Spinoza: Complete Works edited by Michael L. Morgan translated by Samuel Shirley, Hackett Publishing Company 2002)<BR>6. John Locke, An Essay concerning Human Understanding edited by Peter H. Nidditch, Oxford University Press 1975<BR>7. Gottfried Wilhelm Leibniz, Meditationes de cognitione, veritate et ideis, Monadologie<BR>(Philosophical Essays translated by Roger Ariew and Daniel Garber, Hackett Publishing Company 1989)<BR>8. Gottfried Wilhelm Leibniz, Nouveaux essais sur l'entendement humain<BR>(New Essays on Human Understanding edited by Peter Remnant and Jonathan Bennett, Cambridge University Press 1996)<BR>9. Immanuel Kant, Der einzig moegliche Beweisgrund zu einer Demonstration des Daseins Gottes<BR>(Theoretical philosophy 1755-1770 translated by David Walford, Cambridge University Press (The Cambridge edition of theworks of Immanuel Kant) 2003)<BR>10. Immanuel Kant, Kritik der reinen Vernunft<BR>(Immanuel Kant's Critique of Pure Reason translated by Norman Kemp Smith, Macmillan Second impression 1933)<BR><BR>最新の参考文献<BR>・道躰章弘『聖エーディト・シュタインの永遠哲学―存在の意味を求めて』水声社<BR>・Karen Koch, Denken in Zwecken: Bedeutung und Status der Teleologie in der theoretischen Philosophie Kants und Hegels&nbsp;&nbsp;ebook<BR><BR>他はその都度紹介します。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+檜垣 良成 　火:11:40〜12:10ほか(メールにてアポイントのこと)　                                                        <br>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
+                    <p id="style">
+(1)古代中世のいわゆる「存在」概念を継承・批判する近代前半のOntologiaの精髄を学びたい人に最適な授業を心がけます。「存在」、「実体」、「実在性」といった概念の理解を深めます。哲学は抽象的な言葉を振り回すだけでは無意味です。そのリアリティを追究します。<BR>(2)本授業は、西洋哲学を文献学的かつ観想的に考察する基礎を学ぶ授業なので、或る意味無味乾燥な側面をもちます。実践哲学に関心のある人は「哲学演習」をお勧めします。<BR>(3)授業中、わからないことは最後まで待たずに、そのつど遠慮なく授業を中断してもらってけっこうです。また、対立意見をこそ歓迎します。お互いに現在の自説が有効に論駁されることを最大の関心事としましょう。                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>

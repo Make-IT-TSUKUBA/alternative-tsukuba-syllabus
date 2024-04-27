@@ -1,0 +1,650 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2023/01NA015/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+              最終更新日：2023/04/14
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+01NA015        </span>&nbsp;
+        <span id="title">
+民法III〔債権総論〕        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    2.0 単位,
+            </span>
+            <span id="grade">
+                    1 年次,
+            </span>
+            <span id="timetable">
+秋BC 随時            </span>
+            <br>
+            <span id="assignments">
+村山 淳子            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+本講義の目標は、(1)債権一般に関わる基本事項を正確に理解すると同時に、契約法・債権法の基本的な仕組み、基礎理論、諸制度を体系的に理解する。(2) 債権一般に関わる様々な判例・裁判例を正確に理解する。(3) 日常生活や取引活動の中で起こる様々な事実や紛争の中から法的問題を抽出する能力を身に付ける。債権法に関する法的ルールを使いこなす能力を身に付ける。(4) ほかの民法関連科目の授業とあわせて、民法全体の基本的な仕組みを理解する。<BR> 授業は講義形式で、民法の講学上「債権総論」と呼ばれている部分、民法の編別で言えば、第3章・債権の第1節・総則を対象とする。債権総論に関わる事項の習得及び法的な思考能力の向上を目的としている。<BR> この授業では、ほかの民法関連科目、とりわけ、民法IV-1と民法IV-2との関連に留意しつつ、債権の種類や効力、債権回収等の場面で生ずる問題を中心に説明を行う。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+0AFL015と同一。<BR>オンライン(オンデマンド型)        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+リーガルマインド                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標（学修成果）</h2>
+                <p id="style">
+(1) 債権一般に関わる基本事項を正確に理解すると同時に、契約法・債権法の基本的な仕組み、基礎理論、諸制度を体系的に理解する。<BR>(2) 債権一般に関わる様々な判例・裁判例を正確に理解する。<BR>(3) 日常生活や取引活動の中で起こる様々な事実や紛争の中から法的問題を抽出する能力を身に付ける。債権法に関する法的ルールを使いこなす能力を身に付ける。<BR>(4) ほかの民法関連科目の授業とあわせて、民法全体の基本的な仕組みを理解する。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+債権, 債権の種類, 債権の効力, 責任財産の保全, 多数当事者の債権・債務, 債権譲渡, 債務引受, 債権の消滅                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+債権の種類・内容<BR> 債権全般についての序論的な概観を行った後、債権の種類・内容を扱う。具体的には、民法IV-1および民法IV-2の授業の内容と連動させつつ、特定物債権、種類債権、金銭債権、利息債権、選択債権について、民法の基本的なルールを説明する。また、利息債権に関連して、利息の約定についての判例法理と特別法の展開にも言及する。共通的な到達目標モデル(第二次修正案)民法の第3編・第1部・第1章および第2部・第4章を対象とする。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+債権の効力、履行の強制<BR> 債権の効力を扱う。具体的には、民法IV-1および民法IV-2の授業の内容と連動させつつ、債権の基本的な効力を整理し、いわゆる自然債務と責任なき債務の問題を概説する。また、履行の強制について、その意義と体系的な位置付けを確認し、民事執行法のルールにも言及しながら、債務の種類ごとに履行強制の方法を説明する。共通的な到達目標モデル(第二次修正案)民法の第3編・第1部・第2章・第1節および第2節を対象とする。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+債権者代位権I<BR> 債権者代位権を扱う。この回の授業では、まず、伝統的な理解に基づき、責任財産とその保全の方法について、債権者平等の原則との関連も踏まえて概観する。その後、債権者代位権の意味と基本構造、要件枠組、行使の方法を順次説明していく。共通的な到達目標モデル(第二次修正案)民法の第3編・第1部・第2章・第5節・1および2を対象とする。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+債権者代位権II<BR> 第3回の授業の内容を前提として、この回の授業では、債権者代位権の効果と、いわゆる転用の問題を扱う。まず、効果に関して、判例法理に依拠しつつ、民事訴訟法や民事執行法との関係にも留意しながら、その概要を説明する。次に、いわゆる債権者代位権の転用について、主要な事例を取り上げながら検討していく。共通的な到達目標モデル(第二次修正案)民法の第3編・第1部・第2章・第5節・2を対象とする。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+詐害行為取消権I<BR> 詐害行為取消権を扱う。この回の授業では、詐害行為取消権の意味、基本構造に触れた上で、倒産法上の否認権との関係にも留意しながら、詐害行為取消権の要件の基本枠組を整理する。共通的な到達目標モデル(第二次修正案)民法の第3編・第1部・第2章・第5節・3を対象とする。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6回                                        </th>
+                                        <td>
+詐害行為取消権II<BR> 第5回の授業の内容を前提として、この回の授業では、詐害行為取消権の行使方法と効果の問題を扱う。共通的な到達目標モデル(第二次修正案)民法の第3編・第1部・第2章・第5節・3を対象とする。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第7回                                        </th>
+                                        <td>
+多数当事者の債権・債務I 分割債権・債務、不可分債権・債務、連帯債権<BR> まず、多数当事者の債権・債務関係について、民法の構造を概観し、この分野の内容をより良く理解するための視点を設定する。その後、分割債権・債務、不可分債権・債務、連帯債権の基本的なルールを説明する。共通的な到達目標モデル(第二次修正案)民法の第3編・第1部・第3章・第1節を対象とする。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第8回                                        </th>
+                                        <td>
+多数当事者の債権・債務II 連帯債務<BR> 連帯債務を扱う。具体的には、連帯債務の意味、成立を概観した後、連帯債務の効力を、対外関係、影響関係、内部(求償)関係に分けて説明する。共通的な到達目標モデル(第二次修正案)民法の第3編・第1部・第3章・第2節を対象とする。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第9回                                        </th>
+                                        <td>
+多数当事者の債権・債務III 保証債務1<BR> 保証債務を扱う。この回の授業では、まず、保証債務の意味、機能、性質、類似の制度との異同を概説する。次に、保証債務の成立との関連で、その基本的なルールとそこから生ずる諸問題を説明する。最後に、保証債務の効果として、債権者と保証人の関係のうち、保証の範囲の問題を扱う。共通的な到達目標モデル(第二次修正案)民法の第3編・第3章・第3節を対象とする。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第10回                                        </th>
+                                        <td>
+多数当事者の債権・債務IV 保証債務2<BR> 第9回の授業の内容を前提として、この回の授業では、保証債務の効果として、債権者と保証人の関係のうち保証人の抗弁の問題と情報提供義務の問題、主たる債務者と債権者の関係、保証人と主たる債務者の関係を説明する。共通的な到達目標モデル(第二次修正案)民法の第3編・第3章・第3節を対象とする。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第11回                                        </th>
+                                        <td>
+多数当事者の債権・債務V 保証債務3<BR> 第9回および第10回の授業の内容を前提として、この回の授業では、各種の保証、具体的には、連帯保証、共同保証、根保証をめぐる基本的なルールを扱う。また、事業に係る債務についての保証契約の特則にも触れる。共通的な到達目標モデル(第二次修正案)民法の第3編・第3章・第3節を対象とする。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第12回                                        </th>
+                                        <td>
+債権譲渡I<BR> 債権譲渡を扱う。この回の授業では、まず、債権譲渡の意味と機能を確認した上で、債権の譲渡性の原則とその制限について概説する。とりわけ、譲渡制限の意思表示の問題が重要なテーマとなる。次に、債権譲渡の権利行使要件および対抗要件システムの基本構造を説明する。共通的な到達目標モデル(第二次修正案)民法の第3編・第1部・第4章・第1節を対象とする。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第13回                                        </th>
+                                        <td>
+債権譲渡II<BR> 第12回の授業の内容を前提として、この回の授業では、債権譲渡の権利行使要件および対抗要件をめぐる民法上の諸問題を扱う。具体的には、債務者に対する権利行使要件との関連では、債務者による抗弁の対抗と抗弁放棄の意思表示が、第三者に対する対抗要件との関連では、債権譲渡の優劣決定基準が重要なテーマとなる。共通的な到達目標モデル(第二次修正案)民法の第3編・第1部・第4章・第1節を対象とする。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第14回                                        </th>
+                                        <td>
+債権譲渡III<BR> 第12回および第13回の授業の内容を前提として、この回の授業では、債権譲渡法理の現代的展開を扱う。具体的には、危機対応型の債権譲渡から正常業務型の債権譲渡へという基本的な動向に留意しつつ、集合債権譲渡に関わる判例法理を整理し、対抗要件についての特別法(動産・債権譲渡特例法)の内容を説明していく。共通的な到達目標モデル(第二次修正案)民法の第3編・第1部・第4章・第1節を対象とする。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第15回                                        </th>
+                                        <td>
+債務引受、契約譲渡<BR> 債務引受に関しては、免責的債務引受と併存的債務引受という2つの類型について、その意味、要件、効果を説明する。また、契約譲渡に関しては、その意味、要件、効果などの一般論を概観し、併せて、各論として、民法IV-2で扱った賃貸借契約上の当事者の地位の移転の問題を確認する。共通的な到達目標モデル(第二次修正案)民法の第3編・第1部・第4章・第2節を対象とする。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第16回                                        </th>
+                                        <td>
+債権の消滅I 弁済1<BR> 債権の消滅原因の1つ目として、弁済を扱う。この回の授業では、弁済の意味、弁済の方法(時期、場所、内容、費用)を概観した後、弁済の当事者の問題を扱う。とりわけ、第三者による弁済と弁済を受領する権限のない者に対する弁済が中心的なテーマとなる。後者については、制度趣旨を確認した上で、その要件と効果、更に、銀行取引の場面を中心とする同制度の適用領域の拡大について、判例法理を中心に説明していく。共通的な到達目標モデル(第二次修正案)民法の第3編・第1部・第5章・第1節・1を対象とする。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第17回                                        </th>
+                                        <td>
+債権の消滅II 弁済2<BR> 第16回の授業の内容を前提として、この回の授業では、弁済の効果の問題を扱う。とりわけ、弁済による代位が中心的なテーマとなる。より具体的には、弁済による代位の意味と機能を確認した上で、その要件と効果に関わる基本的なルールを、判例法理と学説の理論的到達点を踏まえながら説明していく。共通的な到達目標モデル(第二次修正案)民法の第3編・第1部・第5章・第1節・4を対象とする。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第18回                                        </th>
+                                        <td>
+債権の消滅III 弁済3、弁済供託、代物弁済<BR> 第16回および17回の授業の内容を前提として、この回の授業では、前3回の授業で扱えなかった弁済の問題を整理する。また、代物弁済と弁済供託の基本的なルールも説明する。共通的な到達目標モデル(第二次修正案)民法の第3編・第1部・第5章・第1節・2および3、ならびに第3節を対象とする。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第19回                                        </th>
+                                        <td>
+債権の消滅IV 相殺1<BR> 債権の消滅原因として相殺を扱う。相殺の意味と機能を正確に理解した上で、その要件と効果に関わる基本的なルールを修得することが、この回の授業の目的となる。共通的な到達目標モデル(第二次修正案)民法の第3編・第1部・第5章・第4節を対象とする。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第20回                                        </th>
+                                        <td>
+債権の消滅V 相殺2、更改、免除、混同、有価証券<BR> 第19回の授業の内容を前提として、差押えと相殺の関係、債権譲渡と相殺の関係について、理論的到達点を踏まえながら検討する。また、そのほかの債権消滅原因として、更改、免除、混同の基本的なルールを説明する。更に、補論として、有価証券についても概観する。共通的な到達目標モデル(第二次修正案)民法の第3編・第1部・第5章・第4節および第5節を対象とする。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                        <p id="pretopics">
+双方向性・学生相互の意見交換のためのリアルタイム方式の講義回が複数回入ります。内容としては、起案の相互発表等を予定しています。授業開始日の１週間前までに日時を公表しますので、その日時はリアルタイムで出席できるようスケジュールを押さえておいてください。<BR>                        </p>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+配当年次による。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+定期試験８０％、小テストなどの平常点２０％                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+授業の進め方とともに授業内に指示する。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+担当者が作成した講義資料<BR>ほか、必要に応じて、指示する                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th>
+1. 担当者が作成した講義資料(事前に配布する)                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
+                <div id="topics">
+                        <p id="pretopics">
+履修ガイドに記載する。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
+                    <p id="style">
+民法IV-1および民法IV-2を履修していることが望ましいです。<BR>任意参加の質問会の開催も予定しています。<BR>                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
+                    <p id="style">
+なし。                    </p>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>

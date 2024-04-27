@@ -1,0 +1,585 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2024/0BBAGY5/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+              最終更新日：2024/03/29
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+0BBAGY5        </span>&nbsp;
+        <span id="title">
+リサーチラボ実習(3B)        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    1.0 単位,
+            </span>
+            <span id="grade">
+                    3 年次,
+            </span>
+            <span id="timetable">
+秋AB 応談            </span>
+            <br>
+            <span id="assignments">
+佐々木 勲人, 大矢 俊明, 池田 潤, 橋本 修, 金 仁和, 臼山 利信, 島田 雅晴, 宮腰 幸一, 和田 尚明, 那須 昭夫, 小野 雄一, 住大 恭康, 石田 尊, 澤田 浩子, 金谷 優, 田川 拓海, 山村 崇斗, 黄 賢暻, 今田 水穂, 田中 祐輔, 宮川 創            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+言語学サブプログラムにおいて博士論文を作成する3年次生を対象に、学会発表(またはそれに準じるもの)を行い、それに基づき、複数の教員から成る指導グループからフォローアップを受ける。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+オンライン(対面併用型)<BR>指導教員の指示に従ってください。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+実習･実験･実技        </p>
+    </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業形態の補足</h2>
+                <p id="style">
+                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+汎用コンピテンス「知の創成力」「マネージメント能力」「コミュニケーション能力」「リーダーシップ力」、専門コンピテンス「研究力」「専門知識」「倫理観」「思考力」「総合力」に関連する。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
+                <p id="style">
+博士論文執筆に向けて，リサーチラボ実習(1A)(1B)(2A)(2B)で身に付けた学会プレゼンテーションの方法論をさらに発展させることができる。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+博士論文，学会発表                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+(池田潤)歴史言語学・記述言語学・実験言語学・セム語学に関連するテーマの学会発表指導を行う。<BR>(石田尊)現代日本語を主な対象とした統語的・意味的研究に関する学会発表指導を行う。<BR>(今田水穂)現代日本語に関する文法、意味論、コーパスを用いた研究に関する学会発表指導を行う。<BR>(臼山利信)言語政策に関するテーマの学会発表指導を行う。<BR>(大倉浩)日本語史について中世・近世の語彙・語法を中心に学会発表指導を行う。<BR>(大矢俊明)現代ドイツ語の文法論に関して,他のゲルマン語や日本語などと比較しながら,研究の実践,指導を行い,ドイツ語と他言語の比較文法論について学会発表指導を行う。<BR>(小野雄一)テクノロジーを活用した言語処理、言語分析や学習支援システムの言語教育への利用などに関する学会発表指導を行う。<BR>(加賀信広)生成統語論に関連するテーマの学会発表指導を行う。<BR>(金谷優)構文論・英語語法研究・語用論に関連するテーマの学会発表指導を行う。<BR>(金仁和)韓国語学及び韓日対照と関連するテーマについて学会発表指導する。<BR>(佐々木勲人)中国語文法研究,日中対照研究に関連するテーマの学会発表指導を行う。<BR>(澤田浩子)構文・談話・コミュニケーションを対象に、日本語学・日本語教育学に関する学会発表指導を行う。<BR>(島田雅晴)生成統語論に関連するテーマの学会発表指導を行う。<BR>(杉本武)コーパスを用いた研究方法で、主に現代日本語の動詞が関わる文法現象の記述に関する学会発表指導を行う。<BR>(住大恭康)ドイツ語の機能語に関して,他の言語と比較しつつ,文法的,意味的,語用論的な研究の学会発表指導を行う。<BR>(田川拓海)日本語を対象とした形態論・統語論研究のテーマを取り上げ,特定の理論・モデルを用いた分析に関する学会発表指導を行う。<BR>(那須昭夫)日本語の音声・音韻・韻律にかかわる諸現象のうち、とくに近年変異が進行しつつある事象を複数取り上げ、変異の機序および要因の解明を課題とした研究を実践するとともに、考察を進めるうえで必要となる学会発表指導を行う。<BR>(橋本修)日本語史・他言語との対照を含めた、広義日本語文法論に関する中長期的な研究計画・企画推進について学会発表指導をおこなう。<BR>(黄賢暻)日本語と韓国語を対象とした音声学・音韻論・実験言語学に関する学会発表指導を行う。<BR>(宮腰幸一)主に日本語/英語の意味論・文法論の学会発表指導を行う。<BR>(山村崇斗)生成統語論に基づいて、英語・史的英語に関するテーマの学会発表指導を行う。<BR>(和氣愛仁)現代日本語の文法論・意味論に関するテーマについて学会発表指導を行う。<BR>(和田尚明)時制・アスペクト・モダリティに関連するテーマの学会発表指導を行う。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+学会発表への準備、学会発表の成果にもとづいて判断する。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+適宜、指導教員が指示する。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+適宜、指導教員が指示する。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">参考書</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                    </table>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+佐々木 勲人 　木曜日 11:30～12:00（要予約）　人文社会学系棟 A718                                                        <br>
+                                                                <span class="officehour-address">
+1001670                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+大矢 俊明 　曜日ならびに時間帯は指定しません。電子メールで事前に予約してください。　人文社会学系棟 A611                                                        <br>
+                                                                <span class="officehour-address">
+1001244                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+池田 潤 　金4限(メールにて要予約)　人文社会学系棟 A517                                                        <br>
+                                                                <span class="officehour-address">
+1001270                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+橋本 修 　 水:13:30〜17:00 (会議日等を除く） 要予約 木:11:30〜13:00 要予約　人文社会学系棟 A610                                                        <br>
+                                                                <span class="officehour-address">
+1001483                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+金 仁和 　                                                        <br>
+                                                                <span class="officehour-address">
+1001495                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+臼山 利信 　 火:11:30〜12:10 水:11:30〜12:10 木:11:30〜12:10　人文社会学系棟 B713                                                        <br>
+                                                                <span class="officehour-address">
+1001690                                                                </span>
+                                                                <a href="http://www.lingua.tsukuba.ac.jp/~ippan/members/staffs/Usuyama" target="_blank">http://www.lingua.tsukuba.ac.jp/~ippan/members/staffs/Usuyama</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+島田 雅晴 　予約により随時。　                                                        <br>
+                                                                <span class="officehour-address">
+1001724                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+宮腰 幸一 　水曜日17時~18時　人文社会学系棟 B607                                                        <br>
+                                                                <span class="officehour-address">
+1001850                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+和田 尚明 　月:16:45-18:00　人文社会学系棟 A512                                                        <br>
+                                                                <span class="officehour-address">
+1001868                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+那須 昭夫 　随時 (要事前予約)　人文社会学系棟 A615                                                        <br>
+                                                                <span class="officehour-address">
+1002157                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+小野 雄一 　火:15:00〜16:45、他の時間も対応しますので適宜相談して下さい（対面・オンライン）　人文社会系棟B601                                                        <br>
+                                                                <span class="officehour-address">
+1002193                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+住大 恭康 　一応、金曜３限としますが、それ以外でも電子メールで事前に予約してください。　人文社会学系棟 A707                                                        <br>
+                                                                <span class="officehour-address">
+1002229                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+石田 尊 　メールによるアポイントメント　                                                        <br>
+                                                                <span class="officehour-address">
+1002259                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+澤田 浩子 　                                                        <br>
+                                                                <span class="officehour-address">
+1002518                                                                </span>
+                                                                <a href="https://www.lingua.tsukuba.ac.jp/~sawada/" target="_blank">https://www.lingua.tsukuba.ac.jp/~sawada/</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+金谷 優 　月曜6限またはアポイントメント　人文社会学系棟 B507                                                        <br>
+                                                                <span class="officehour-address">
+1011799                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+田川 拓海 　火:8:40-9:55　人文社会学系棟 A613                                                        <br>
+                                                                <span class="officehour-address">
+23050893                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+山村 崇斗 　                                                        <br>
+                                                                <span class="officehour-address">
+23051711                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+黄 賢暻 　メールにて要予約、人文社会学系棟 B408 　                                                        <br>
+                                                                <span class="officehour-address">
+100002953                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+今田 水穂 　                                                        <br>
+                                                                <span class="officehour-address">
+1002941                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>

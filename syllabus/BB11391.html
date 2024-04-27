@@ -1,0 +1,542 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2024/BB11391/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+              最終更新日：2024/03/29
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+BB11391        </span>&nbsp;
+        <span id="title">
+コミュニケーション論        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    1.0 単位,
+            </span>
+            <span id="grade">
+                    2・3 年次,
+            </span>
+            <span id="timetable">
+春AB 火2            </span>
+            <br>
+            <span id="assignments">
+海後 宗男            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+この授業では、コミュニケーション・プロセスに関する知見を、応用できるようになることを目的とする。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+AC64301, BB11401の単位取得者は履修できない。<BR>西暦奇数年度開講。<BR>AC64E01と同一。<BR>対面        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+「批判的・創造的思考力」「データ・情報リテラシー」「広い視野と国際性」「文化事象の理解力」に関連する。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標（学修成果）</h2>
+                <p id="style">
+広い視野と国際性の上に立つメディア研究の批判的・創造的思考力・データ・情報リテラシーについて学習する。また 文化事象の理解力の養成に不可欠な思考する力を見につけつつ、履修者自身の問題意識を深める。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+実証的研究, メディア, コミュニケーション, 科学的手法                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+コミュニケーション論の研究について学習します。この授業では、コミュニケーション研究に関連する様々な文献を読み、ディスカッションをすることによって、コミュニケーション研究方法や理論等を学習する。コミュニケーション研究への理解を深める。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+オリエンテーション                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+コミュニケーション論の基礎<BR><BR>「情報とコミュニケーションに関する考察」篠田、磯野1996<BR>https://ci.nii.ac.jp/naid/110000473255<BR><BR>「情報リテラシーとメディア・リテラシー 」篠田、本郷、本村1998<BR>https://ci.nii.ac.jp/naid/110000473281<BR><BR>「ディスコミュニケーションに関する考察」磯野1998<BR>https://ci.nii.ac.jp/naid/110000473280                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+シャノン ウィーバー<BR><BR>コミュニケーションによる自己組織化<BR>正村 俊之<BR>社会学評論 <BR>40 巻 (1989) 2 号 121-136,249 <BR>公開日: 2009/11/11<BR>DOI https://doi.org/10.4057/jsr.40.121<BR><BR>基礎情報学(FI)研究会のめざすもの<BR>西垣 通<BR>情報システム学会誌 <BR>10 巻 (2014) 1 号 31-33 <BR>公開日: 2017/06/08<BR>DOI https://doi.org/10.19014/jissj.10.1_31<BR><BR>政治学とサイバネティクス<BR>山川 雄巳<BR>年報政治学 <BR>31 巻 (1980) 77-109 <BR>公開日: 2009/12/21<BR>DOI https://doi.org/10.7218/nenpouseijigaku1953.31.0_77                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+意味論とオズグッド<BR><BR>セマンティック・ディファレンシャル法(SD法)の可能性と今後の課題<BR>市原 茂<BR>人間工学 <BR>45 巻 (2009) 5 号 263-269 <BR>公開日: 2010/12/03<BR>DOI https://doi.org/10.5100/jje.45.263<BR><BR>ハイダー バランス理論<BR>政治家とジャーナリストの関係を検証するための試み(&lt;特集&gt;マス・メディア批判の軸をめぐって)<BR>金山 勉<BR>マス・コミュニケーション研究 <BR>57 巻 (2000) 50-64,215 <BR>公開日: 2017/10/06<BR>DOI https://doi.org/10.24460/mscom.57.0_50                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+認知不協和	説得的コミュニケーション<BR><BR>説得的コミュニケーションの受容に関する実験的研究(&lt;特集&gt;マスコミの受容行動)<BR>萩原 滋<BR>新聞学評論 <BR>26 巻 (1977) 48-55 <BR>公開日: 2017/10/06<BR>DOI https://doi.org/10.24460/shinbungaku.26.0_48<BR><BR>精緻化見込みモデル<BR><BR>説得的コミュニケーションの情報処理における2重過程&times;2層モデル(&lt;特集&gt;ITとマーケティング)<BR>澁谷 覚<BR>日本情報経営学会誌 <BR>30 巻 (2010) 4 号 69-80 <BR>公開日: 2017/08/07<BR>DOI https://doi.org/10.20627/jsim.30.4_69                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+プライバシー<BR>プライバシー意識がプライバシーを感じる内容,理由に与える影響<BR>太幡 直也, 佐藤 広英<BR>パーソナリティ研究 <BR>18 巻 (2010) 3 号 241-243 <BR>公開日: 2010/04/28<BR>DOI https://doi.org/10.2132/personality.18.241<BR><BR>プライバシー意識とプライバシーの捉え方の関係<BR>佐藤 広英, 太幡 直也<BR>パーソナリティ研究 <BR>19 巻 (2011) 3 号 281-283 <BR>公開日: 2011/06/23<BR>DOI https://doi.org/10.2132/personality.19.281<BR><BR>ウソ<BR>弁明としてのウソが利益とコストの評価に及ぼす影響<BR>菊地 史倫, 佐藤 拓, 阿部 恒之, 仁平 義明<BR>感情心理学研究 <BR>16 巻 (2009) 3 号 220-228 <BR>公開日: 2009/03/19<BR>DOI https://doi.org/10.4092/jsre.16.220                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+異文化コミュニケーション論・ガディクンスト<BR>日本コミュニケーション学会九州支部 <BR>http://www.caj1971.com/~kyushu/KCS_03_Panel_Yoshitake.pdf<BR><BR>コミュニケーション教育は可能か<BR>守崎 誠一<BR>日本コミュニケーション研究 <BR>44 巻 (2015) 1 号 37-45 <BR>公開日: 2017/05/17<BR>DOI https://doi.org/10.20698/comm.44.1_37                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+産業界のニーズに傾倒したコミュニケーション教育の現状と課題<BR>石橋 嘉一<BR>原稿種別: 論文<BR>44 巻 (2015) 1 号 p. 47-56<BR>公開日: 2017/05/17 <BR>DOIhttps://doi.org/10.20698/comm.44.1_47<BR><BR><BR>対人心理学研究の最前線 (第4回) コミュニケーションの内と外<BR>木村 昌紀<BR>繊維製品消費科学 <BR>49 巻 (2008) 6 号 388-394 <BR>公開日: 2010/09/30<BR>DOI https://doi.org/10.11419/senshoshi1960.49.388<BR><BR><BR>他分野とコミュニケーション教育を語る意義:医療福祉分野で求められる「コミュニケーション力」をめぐって<BR>五十嵐 紀子<BR>原稿種別: 論文<BR>44 巻 (2015) 1 号 p. 7-15<BR>公開日: 2017/05/17 <BR>DOIhttps://doi.org/10.20698/comm.44.1_7                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+組織におけるファシリテーションに関する探索的研究 : メンバーの自律および協働はいかにして「促進」されるか<BR>池田 章子<BR>原稿種別: 論文<BR>44 巻 (2015) 1 号 p. 85-106<BR>公開日: 2017/05/17 <BR>DOIhttps://doi.org/10.20698/comm.44.1_85<BR><BR><BR>これからの「統計」の話をしよう : 日本のコミュニケーション研究者のための最先端手法案内<BR>松永 正樹<BR>原稿種別: 本文<BR>40 巻 (2012) p. 55-85<BR>公開日: 2017/11/30 <BR>DOIhttps://doi.org/10.20698/hcr.40.0_55                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+総括                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+各自学術論文をデータベース等からダウンロードして、読む情報機器環境をもっていること。<BR>実証研究の方法(仮説検証・統計分析を用いた研究方法)に関する授業の過去の履修や体験等が望ましい。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+課題・報告の提出状況（50％）と期末試験（50％）による評価。学習態度とマナーも重視する。<BR>尚、「事前課題」と「授業活動報告」の提出が期限内にされていることが、第2回目の授業から評価対象となる。いかなる理由があっても、第2回目以降から履修した人の評価は相応にマイナスとなる(就職活動中でも課題未提出は、減点対象になる)。特に4年生はこの点理解した上で履修すること。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+授業の事前・事後に課題提出があるため、授業時間外での準備や授業後の課題提出が成績に関連するため、その時間を確保することが必要になる。事前に指示している論文等を読んでいない学生は他の学生の迷惑になるため、減点対象とする。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+上記各回に指示した通りである。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
+                <div id="topics">
+                        <p id="pretopics">
+開講時に指示。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
+                    <p id="style">
+・オフィスアワーは事前アポしてください。<BR>・受講に関しまして、以下のことを守ってください:1)授業中に私語をしない、2)無断で早退しない、3)授業中に、授業に関係ない物を使用しない、4)無断で携帯電話等、授業に関係のない電子機器を使用しない、5)他の学生と協調し、調和を乱さない、6)迷惑行為をしない。これら事項に反する行為がありましたら、即時退室と成績の減点になります。<BR>・卒業年度の学生(4年生以上)は履修する前に必ず担当教員と相談すること。                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>
