@@ -1,0 +1,744 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2023/01NA024/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+              最終更新日：2023/04/14
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+01NA024        </span>&nbsp;
+        <span id="title">
+民事訴訟法I        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    3.0 単位,
+            </span>
+            <span id="grade">
+                    1 年次,
+            </span>
+            <span id="timetable">
+秋ABC 随時            </span>
+            <br>
+            <span id="assignments">
+田村 陽子            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+民事紛争の公権的解決手段を定める民事訴訟法の判決手続全般について講義する。民事訴訟の制度的な仕組みを概観したうえで、その手続の基本原則や構造について、それぞれの適用事例を示しながら講義の中で解説する。<BR> 第1に、民事訴訟法の基礎を学んでもらうこと、第2に、2年次以降に予定されている民事訴訟実務の基礎、民事法演習の受講に必要な技術的知識を獲得することが目標である。<BR> この科目で、全国統一教育基準であるコア・カリキュラムの民事訴訟法部分については一通り扱う予定であるが、実際の項目との対応関係については、順番が異なり煩雑になるので、別途冊子を配布し、そこで具体的項目の対応関係も示すので、授業の予習・復習教材として扱う。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+民事訴訟法は、平成8年に大改正があり、現行法はその内容を中心とする。なお、平成15年、16年にも中規模の改正があった。<BR>0AFL029と同一。<BR>オンライン(オンデマンド型)        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+リーガルマインド                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標（学修成果）</h2>
+                <p id="style">
+民事訴訟の制度的な仕組みを概観したうえで、その手続の基本原則や構造について、それぞれの適用事例を示しながら解説する。第1に、民事訴訟法の基礎を学んでもらうこと、第2に、2年次以降に予定されている民事訴訟実務の基礎、民事法演習の受講に必要な技術的知識を獲得すること、が目標である。この科目で、全国統一教育基準であるコア・カリキュラムの民事訴訟法部分については一通り扱う予定であるが、実際の項目との対応関係については、順番が異なり煩雑になるので、別途冊子を配布し、そこで具体的項目の対応関係も示すので、授業の予習・復習教材として扱う。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+非訟と訴訟, 管轄, 当事者, 当事者適格, 当事者能力, 訴訟能力, 争点整理, 送達, 訴訟係属, 処分権主義, 弁論主義, 釈明権, 証明責任, 証拠, 判決効, 既判力, 訴訟上の和解, 請求の放棄・認諾, 複数訴訟, 上訴, 再審                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+訴えの提起から判決までが主な内容である。上訴・再審、保全手続や強制執行などは簡単に触れる。具体的な設例もなるべく使いながら、質疑応答形式を取り入れた講義を行う。<BR>                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+民事紛争と民事訴訟<BR> 世の中のトラブルや争いがすべて訴訟になるわけではない。「民事」の「訴訟」には、それなりの意味がある。刑事訴訟と民事訴訟の区別、民事訴訟法の目的、裁判制度の構造などに触れる。また参考書等の説明も併せて行う。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+非訟<BR> 訴訟と非訟の区別。非訟における手続保障に触れる。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+管轄<BR> どこの裁判所に訴えを提起すればよいのか(管轄)について学習する。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+訴訟当事者と確定<BR> 誰でも訴訟当事者になれるものではない。また誰が訴訟当事者なのかよく分からないということもある。講学上、当事者概念と当事者の確定と呼ばれる問題を扱う。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+当事者能力・訴訟能力<BR> 訴訟当事者に要求される「能力」として当事者能力と訴訟能力について解説する。権利能力なき社団の扱いにも触れる。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6回                                        </th>
+                                        <td>
+当事者能力・訴訟能力<BR> 訴訟当事者に要求される「能力」として当事者能力と訴訟能力について解説する。権利能力なき社団の扱いにも触れる。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第7回                                        </th>
+                                        <td>
+訴訟要件と訴えの利益<BR> 訴訟要件と考えられるものを概観し、訴えの利益を検討する。あわせて却下と棄却の区別も説明する。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第8回                                        </th>
+                                        <td>
+三種の訴え<BR> 訴えの利益が実際の訴訟でどのように発現してくるかを給付訴訟・確認訴訟・形成訴訟の訴訟3類型に照らして検討する。ここでは、将来の給付の訴え、過去の法律関係の確認、形式的形成訴訟などについて検討する。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第9回                                        </th>
+                                        <td>
+訴訟上の請求・訴訟物理論<BR> 民事訴訟の基本構造をなす「訴え」「請求」という言葉について学習する。訴訟物論の対立について学ぶ。訴訟物とはなにか。訴訟物理論の対立とその背景にある訴訟観を明らかにし、その差異を学ぶ。また、訴えの併合や重複訴訟の禁止についても学ぶ。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第10回                                        </th>
+                                        <td>
+訴状提出の効果・処分権主義(1)<BR> 訴状とはなにか、訴状提出の効果を概説し、その上で処分権主義とは何かを学習する。<BR> 申立主義の中身と一部請求の問題を扱う。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第11回                                        </th>
+                                        <td>
+処分権主義(2)<BR> この回は、処分権主義のうち一部認容判決、債務不存在確認の問題などを解説する。当事者による訴訟の終了は後半に予定。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第12回                                        </th>
+                                        <td>
+口頭弁論とその準備<BR> 口頭弁論とは何か、争点整理手続とはなにか、それぞれの手続の特徴について学ぶ。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第13回                                        </th>
+                                        <td>
+本案審理の原則<BR> 本案審理である口頭弁論の原則には、口頭主義、弁論主義、公開主義、直接主義、双方審尋主義などがあることを学ぶ。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第14回                                        </th>
+                                        <td>
+弁論主義<BR> 弁論主義の意味・内容、主張責任、主要事実と間接事実の区別を解説する。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第15回                                        </th>
+                                        <td>
+自白と釈明権<BR> 弁論主義の中身として位置づけられている自白、および裁判所の釈明権について学ぶ。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第16回                                        </th>
+                                        <td>
+訴訟手続の停止と欠席当事者の扱い<BR> 訴訟手続が停止する場合について学ぶ。また、欠席当事者の取り扱いについても学ぶ。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第17回                                        </th>
+                                        <td>
+事実認定と証明責任<BR> 事実認定の意味、証拠や証明に関する概念、自由心証主義、推定、証明責任の考え方を学ぶ。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第18回                                        </th>
+                                        <td>
+証拠方法と文書提出命令<BR> 証拠方法の種類、違法収集証拠についての考え方について解説する。書証の扱い(二段の推定の意味)、文書提出命令の制度について学ぶ。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第19回                                        </th>
+                                        <td>
+判決の効力―客観的範囲(1)<BR> 判決とは何か、判決の効力を概観し、既判力論の中の客観的範囲の問題を解説する。相殺の抗弁に関する例外も取り扱う。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第20回                                        </th>
+                                        <td>
+判決の効力―客観的範囲(2)<BR> 第20回に引き続き、判決とは何か、判決の効力を概観し、既判力論の中の客観的範囲の問題を解説する。相殺の抗弁に関する例外も取り扱う。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第21回                                        </th>
+                                        <td>
+判決の効力―時的限界<BR> 判決の効力を判断する前提として基準時の問題を取りあげる。形成権の行使と既判力の効果の問題がよく言及されているが、既判力の作用につき解説する。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第22回                                        </th>
+                                        <td>
+判決の効力―主観的範囲(1)<BR> 判決の効力としての主観的範囲の問題を扱う。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第23回                                        </th>
+                                        <td>
+判決の効力―主観的範囲(2)<BR> 第22回に引き続き、判決の効力としての主観的範囲の問題を扱う。反射効理論についても触れる。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第24回                                        </th>
+                                        <td>
+当事者の訴訟行為<BR> 訴訟行為と私法行為の関係について学ぶ。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第25回                                        </th>
+                                        <td>
+判決によらない訴訟の終了<BR> 当事者による訴訟の終了である、訴えの取り下げ、認諾、訴訟上の和解を解説する。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第26回                                        </th>
+                                        <td>
+上訴・再審<BR> 判決につき当事者に不服がある場合の対応としての上訴(控訴・上告、抗告)を扱う。<BR> また、判決確定後の例外的な不服申立手段としての再審を扱う。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第27回                                        </th>
+                                        <td>
+多数当事者訴訟1<BR> 多数当事者訴訟の取り扱いの基本原則を確認し、固有必要的共同訴訟の問題を解説する。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第28回                                        </th>
+                                        <td>
+多数当事者訴訟2<BR> 当事者が死亡したり合併したりした場合(当然承継)、争いの対象の譲渡(係争物の譲渡)など、社会的な当事者が変動した場合の訴訟上の取り扱いを解説する。中断、引受承継、参加承継など。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第29回                                        </th>
+                                        <td>
+共同訴訟参加・独立当事者参加<BR> 既存の訴訟に、関係する第三者が原告・被告どちらにも与しない立場で当事者として参加する制度である。日本独特の制度であるが、沿革に不明な点が多いので、意義・特徴を確認する。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第30回                                        </th>
+                                        <td>
+訴訟参加<BR> 第三者が既存訴訟に参加する場合を概観し、その中でこの回は補助参加についての議論を解説する。参加的効力と既判力の違い、訴訟告知の効果にも触れる。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+民法科目をなるべくしっかり履修しておくことが望ましい。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+期末試験の点を50%、レポートや小テストを50%とし、総合評価を行う。レポートや小テストの回数は、皆さんの学修の進捗状況を見て変更することがある。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+予習段階では、授業レジュメや基本書を中心に、専門用語の意義・内容を確認して授業にのぞむようにすること。復習については、同様の資料を基に、授業で学んだことを                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+1 教科書は、以下の2冊。<BR>&nbsp;&nbsp;1和田吉弘『基礎からわかる民事訴訟法【第2版】』(商事法務、2022年)(判例中心で分かりやすいので、基本書とする)<BR>&nbsp;&nbsp;2長谷部由起子ほか『基礎演習 民事訴訟法[第3版]』(弘文堂、2018年)(解説が良いので、やはり必携。レポートの課題はここからも出題予定。)<BR>2 以下のいずれかの判例集を持つこと。(判例の知識はどのみち必須)<BR>&nbsp;&nbsp;・『判例講義民事訴訟法』(弘文堂、2019年)(詳しくて分かりやすいのでおすすめ)<BR>&nbsp;&nbsp;・『民事訴訟法判例インデックス』(商事法務、2014年)(事案と結論だけ把握するには良い)<BR>&nbsp;&nbsp;・ 別冊ジュリスト『民事訴訟法判例百選[第６版]』(有斐閣、2023年)（夏ごろ出版予定。）<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* 講義には、配布レジュメ、補助資料および六法を必ず持参すること。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                        <p id="pretopics">
+オンデマンド講義であるが、リアルタイム復習会と会場での小テストを、①10月23日（月）7・8限、②11月24日（金）8限、③&rsquo;24年1月5日（金）8限に実施予定。別途、11月20日月曜レポート第1回分（基礎演設問７～９）締め切り。&rsquo;24.1月20日（土）7限オンライン質問会。1月22日レポート第2回分（基礎演設問14、15、16、24）締め切り1月22日（月）の予定。<BR>小テスト、レポート、質問会の案内などは、基本的にmanabaを通じて行う。                        </p>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
+                <div id="topics">
+                        <p id="pretopics">
+水曜日17時~18時                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
+                    <p id="style">
+なるべく民法科目は履修しておくことがのぞましい。                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>
