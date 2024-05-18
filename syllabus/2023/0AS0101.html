@@ -1,0 +1,655 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    body {background-color:#FFFFFF  !important ;color:#383838 !important;font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC !important;font-size:128%;background-color:#dbdbff !important;}
+h2 {margin:1em 0px;font-weight:bold;background-color:#ffe0ff !important;}
+p, table {margin:1em;}
+th, td {padding-right:5px;border: 1px #808080 solid;background-color:#e5e5ff !important;}
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2023/0AS0101/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+              最終更新日：2023/10/13
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+0AS0101        </span>&nbsp;
+        <span id="title">
+教育学理論研究        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    1.0 単位,
+            </span>
+            <span id="grade">
+                    1 年次,
+            </span>
+            <span id="timetable">
+春C 月1,2            </span>
+            <br>
+            <span id="assignments">
+濱田 博文, 佐藤 博志, 上田 孝典, 藤井 穂高, 平井 悠介, タスタンベコワ クアニシ, 京免 徹雄, 德永 智子, 田中 正弘, 藤田 晃之            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+教育学研究を展開する上で、関連する学問分野の理論的な基礎を学ぶ。「教育」に関わるテーマを研究するのは教育学だけでなく、関連領域として様々な学問分野においてもテーマとなりえる。そのため、様々な学問分野における基礎的な理論や方法について学ぶことで、教育学研究を進めるための視野を広げ、複眼的な視点から教育学を研究する素養を身に付ける。具体的には、教育をテーマにした以下の学問分野における研究から教育学への知見を導く。教育学と思想・哲学/歴史学/外国研究/地方行政学/政治学/社会学/経営学/法律学/文化人類学/福祉学の各学問分野が検討される。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義        </p>
+    </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業形態の補足</h2>
+                <p id="style">
+各教員がテーマ別に講義を行う。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+1. 知の活用力<BR>2. マネジメント能力<BR>3. コミュニケーション能力<BR>4. チームワーク力<BR>5. 国際性<BR>6. 教育課題発見能力<BR>7. 教育内容探究能力<BR>8. 教育学的分析能力<BR>9. 教育課題解決能力                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
+                <p id="style">
+教育学研究を行う上での基盤を形成する、関連した学問領域についての理論的な基礎と方法を学ぶ。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+教育哲学、教育史学、比較教育学、教育政治学、文化人類学、教育社会学、教育経営学、教育法学、高等教育学、社会福祉学                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+担当教員が、それぞれテーマを設定し講義を行う。<BR>下記の教員が交代で担当する。<BR>(平井悠介、上田孝典、タスタンベコワ・クアニシ、佐藤博志、京免徹雄、徳永智子、浜田博文、藤井穂高、田中正弘、藤田晃之)                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+教育学と思想・哲学                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+平井 悠介                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+教育学と歴史学                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+上田 孝典                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+教育学と外国研究                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+タスタンベコワ クアニシ                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+教育学と政治学                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+佐藤 博志                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+教育学と文化人類学                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+京免 徹雄                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6回                                        </th>
+                                        <td>
+教育学と社会学                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+德永 智子                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第7回                                        </th>
+                                        <td>
+教育学と経営学                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+濱田 博文                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第8回                                        </th>
+                                        <td>
+教育学と法律学                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+藤井 穂高                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第9回                                        </th>
+                                        <td>
+教育学と大学研究                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+田中 正弘                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第10回                                        </th>
+                                        <td>
+教育学と社会福祉学                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+藤田 晃之                                         </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+履修規定に準ずる。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+・各回で課されるレポート（10回分）:100%<BR>・各授業時の学習成果物により、到達目標を十分満たしたと判断された場合、合格(A+, A, B, C)のいずれかの評価となる。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+事前学習、事後学習を含め、150分の授業外における学修を要する。<BR>事前学習においては、次の授業で扱うテーマについて、基本事項に関する情報を収集する。<BR>事後学習においては、授業内容の振り返りを行った上で、課された課題に対して、授業をふまえて解答をまとめる。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+適宜、授業で指示をする。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">参考書</h2>
+                <div id="topics">
+                        <p id="pretopics">
+適宜、授業で指示をする。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                    </table>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+濱田 博文 　                                                        <br>
+                                                                <span class="officehour-address">
+1001347                                                                </span>
+                                                                <a href="http://www.human.tsukuba.ac.jp/~hamada/" target="_blank">http://www.human.tsukuba.ac.jp/~hamada/</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+佐藤 博志 　                                                        <br>
+                                                                <span class="officehour-address">
+1002182                                                                </span>
+                                                                <a href="http://www.human.tsukuba.ac.jp/education/institute/staff/name/%E4%BD%90%E8%97%A4%E5%8D%9A%E5%BF%97" target="_blank">http://www.human.tsukuba.ac.jp/education/institute/staff/name/%E4%BD%90%E8%97%A4%E5%8D%9A%E5%BF%97</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+上田 孝典 　                                                        <br>
+                                                                <span class="officehour-address">
+1002351                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+藤井 穂高 　                                                        <br>
+                                                                <span class="officehour-address">
+1007312                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+平井 悠介 　水曜日11:30-13:00　（事前にアポイントを取ってください。）　人間系学系棟A506                                                        <br>
+                                                                <span class="officehour-address">
+100001798                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+タスタンベコワ クアニシ 　                                                        <br>
+                                                                <span class="officehour-address">
+23051819                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+京免 徹雄 　                                                        <br>
+                                                                <span class="officehour-address">
+100002905                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+德永 智子 　水曜11:30-13(事前のアポイントをとること)　                                                        <br>
+                                                                <span class="officehour-address">
+100002807                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+田中 正弘 　                                                        <br>
+                                                                <span class="officehour-address">
+100002011                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+藤田 晃之 　                                                        <br>
+                                                                <span class="officehour-address">
+1001459                                                                </span>
+                                                                <a href="http://www.human.tsukuba.ac.jp/~tfujita/" target="_blank">http://www.human.tsukuba.ac.jp/~tfujita/</a>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
+                    <p id="style">
+狭い学問領域だけでなく、幅広い学問分野に目を向けること。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">欠席の場合の措置</h2>
+                    <p id="style">
+授業で指示をする。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+                    <p id="style">
+TF・TAの配置予定はない。                    </p>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>
