@@ -1,0 +1,491 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2023/0ANB404/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+              最終更新日：2023/05/26
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+0ANB404        </span>&nbsp;
+        <span id="title">
+農林社会経済学演習IIF        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    2.0 単位,
+            </span>
+            <span id="grade">
+                    2 年次,
+            </span>
+            <span id="timetable">
+秋ABC 応談            </span>
+            <br>
+            <span id="assignments">
+首藤 久人, 茂野 隆一, 氏家 清和, 興梠 克久, 立花 敏, 飯山 みゆき, 石崎 涼子            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+農林社会経済学関連分野の優れた著書や学術論文等を収集・講読し、その中から適切な文献を選び論文紹介を行い、そのテーマに関する討論を通してその研究成果を適切に評価する能力を養う。また、その討論を通して科学的・論理的思考能力を身につけ、自らの視点で考察し、新たな研究課題や研究手法を発見・考案する。授業は、下記の計画で進める。<BR> (1) 研究テーマに関する討論により、論文内容の理解を深める。(2) 科学的・論理的思考能力を身につける。(3) 自らの視点で考察し、新たな研究課題や研究手法を発見・考案する。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+研究室        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+演習        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+農林社会経済学関連分野において、学習している課題に関連する著書や学術文献等を広く収集・講読して内容をまとめ、発表・議論することで、博士前期課程2年次秋学期の学習に必要とされる、農林社会経済学に関する専門知識ならびに基礎的知識を習得することができる。<BR><BR>生物資源科学学位プログラム<BR>汎用コンピテンス：マネージメント能力、コミュニケーション能力、チームワーク力、国際性<BR>専門コンピテンス：専門性、基礎的知識<BR>                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
+                <p id="style">
+農林社会経済学の関連分野において、学習している課題に関連する著書や学術文献等を広く収集・講読し、既存研究の内容を理解して専門知識を学び、課題に関する最新の研究動向を把握すると共に、自ら専門的な視点で研究文献を評価する。特に博士前期課程2年次秋学期に行うこの科目では、演習における議論を主体的に進め、活性化することを求める。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+農業, 林業, 経営体, 社会経済学                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+第1回 農林社会経済学関連分野の研究に関連した専門的な課題に関する発表と議論により文献内容の理解を深める1 課題に関する文献のデータベースを利用した調査と紹介文献の選択<BR>第2回 農林社会経済学関連分野の研究に関連した専門的な課題に関する発表と議論により文献内容の理解を深める2 課題に関する文献のデータベースの検討による紹介文献の選択<BR>第3回 農林社会経済学関連分野の研究に関連した専門的な課題に関する発表と議論により文献内容の理解を深める3 紹介する文献内容の整理とまとめ<BR>第4回 農林社会経済学関連分野の研究に関連した専門的な課題に関する発表と議論により文献内容の理解を深める4 紹介する文献内容から得られる政策インプリケーションの理解<BR>第5回 農林社会経済学関連分野の研究に関連した専門的な課題に関する発表と議論により文献内容の理解を深める5 グループにおける精読した文献の紹介と討議<BR>第6回 農林社会経済学関連分野の研究に関連した専門的な課題に関する発表と議論により科学的・論理的思考能力を身につける1 対象課題の検討<BR>第7回 農林社会経済学関連分野の研究に関連した専門的な課題に関する発表と議論により科学的・論理的思考能力を身につける2 対象課題に関する文献調査<BR>第8回 農林社会経済学関連分野の研究に関連した専門的な課題に関する発表と議論により科学的・論理的思考能力を身につける3 文献調査から討論する文献の選択と内容のまとめ<BR>第9回 農農林社会経済学関連分野の研究に関連した専門的な課題に関する発表と議論により科学的・論理的思考能力を身につける4 まとめた文献内容の発表と討論<BR>第10回 農林社会経済学関連分野の研究に関連した専門的な課題に関する発表と議論により科学的・論理的思考能力を身につける5 討論の内容をまとめ、文献の理解を深める<BR>第11回 農林社会経済学の関連分野の文献として求められる要素の理解1 課題に関連する文献の調査と対象文献の選定と構成要素抽出のための精読<BR>                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+・                                        </th>
+                                        <td>
+第1回 農林社会経済学関連分野の研究に関連した専門的な課題に関する発表と議論により文献内容の理解を深める1 課題に関する文献のデータベースを利用した調査と紹介文献の選択<BR>第2回 農林社会経済学関連分野の研究に関連した専門的な課題に関する発表と議論により文献内容の理解を深める2 課題に関する文献のデータベースの検討による紹介文献の選択<BR>第3回 農林社会経済学関連分野の研究に関連した専門的な課題に関する発表と議論により文献内容の理解を深める3 紹介する文献内容の整理とまとめ<BR>第4回 農林社会経済学関連分野の研究に関連した専門的な課題に関する発表と議論により文献内容の理解を深める4 紹介する文献内容から得られる政策インプリケーションの理解<BR>第5回 農林社会経済学関連分野の研究に関連した専門的な課題に関する発表と議論により文献内容の理解を深める5 グループにおける精読した文献の紹介と討議<BR>第6回 農林社会経済学関連分野の研究に関連した専門的な課題に関する発表と議論により科学的・論理的思考能力を身につける1 対象課題の検討<BR>第7回 農林社会経済学関連分野の研究に関連した専門的な課題に関する発表と議論により科学的・論理的思考能力を身につける2 対象課題に関する文献調査<BR>第8回 農林社会経済学関連分野の研究に関連した専門的な課題に関する発表と議論により科学的・論理的思考能力を身につける3 文献調査から討論する文献の選択と内容のまとめ<BR>第9回 農農林社会経済学関連分野の研究に関連した専門的な課題に関する発表と議論により科学的・論理的思考能力を身につける4 まとめた文献内容の発表と討論<BR>第10回 農林社会経済学関連分野の研究に関連した専門的な課題に関する発表と議論により科学的・論理的思考能力を身につける5 討論の内容をまとめ、文献の理解を深める<BR>第11回 農林社会経済学の関連分野の文献として求められる要素の理解1 課題に関連する文献の調査と対象文献の選定と構成要素抽出のための精読<BR>第12回 農林社会経済学の関連分野の文献として求められる要素の理解2 文献から抽出した要素の整理<BR>第13回 農林社会経済学の関連分野の文献として求められる要素の理解3 整理した要素に関する専門知識の習得<BR>第14回 農林社会経済学の関連分野の文献として求められる要素の理解4 調査文献の内容と文献の結論に至る構成要素と論旨に関するまとめ<BR>第15回 農林社会経済学の関連分野の文献として求められる要素の理解5 グループにおけるまとめの発表と討議<BR>第16回 農林社会経済学関連分野の研究に関連した専門的な課題に関する発表と議論により、自らの視点で考察し新たな課題や手法を発見・考案する1 対象文献の調査と選定<BR>第17回 農林社会経済学関連分野の研究に関連した専門的な課題に関する発表と議論により、自らの視点で考察し新たな課題や手法を発見・考案する2 選定した対象文献の内容を理解し評価を行うための精読と既往の文献との比較検討<BR>第18回 農林社会経済学関連分野の研究に関連した専門的な課題に関する発表と議論により、自らの視点で考察し新たな課題や手法を発見・考案する3 対象文献の内容と評価のまとめ<BR>第19回 農林社会経済学関連分野の研究に関連した専門的な課題に関する発表と議論により、自らの視点で考察し新たな課題や手法を発見・考案する4 グループにおけるまとめの発表と討議<BR>第20回 農林社会経済学関連分野の研究に関連した専門的な課題に関する発表と議論により、自らの視点で考察し新たな課題や手法を発見・考案する5 発表と討議内容を振り返ってまとめ、文献の適切な評価について理解を深める                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                        <p id="pretopics">
+第12回 農林社会経済学の関連分野の文献として求められる要素の理解2 文献から抽出した要素の整理<BR>第13回 農林社会経済学の関連分野の文献として求められる要素の理解3 整理した要素に関する専門知識の習得<BR>第14回 農林社会経済学の関連分野の文献として求められる要素の理解4 調査文献の内容と文献の結論に至る構成要素と論旨に関するまとめ<BR>第15回 農林社会経済学の関連分野の文献として求められる要素の理解5 グループにおけるまとめの発表と討議<BR>第16回 農林社会経済学関連分野の研究に関連した専門的な課題に関する発表と議論により、自らの視点で考察し新たな課題や手法を発見・考案する1 対象文献の調査と選定<BR>第17回 農林社会経済学関連分野の研究に関連した専門的な課題に関する発表と議論により、自らの視点で考察し新たな課題や手法を発見・考案する2 選定した対象文献の内容を理解し評価を行うための精読と既往の文献との比較検討<BR>第18回 農林社会経済学関連分野の研究に関連した専門的な課題に関する発表と議論により、自らの視点で考察し新たな課題や手法を発見・考案する3 対象文献の内容と評価のまとめ<BR>第19回 農林社会経済学関連分野の研究に関連した専門的な課題に関する発表と議論により、自らの視点で考察し新たな課題や手法を発見・考案する4 グループにおけるまとめの発表と討議<BR>第20回 農林社会経済学関連分野の研究に関連した専門的な課題に関する発表と議論により、自らの視点で考察し新たな課題や手法を発見・考案する5 発表と討議内容を振り返ってまとめ、文献の適切な評価について理解を深める                        </p>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+農林社会経済学領域の学生で、事前に面談で承諾を受けた者に限る。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+著書や学術論文等を紹介する発表内容(60%)、発表内容に関する討論(40%)から理解度と考察力・展開力を評価し、成績評価を行う。評点は、筑波大学が定める到達目標に対する達成度に基づいて行う。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+関連する論文の熟読とまとめ。発表資料の作成。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+特に指定せず講義の中で紹介、配付する。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                        <p id="pretopics">
+事前に連絡しアポイントメントを取ること。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+首藤 久人 　                                                        <br>
+                                                                <span class="officehour-address">
+1002134                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+茂野 隆一 　                                                        <br>
+                                                                <span class="officehour-address">
+1001077                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+氏家 清和 　                                                        <br>
+                                                                <span class="officehour-address">
+1002543                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+興梠 克久 　                                                        <br>
+                                                                <span class="officehour-address">
+1001915                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+立花 敏 　事前にメールなどで連絡すること。　                                                        <br>
+                                                                <span class="officehour-address">
+1001676                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>
