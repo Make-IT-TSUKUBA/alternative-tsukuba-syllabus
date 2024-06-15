@@ -208,6 +208,50 @@ $(window).on('load', function() {
     }
     // 変換した文字列を設定
     $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
 });
 </script>
 <body>
@@ -227,7 +271,7 @@ th, td {padding-right:5px;border: 1px #808080 solid;background-color:#e5e5ff;}
         <td align="left">
             
             
-              <a href="/syllabi/2023/01PC325/jpn/0/">
+              <a href="/syllabi/2024/01PC325/jpn/0/">
                   最新版のシラバスを表示
               </a>
           
@@ -237,6 +281,8 @@ th, td {padding-right:5px;border: 1px #808080 solid;background-color:#e5e5ff;}
   </tr>
   <tr>
       <td align="right">
+          
+              最終更新日：2024/04/26
           
             &nbsp;
         </td>
@@ -278,7 +324,7 @@ The MBA-IB Speaker series aims to provide students with the opportunity to learn
             
         </h2>
         <p id="note">
-Guest Speakers (Organized by<BR>西暦奇数年度開講。<BR>0AFM612と同一。<BR>英語で授業。<BR>対面        </p>
+Guest Speakers (Organized by<BR>西暦偶数年度開講。<BR>0AFM612と同一。<BR>英語で授業。<BR>対面        </p>
     </div>
     <div id="note-heading-note">
         <h2 id="note-heading">
@@ -316,7 +362,7 @@ Guest speech, class discussion, and case study.                </p>
                     <h2 id="style-heading">Class Schedule</h2>
                 <div id="topics">
                         <p id="pretopics">
-January 7 	A guest speaker and the topics will be announced later.<BR>January 14	A guest speaker and the topics will be announced later.<BR>January 21	A guest speaker and the topics will be announced later.<BR>January 28	A guest speaker and the topics will be announced later.<BR>February 18	A guest speaker and the topics will be announced later.<BR>                        </p>
+January 11 	A guest speaker and the topics will be announced later.<BR>January 16	A guest speaker and the topics will be announced later.<BR>January 25	A guest speaker and the topics will be announced later.<BR>February 8	A guest speaker and the topics will be announced later.<BR>February 15	A guest speaker and the topics will be announced later.<BR>                        </p>
                     <div id="topic-assignments">
                         <table summary="topsics">
                         </table>
@@ -402,6 +448,9 @@ Check the notice posted on mailing list and on bulletin board on Manaba. Instruc
 
 
 
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
 
 </body>
 </html>
