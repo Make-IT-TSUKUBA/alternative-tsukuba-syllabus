@@ -1,0 +1,467 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2024/0ATV110/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+              最終更新日：2024/04/10
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+0ATV110        </span>&nbsp;
+        <span id="title">
+Global Learning: Heritage, Creativity and Art（グローバルに学ぶヘリテージ，創造性とアート）        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    1.0 単位,
+            </span>
+            <span id="grade">
+                    1・2 年次,
+            </span>
+            <span id="timetable">
+春C 木2,3            </span>
+            <br>
+            <span id="assignments">
+池田 真利子, 上北 恭史, 松井 敏也, 渡 和由, 大谷 悠, Gross Anne            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+本科目は，「Creativity and Art（創造性とアート）」をキーワードとし，ヘリテージ学に関わる文理横断的な学術・学際的研究視点を日本語と外国語で学ぶことにある。そこで，「Designing Heritage Research」のテーマと関連付け，各年の学生／教員の関心や時流に合ったテーマを設定し，当該テーマに関する研究視点や事例，モデル等を学生と議論しながら解説する。2024年度は，ヘリテージ学の「活用」に焦点を当て，地理学（地域空間変容・都市文化・地域フィールド調査）・建築デザイン学（材料・構造・デザイン史・フィールド科学）・保存科学（行政協働・問題解決型科学・科学的調査手法）を中核とし，上述の学域以外の研究者ら（メディア学・建築学・デザイン学等）も交えて，概念・理論から実践的事例まで幅広く紹介し，議論を行う。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+英語運用能力が求められる。（日本語話者向け）<BR>対面<BR>対面(オンライン併用型)<BR>オンライン(同時双方向型)<BR>2024年度は対面講義（教室で国内外の大学とオンラインで接続する可能性はある）を予定する。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義及び演習        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+【汎用コンピテンス】①知の創成力，②マネージメント能力，③コミュニケーション能力，⑤国際性<BR>【専門コンピテンス】①共通知の展開力，②専門知の創造力，③共通技能の展開力，⑤国際的開発力<BR>                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標（学修成果）</h2>
+                <p id="style">
+　全10回の講義により，文理横断的視点と学際的科学知を学修できる。また，「知りたいこと」の手段として英語・外国語を使用することで，自然な国際的感覚が身につく。これにより，「グローバル・ヘリテージスタディーズ（世界遺産学）」の新しいフレームワークを考究することができる。<BR>A total of ten lectures will enable students to acquire a cross-disciplinary perspective and interdisciplinary scientific knowledge. In addition, the pur-pose-driven use of English will enable students to acquire a natural sense of internationalism. This allows for the consideration of a new framework for 'Global Heritage Studies' (Sekaiisan-gaku).                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+オンライン講義，活用，地域資源，再評価，産業遺産，私有地，空間，リユース＆リサイクル，持続可能性，文理横断，学際的科学的知, 学内留学<BR>Online lectures, utilisation, local resources, revaluation, industrial heritage, private property, space, reuse and recycling, sustainability, cross-literacy, interdisciplinary scientific knowledge, interdisciplinary study abroad                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+ハ）ハイブリット，対）対面のみ（オンライン対応困難）<BR>参考）2023年度<BR><BR>①7/4 4限&nbsp;&nbsp;対）ガイダンス（池田・上北・松井）<BR>②7/4 5限&nbsp;&nbsp;対）本講義の学術的視点・展開可能性（池田・上北・松井）<BR>③7/11　対）渡先生（プレイスメイキングとヘリテージ，デッサン演習）<BR>④7/11　対）Gross先生（昭和遺産とギャラリー）<BR>⑤7/18　ハ）大谷先生（ライプチヒの日本の家と広島・尾道の空き家実践）<BR>⑥7/18　ハ）BTU<BR>⑦7/25　ハ）情報実習①<BR>⑧7/25　ハ）情報実習①<BR>⑨8/1&nbsp;&nbsp;　対）学生発表・議論<BR>⑩8/1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;対）学生発表・議論<BR><BR>(c) Hybrid, vs.) face-to-face only (online support difficult)<BR>Cf) 2023<BR><BR>①7/4 4th period (vs.) Guidance (Ikeda, Ueikita, Matsui)<BR>②7/4 5th period (vs.) Academic perspectives and development potential of this lecture (Ikeda, Ueikita, Matsui)<BR>③7/11 (vs.) Dr. Wataru (Placemaking and Heritage, Drawing Exercise)<BR>④7/11 vs.) Dr. Gross (Showa Heritage and Galleries)<BR>⑤7/18 c) Dr. Otani (Japanese houses in Leipzig and vacant house practice in Hiroshima and Onomichi)<BR>⑥7/18 c) BTU<BR>⑦7/25 c) Information practice (1)<BR>⑧7/25 c) Information practice (1)<BR>⑨8/1 vs.) Student presentation/discussion<BR>⑩8/1 vs. 8/1) Student presentations/discussions                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+0ATV111「Global Project: Designing Heritage Research(グローバルに考究するヘリテージ研究デザイン)」と併せて履修すること（演習科目は履修人数の制限有り）/ Must be taken in conjunction with 0ATV111 &quot;Global Project: Designing Heritage Research&quot; (limited number of students in the seminar)                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+各回に提示される課題（レポート）と最終発表（100%）を対象とし，授業で示された内容等の理解度や，授業目標への到達状況に基づき，学位Pの成績評価基準と照合しながら評価する。なお，出席数が全体の7割に達しない場合には，発表を行っても成績評価の対象としない。なお，出席数が全体の7割に達しない場合には，発表を行っても成績評価の対象としない。<BR>The assignment (report) and final presentation (100%) presented in each session are subject to evaluation based on the level of understanding of the content, etc. presented in class and the degree of achievement towards the class objectives, while checking them against the grading criteria in degree P. In cases where attendance does not reach 70% of the total number of students, the presentation is not subject to grading. In cases where attendance does not reach 70% of the total number of students, the presentation is not subject to grading.                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+本科目は１単位の設定であり，合計20時間程度の授業があるが，授業外の予習・復習や発表資料の作成等で10時間分相当の学修が必要となる。<BR>授業外では，各回の講義内容を復習し，専門用語の意味等を理解する，あるいは，授業で扱ったテーマ・事象に関して，ニュースや学術ジャーナル等で最新の情報等を収集すること。<BR>This subject is set up as a 1-credit course, with a total of about 20 hours of class time, but 10 hours' worth of study is required outside of class for preparation, review and preparation of presentation materials.<BR>Outside of class, students should review the content of each lecture, understand the meaning of technical terms, etc., and collect the latest information on the themes and events covered in class from news, academic journals, etc.<BR><BR>                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+地理学・建築学・保存科学で使用される概念説明や基礎的な人文・科学知識に関して，分からない場合には各自で文献に当たり，理解に努めて下さい。なお，0ATV111「Global Project: Designing Heritage Research(グローバルに考究するヘリテージ研究デザイン)」では，『都市／建築フィールドワーク・メソッド』（INAX出版），『東京裏返し』（集英社新書），『江戸東京の都市組織に挑む』（彰国社），『近代建築遺産の継承』（鹿島出版会），『無形学へ　かたちになる前の思考』（水曜社）等を参考書とします。別途，必要な場合には，各回で指示・配布します。<BR>If you are unsure about conceptual explanations or basic humanities and scientific knowledge used in geography, architecture or conservation science, please consult the literature on your own to help you understand. For 0ATV111 'Global Project: Designing Heritage Research', please refer to 'Urban/Architectural Fieldwork Methods' (INAX Publishing), 'Tokyo Urabashira' (Shueisha Shinsho), 'The City of Edo Tokyo. The &quot;Urban/Architectural Fieldwork Methods&quot; (INAX Publishing), &quot;Tokyo Urabashira&quot; (Shueisha Shinsho), &quot;Edo Tokyo no Toshiki-zokusei wo Chosen&quot; (Shokoku-sha), &quot;Kindai Kenchiku Heritage Succession&quot; (Kajima Publishing), &quot;Mugaku Gaku he Katachi ni Narumae no Shiko&quot; (Suiyosha) and other reference books. If separately required, these will be given and distributed at each session.<BR>                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
+                <div id="topics">
+                        <p id="pretopics">
+研究相談希望時には，下記を参考に，必ず事前にアポイントメントを取ること。<BR>When you wish to have a research consultation, be sure to make an appointment in advance, referring to the following.                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+池田 真利子 　                                                        <br>
+                                                                <span class="officehour-address">
+100001571                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
+                    <p id="style">
+［2024年度］講義は，日本語・英語双方を用いて実施予定です。<BR>［The lectures [in 2024] will be given in both Japanese and English.                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
+                    <p id="style">
+該当なし<BR>NA                    </p>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>
