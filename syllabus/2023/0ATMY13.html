@@ -1,0 +1,543 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2023/0ATMY13/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+0ATMY13        </span>&nbsp;
+        <span id="title">
+看護科学特別研究        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    4.0 単位,
+            </span>
+            <span id="grade">
+                    2 年次,
+            </span>
+            <span id="timetable">
+通年 応談            </span>
+            <br>
+            <span id="assignments">
+看護教務委員長, 柴山 大賀, 安梅 勅江, 岡山 久代, 山海 知子, 日高 紀久江, 水野 道代, 岩田 裕子, 大宮 朋子, 目 麻里子, 水野 智美, 涌水 理恵, 阿部 吉樹, 伊藤 智子, 工藤 理恵, 菅谷 智一, 福澤 利江子, 山下 美智代            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+看護科学に関する各専門研究領域で、各専任教員が指導学生に対して、科学的視点から文献検索、研究計画書の作成、研究デザイン、データ収集、データ解析、結果の考察、倫理的配慮など一連のプロセスを通して、修士論文または特定の課題についての研究成果の作成に向けた研究指導を行う。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+主専攻必修科目<BR>対面        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+演習        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+知の活用力 10%<BR><BR>科学的根拠に基づく探究力 20%	<BR>専門領域における実践力 15%	<BR>看護の学際性	15%<BR>看護の感性と倫理観 20%	<BR>国際通用性を目指す研究・実践力 20%                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標（学修成果）</h2>
+                <p id="style">
+自らの専門研究領域における研究活動に取り組み、看護科学の領域において社会的学術的意義の高い修士論文または特定の課題についての研究の成果が作成できる。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+研究計画の立案, 研究論文の作成                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+研究領域・指導教員調べ<BR>入学時『専門研究領域・指導教員調べ』を学位プログラム事務に提出<BR><BR>研究領域・指導教員決定<BR>1年次4月第3金曜『専門研究領域、指導教員届』を学位プログラム事務に提出 <BR>研究領域・指導教員を決定<BR><BR>研究計画評価委員推薦書提出<BR>1年次3月第3金曜 指導教員と要相談 <BR>『研究計画評価委員推薦書』を学位プログラム事務に提出<BR><BR>研究計画書提出<BR>2年次4月第3木曜『研究計画評価願』に研究計画書を添えて学位プログラム事務に提出<BR>各研究計画評価を実施する評価委員を決定。各教員は研究計画の内容を評価する<BR><BR>研究計画発表会<BR>2年次4月第4木曜『学位論文審査に関する申合せ・第3項』及び『研究計画発表会の開催方法』を参考に研究計画を発表<BR>評価委員は発表会の場で、学生が適切に研究を遂行できる様に示唆を与える<BR><BR>倫理審査申請<BR>随時 該当する筑波大学の倫理審査委員会に審査申請を行い審査を受ける<BR><BR>施設等への調査依頼<BR>必要に応じて随時 <BR><BR>学位論文審査の願い出<BR>2年次12月10日(土日の場合は直近の金曜)『修士論文』3部に、『学位論文審査願』2部、『論文概要、論文目録、履歴書』各5部、『学位論文指導者確認書』2部、『論文公正に関する確認書』2部、『電子媒体に保存された学位論文』1部、『倫理審査結果通知書(写)』2部(ヒトを対象とした研究の場合)を添え、指定された時間までに提出する<BR>審査の願い出を受けて、看護科学学位プログラム教育会議にて修士論文審査委員会を設置する<BR><BR>修士論文発表会<BR>2年次12月第3木曜 『学位論文(修士)発表会の手引き』を参考に、論文内容を発表<BR><BR>修士論文予備審査<BR>発表会終了後より開始 審査委員会による論文の予備審査<BR>審査委員会の主査は審査日時・場所を決定次第、学生に周知する。審査後主査は『修士論文予備審査報告書』を作成し、学位プログラムリーダーに提出<BR><BR>修士論文の審査及び最終試験<BR>2年次1月より開始 審査委員会による論文の審査及び最終試験(口頭試問を含む)を受ける<BR>審査委員会の主査は審査日時・場所を決定し、1月中に学生に周知する。審査後主査は『修士学位論文審査報告書』を作成し、看護科学学位プログラム教育会議に提出<BR><BR>看護科学学位プログラム教育会議における合否に関する審議<BR>2年次2月初旬 主査より審査結果の報告を受ける<BR>看護科学学位プログラム教育会議にて、審査委員会による論文審査の合否判定案に基づき、修士論文審査等の合否判定を行い、学位プログラムリーダーを通じて学術院長に報告する<BR><BR>課程修了認定に係る判定<BR>2年次2月中旬 学術院長は、学術院運営委員会において、課程修了認定の審査を行う<BR><BR>製本論文提出<BR>2年次2月下旬 『修士論文の製本の手引き』に従って製本し、1部を学位プログラム事務に提出<BR><BR>学位授与式<BR>2年次3月下旬 学位記を授与する                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+修士論文または特定の課題についての研究成果を提出するための要件は以下のとおりである。<BR>1.当該学位プログラムに 2 年以上在学していること。<BR>2.学位プログラムが定める履修方法に沿って2年次終了までに 30単位以上を取得(見込みを含む)し ていること。<BR>3.研究計画書を提出し、研究計画評価、筑波大学の研究倫理審査(ヒトを対象にする場合)を受けていること。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+修士論文または特定の課題についての研究の成果の審査および最終試験の合格 60%<BR>研究活動への取り組み状況 40%<BR><BR>研究活動への取り組み状況は、当該学生の指導教員が以下の視点で評価する。<BR>1. 自らの研究課題を設定できる。<BR>2. 研究課題に応じた研究計画を立案できる。<BR>3. 研究計画に基づき主体的に研究活動ができる。<BR>4. 研究成果を論文としてまとめることができる。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+積極的に指導教員(主・副指導教員)とコンタクトをとり、よりよい指導を受けられるよう自ら働きかける。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+必要があれば各担当教員が別途提示する。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+柴山 大賀 　4B棟 412号室                                                        <br>
+                                                                <span class="officehour-address">
+1002375                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+安梅 勅江 　                                                        <br>
+                                                                <span class="officehour-address">
+1001292                                                                </span>
+                                                                <a href="http://plaza.umin.ac.jp/~empower/anme/" target="_blank">http://plaza.umin.ac.jp/~empower/anme/</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+岡山 久代 　                                                        <br>
+                                                                <span class="officehour-address">
+100001664                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+山海 知子 　4B棟506室 内線3151                                                        <br>
+                                                                <span class="officehour-address">
+1001363                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+日高 紀久江 　                                                        <br>
+                                                                <span class="officehour-address">
+1001797                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+水野 道代 　4B棟505号室                                                        <br>
+                                                                <span class="officehour-address">
+1001472                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+大宮 朋子 　4B棟　410研究室                                                        <br>
+                                                                <span class="officehour-address">
+100001778                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+涌水 理恵 　                                                        <br>
+                                                                <span class="officehour-address">
+1002601                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+阿部 吉樹 　メールでの問い合わせは随時。訪室する際は事前にメールで連絡すること。　4B棟 218室                                                        <br>
+                                                                <span class="officehour-address">
+23050938                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+菅谷 智一 　4B 218室                                                        <br>
+                                                                <span class="officehour-address">
+100002534                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+福澤 利江子 　                                                        <br>
+                                                                <span class="officehour-address">
+100000980                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+山下 美智代 　4B棟217号室                                                        <br>
+                                                                <span class="officehour-address">
+100000852                                                                </span>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
+                    <p id="style">
+わからないことは、その場で質問し解決すること。<BR>審査にかかる提出物の締め切りは17時とする。<BR>課程修了判定を受けるためには、授業計画に記載の全プロセスを終了していることが必要。                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>

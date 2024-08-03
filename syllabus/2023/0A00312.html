@@ -1,0 +1,454 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2023/0A00312/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+0A00312        </span>&nbsp;
+        <span id="title">
+地球規模課題と国際社会: 海洋環境変動と生命        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    1.0 単位,
+            </span>
+            <span id="grade">
+                    1 - 5 年次,
+            </span>
+            <span id="timetable">
+春季休業中 集中            </span>
+            <br>
+            <span id="assignments">
+稲葉 一男, 白岩 善博, 柴 小菊            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+国連が提起した「持続可能な開発目標(SDGs)」に密接に関わる国際社会が直面する課題を理解し、大学院生各人に国際社会の一員としての自覚を誘起することで、高等教育を受けた者が果たすべき役割と責任について熟考させることを目的とする。<BR> 当科目は「持続可能な開発目標(SDGs)」のうち、Goal 13 &amp; 14に関連した、国際社会が直面する「海洋環境変動と生命」について取り扱う。CO2濃度上昇に関わる地球規模環境課題、海洋酸性化、地球温暖化による生物影響、北極・南極の海氷融解などの個別課題を含めて講義することにより、国際社会で活躍できる能力と人間力を養う。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+英語で授業。<BR>対面<BR>場所：下田臨海実験センター        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+修士レベル<BR> 知の活用力・コミュニケーション能力・国際性<BR>博士レベル<BR> 知の創成力・コミュニケーション能力・国際性                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
+                <p id="style">
+・多国籍、多様な講師陣を迎え、当該問題の学術的アプローチの紹介、講師陣や他の受講者との議論により国際社会が抱える地球規模課題について認識を深めること。<BR>・国連が提示しているSDGs (Sustainable Developmental Goals)を題材として学内外の人たちとの意見交換や議論が十分できるようになること。(SDGSに関連した講義を受けることによる国際性の向上をもたらす学修成果)<BR>・大学院共通科目「国際インターンシップ」や「国際研究プロジェクト」で海外渡航の支援に応募し、採択されるだけの能力を身につけること。(英語によるコミュニケーション力や活用力の向上をもたらす学修成果)<BR>・国際社会の一員としての自覚を誘起することで、高等教育を受けた者が果たすべき役割と責任について熟考する経験を通して、国連や国際機関へのキャリアパスにチャレンジできる能力を身に着けるきっかけを得ること。<BR>・「持続可能な開発目標(SDGs)」のうち、Goal 13 &amp; 14に関連する国際社会が直面する「海洋環境変動と生命」について理解を深めることにより、科学的根拠を基に地球環境問題を論ずることができる能力を身につけること。(最先端の研究に基づいたトップクラスの講義により専門分野に接続する知識の獲得につながる学修成果)<BR>・CO2濃度上昇に関わる地球規模環境課題、海洋酸性化、地球温暖化による生物影響、北極・南極の海氷融解などの地球レベルの環境問題に関する認識が深まることにより、国際社会で活躍できる能力と人間力を養うこと。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+CO2濃度上昇, 地球規模環境課題, 海洋酸性化, 地球温暖化, 生物影響, 北極・南極海氷融解, Atmospheric CO2 increase, Global environmental issues, Ocean acidification, global warming, Biological effects, Melting of Arctic and Antarctic icebergs                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+「授業の進行方法」<BR> ・パワーポイントやDVDの視覚教材を活用し、それに沿って進める 。原則としてハンドアウトは配布しないので、講義の際 は講師の講義に注力し、聴講に集中するよう求める。不明の点は随時挙手により質問を投げかけることを推奨する。尚 、Q&amp;Aや総合討論の時間を設けるので、理解できなかった点を補足する方法や追加の学習のための文献等の紹介を丁寧に行う。<BR><BR>「学生に対するアドバイス」<BR> ・講義中、詳細なノートを取ることで、ヒアリングに集中できないことが生じないように注意すること。<BR> ・質問、意見表明を積極的に行うトレーニングの場として位置づけて授業に臨むこと。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                        <p id="pretopics">
+Day 1<BR>1.&nbsp;&nbsp;&nbsp;&nbsp;本科目全体のガイダンスとポイントについて解説し、学びの視点について解説する。<BR>2.&nbsp;&nbsp;国際的な環境問題、解決課題に関する総合的な情報提供を行う。<BR>3.&nbsp;&nbsp;海洋における一次生産生物の重要性、海洋における役割、海洋環境に与えるインパクトに開設し、海洋環境の変動が植物プランクトンの増殖や物質生産に与える影響についての学術的知見を紹介する。<BR>4.&nbsp;&nbsp;質疑応答を通して、海洋植物プランクトン研究と地球環境とのかかわりについて議論する。<BR>5.海洋研究と海洋研究施設、世界の海洋研究のホットスポットの研究活動について紹介するとともに、それらの研究機関が果たす役割について論ずる。<BR>6.SDGsの最重要課題の一つである海洋酸性化に関して、下田臨海実験センターにおける研究成果を基に、世界の現状紹介を講義するとともに、生物コミュニティーへの海洋酸性化の影響について解説する。<BR>7.質疑応答を通して、海洋研究と海洋環境保全に関する関連性について議論する。<BR><BR>Day 2<BR>1.海洋研究の歴史と海洋環境の変動に関する総合的なガイダンスを行う。<BR>2.北西大西洋の研究成果を基に、海洋生命体と人間活動に焦点を合わせて、地球レベルの海洋環境変動影響について講義する。<BR>3.質疑応答を通して、海洋環境変動と人間活動との関連性について議論する。<BR>4.二酸化炭素濃度が上昇する世界における海洋環境、特にサンゴ礁に及ぼす影響について講師自身の研究成果を含めて学術的研究成果を基に議論する。<BR>5.地球環境・海洋環境の変動に対する大型海藻・微細藻類(植物プランクトン)などの光合成生物の役割と相互作用について、自身の研究成果を基に論ずる。<BR>6.質疑応答を通して、海洋一次生産と海洋CO2濃度の変動との相関、海洋環境保全に関する関連性について議論する。                        </p>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+・受講にあたって、学年や専門性は問わない。<BR>・英語力向上と国際感覚を研磨する高いモチベーションを有すること<BR>High motivation for improving own English skills and global sense will be required. <BR>・多様な学年と多国籍な受講生の中で、自分の意見を臆することなく披露するような高いモチベーションを有すること。<BR>・国連などを中心とする国際問題や国際社会に課せられた課題についての情報に日頃から関心を持って取り組んでいること。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+1評価方法:授業中の積極的な発言実績、授業後に提出するレポート(授業において課題を提示する)とその内容の質を基に評価する。<BR>2割合:発言(30%)、レポート(自主レポートを含む)(70%)<BR>3評価基準:授業の到達目標に掲げた内容に関するレポート課題に対して、単に授業内容からの抜粋にとどまらず、自ら積極的に関連の学術的資料(学術論文、インターネットの公開記事、政府、国際機関、学術団体が提供するポリシーペーパーなど)を調査し、文献を正確に引用することによって記載されたレポートか否かについて精査し、評価する。授業中の積極的な発言の回数(積極性)をレポートの評点と合わせて総合評価(A+~D)を成績とする。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+・授業における講師の講義を聴講し、問題点を理解することに集中すること。<BR>・積極的に質疑を行い、積極的に議論に参加する。<BR>・紹介される学術情報・文献について、授業後、他の文献やインターネットの活用により自ら補足情報にアクセスすること。<BR>・自主的に、学内外における関連のシンポジウムやセミナーへの出席とレポート提出を推奨する。その実行に対しては、成績評価においてレポートの評価項目において加点する。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+・国連のSustainable Developmental Goals (SDGs)のウエブサイト <BR> (1) https://www.unglobalcompact.org/what-is-gc/our-work/sustainable-development (UN Global Compact)<BR> (2) https://www.unic.or.jp/(国際連合広報センター)<BR> (3) https://www.osi.tsukuba.ac.jp/sdgs/(筑波大学-Driving Sustainable Development)<BR><BR>・筑波大学下田臨海実験センターのJason Hall-Spencer教授とBen Harvey助教は、海洋酸性化が生態系ならびに生態系サービスに広く影響を及ぼしうることを示しました。この知見は、実験室下における影響試験と酸性化された自然の生態系での観察結果に基づきます。この結果は現在、Emerging Topics in Life Sciences誌に掲載され、オンラインで見ることができます。<BR>-Visit following web site for a scientific article on &ldquo;Ocean Acidification&rdquo; published by Prof. Jason Hall-Spence and Ben Harvey (Professors at Shimoda Marine Research Center)<BR>&rArr;Ocean acidification impacts on coastal ecosystem services due to habitat degradation&nbsp;&nbsp;<BR>&nbsp;&nbsp;&lt; https://doi.org/10.1042/ETLS20180117&gt;                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th>
+1. Kazuo Inaba and Jason Hall-Spencer Japanese Marine Life (Springer)                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                        <p id="pretopics">
+Via e-mail to Prof. INABA for General Question on this class (kinaba@shimoda.tsukuba.ac.jp)                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
+                    <p id="style">
+12月から３月の間に２日間集中で英語で授業（対面）、コロナウイルスの状況によりオンラインの可能性があるが詳細は日程とともに追って連絡する。Course is planned to be open from December to March, given in English and basically on site. In the case that it is difficult to hold on-site, it will be on-line. Information will appear on manaba and updated due to the COVID situation.<BR>                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+                    <p id="style">
+・「地球規模課題と国際社会」シリーズの他の科目は本科目と密接に関係することから、それらの科目の履修を推奨する。                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>
