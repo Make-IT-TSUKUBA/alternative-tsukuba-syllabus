@@ -1,0 +1,652 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    body {background-color:#FFFFFF  !important ;color:#383838 !important;font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC !important;font-size:128%;background-color:#dbdbff !important;}
+h2 {margin:1em 0px;font-weight:bold;background-color:#ffe0ff !important;}
+p, table {margin:1em;}
+th, td {padding-right:5px;border: 1px #808080 solid;background-color:#e5e5ff !important;}
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2024/0AS0307/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+              最終更新日：2024/03/22
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+0AS0307        </span>&nbsp;
+        <span id="title">
+芸術制作の舞台裏        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    1.0 単位,
+            </span>
+            <span id="grade">
+                    1・2 年次,
+            </span>
+            <span id="timetable">
+秋AB NT            </span>
+            <br>
+            <span id="assignments">
+大原 央聡, 仏山 輝美, 福満 正志郎, 星 美加, 田島 直樹, 程塚 敏明, 山本 浩之, 諏訪 智美, 宮坂 慎司, 川島 史也            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+どのように芸術作品は生まれてくるのか。洋画、版画、日本画、彫塑の各分野における作家が、完成作品からは直接的に見ることができない制作過程、制作の裏側、併せて表現内容や表現方法、構想、技法材料について論述する。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+美術技法論-1,2の履修者は本科目を履修できません。<BR>本科目を履修した場合、美術技法論-1,2は履修できないので注意して下さい。<BR>特に芸術学学位プログラム洋画、版画、日本画、彫塑領域の学生は本科目ではなく、美術技法論-1,2の履修を推奨します。<BR>西暦偶数年度開講。<BR>オンライン(オンデマンド型)        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義        </p>
+    </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業形態の補足</h2>
+                <p id="style">
+オンライン（オンデマンド型）<BR>西暦偶数年度開講                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+学術院専門<BR>1. 研究力                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
+                <p id="style">
+芸術作品鑑賞を積極的に行い、芸術表現について興味を持つとともに、洋画、版画、日本画、彫塑における行為（制作）と結果（作品）の関係についての学びを作品理解に役立てることができるようになる。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+芸術制作　表現&nbsp;&nbsp;絵画&nbsp;&nbsp;洋画　日本画　版画　技法&nbsp;&nbsp;構想 デジタルツール&nbsp;&nbsp;版　刷り&nbsp;&nbsp;美術技法 日本画 表現技法 マチエール 裏彩色 もみ紙技法 金属箔 彩色技法 彫塑 彫刻 塑造 モデリング 石膏技法 ブロンズ                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+10名の教員によるオムニバス授業を行う                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+絵画表現様式の展開&mdash;描画プロセスにみる絵画空間の膨張と収縮―<BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+仏山 輝美                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+洋画制作における構想と制作プロセスについて<BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+福満 正志郎                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+日本画制作における表現と技法の関係について<BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+程塚 敏明                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+絵画制作におけるデジタルツール活用の可能性 <BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+星 美加                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+銅版画制作における「刷り」の効果について <BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+田島 直樹                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6回                                        </th>
+                                        <td>
+岩絵具による表現技法について（彩色技法）<BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+山本 浩之                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第7回                                        </th>
+                                        <td>
+日本の絵画における遊魚表現と技法の変遷<BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+諏訪 智美                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第8回                                        </th>
+                                        <td>
+モデリングによる彫塑技法について1(石膏技法・テラコッタ技法)	<BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+宮坂 慎司                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第9回                                        </th>
+                                        <td>
+モデリングによる彫塑技法について2(ブロンズ技法・乾漆技法)	<BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+川島 史也                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第10回                                        </th>
+                                        <td>
+カービングによる彫塑技法について<BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+大原 央聡                                         </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+美術技法論-1,2の履修者は本科目を履修することはできない。<BR>本科目を履修した場合、美術技法論-1,2は履修できない。<BR>特に芸術学学位プログラム洋画、版画、日本画、彫塑領域の学生は本科目ではなく、美術技法論-1,2の履修を推奨。<BR>                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+1．評価方法：毎時の授業に関するレポートを課題とし、本授業の達成目標への到達度を評価する。<BR>2．割合：毎時の活動状況（毎回のレポートを含む）100%<BR>3．評価基準：到達目標に挙げた各項目について、毎時の活動状況(レポートを含む）について評価し満点の60%以上を合格とする。なお、A+〜Cの評点は採点された点数に基づいて行う。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+本授業は1単位の設定であり、合計15時間の授業がありますが、授業外での学修について(復習やレポート作成等で)合計30時間が必要となります。<BR>授業で取り上げられた各時代の作家やその技法等について資料収集を行い、各自の研究の参考とすること。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+適宜必要に応じて指示する。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">参考書</h2>
+                <div id="topics">
+                        <p id="pretopics">
+適宜必要に応じて指示する。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                    </table>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                        <p id="pretopics">
+事前連絡をしてから訪問すること。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+大原 央聡 　事前連絡をしてから訪問すること　芸術学系棟B135                                                        <br>
+                                                                <span class="officehour-address">
+1001759                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+仏山 輝美 　                                                        <br>
+                                                                <span class="officehour-address">
+1001561                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+福満 正志郎 　事前に連絡すること　                                                        <br>
+                                                                <span class="officehour-address">
+1001333                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+星 美加 　                                                        <br>
+                                                                <span class="officehour-address">
+100000606                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+田島 直樹 　                                                        <br>
+                                                                <span class="officehour-address">
+1001931                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+程塚 敏明 　メールにて事前調整の上、訪問すること。　芸術系棟B638                                                        <br>
+                                                                <span class="officehour-address">
+1001630                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+山本 浩之 　メールにて事前調整の上、訪問すること。　芸術系棟B642                                                        <br>
+                                                                <span class="officehour-address">
+1002230                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+諏訪 智美 　訪問時は事前にメールでアポイントをとってください。　芸術学系棟B643(仮)                                                        <br>
+                                                                <span class="officehour-address">
+100004456                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+宮坂 慎司 　                                                        <br>
+                                                                <span class="officehour-address">
+100002552                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+川島 史也 　事前連絡をしてから訪問すること　                                                        <br>
+                                                                <span class="officehour-address">
+100003995                                                                </span>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
+                    <p id="style">
+特になし                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">欠席の場合の措置</h2>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+                    <p id="style">
+未定                    </p>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>

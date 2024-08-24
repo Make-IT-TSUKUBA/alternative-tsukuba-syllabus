@@ -1,0 +1,438 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2023/0A00409/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+0A00409        </span>&nbsp;
+        <span id="title">
+博士のキャリアパス        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    1.0 単位,
+            </span>
+            <span id="grade">
+                    1 - 5 年次,
+            </span>
+            <span id="timetable">
+春C 集中            </span>
+            <br>
+            <span id="assignments">
+谷口 孝介            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+目的意識をもって博士課程を過ごしてもらうために、博士後期課程修了後の多様なキャリアパスについて考察する。社会における博士の役割について取り上げるとともに、博士課程で習得することが期待される能力は何か、汎用的スキルやマネジメント能力等について紹介する。キャリアデザインについても言及する。<BR>アカデミアや産業界等で活躍する博士人材をゲストスピーカーとして招き、多様な博士のキャリアパスを考察するための生きた事例を提供する。講義のほか、グループディスカッションやクラス討論を通して、自らのキャリアパスと大学院時代のすごし方についての考えを深める。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+7/8, 7/22<BR>対面        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+演習        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+修士レベル<BR> 知の活用力・マネジメント能力<BR>博士レベル<BR> 知の創成力・マネジメント能力・リーダーシップ力                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
+                <p id="style">
+1.博士の意義、博士の就職、博士の仕事の実態を理解する。<BR>2.大学院生が自身のキャリアについて考察できるようになる。<BR>3.大学院で何を学ぶか、どうすごすか、どのような能力を獲得すべきか、について自省できるようになる。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+博士, 博士と社会, キャリアデザイン, 能力開発, ポスドク                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+講義はパワーポイント等を使用したスライド投影やプリントを配布し、それらに沿って進める。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                        <p id="pretopics">
+●1日目<BR>・【講義1】博士になったらどう生きる?<BR>・【講義2】データで見る博士の実態<BR>・【講義3】大学教員の仕事を考える<BR>・【講義4】産業界でのキャリアパスを考える<BR>●2日目 <BR>・【講義5】博士学生の日常を紐解く<BR>・【講義6】「博士で身につく力」を考える<BR>・【トークセッション】ゲストスピーカーとの交流会<BR>・【総合討論】<BR>※2日とも適宜グループディスカッションを織り交ぜて進行する。                        </p>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+・コロナ対応について<BR>諸事情により対面での出席が難しい場合は、後日配信する動画を視聴のうえ、出席表(レスポン)と宿題のレポートを提出してください。<BR>・聴講者について<BR>履修登録者以外の聴講も歓迎いたします。聴講希望者には後日動画を配信しますので、希望者は登録フォーム（https://forms.office.com/r/YmmKFUiZsd）にて登録してください。<BR>視聴方法などは改めてご連絡します。<BR>【視聴期間】7/18～(予定)<BR>                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+1評価方法:宿題及び最終レポート。また、授業への積極的な参加(質疑応答への参加度など)は成績評価に加味する。<BR>2割合:宿題30%、最終レポート70%<BR>3評価基準:授業中に課す宿題及びレポート、授業への参加状況で総合的に評価する。最終レポートについて満点の60%以上をとること、宿題について満点の60%以上をとること。<BR>最終レポートに関しては、自らのキャリアについて自省できるようになること、レポートの内容が到達目標に照らして十分であることを評価する。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+講義(65%)、演習(35%)<BR>1日目の授業後に宿題を課すので、2日目に小レポートとして提出すること                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+講義の際に資料配布                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                        <p id="pretopics">
+随時(事前にメールでアポイントを取ること) <BR>career@un.tsukuba.ac.jp                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
+                    <p id="style">
+履修締切は6月23日（金）です。ヒューマンエンパワーメント推進局（BHE）では本科目以外にも大学院生向けのキャリアデザインに関するセミナーなどや、キャリアカウンセリング(個別)を用意している。状況に応じて参加することを推奨する。<BR>BHEキャリア支援チームのHPでは、博士後期課程以降の学生のためのキャリア・就職に関する情報を掲載している。<BR>http://syushoku.sec.tsukuba.ac.jp/career/                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>

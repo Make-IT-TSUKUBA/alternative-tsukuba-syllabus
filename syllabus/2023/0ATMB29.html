@@ -1,0 +1,697 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2023/0ATMB29/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+0ATMB29        </span>&nbsp;
+        <span id="title">
+地域母子保健論        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    2.0 単位,
+            </span>
+            <span id="grade">
+                    1 年次,
+            </span>
+            <span id="timetable">
+春A 火3,4            </span>
+            <br>
+            <span id="assignments">
+岩田 裕子, 大宮 朋子, 福澤 利江子            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+地域母子の現状を把握し母子への支援や政策的課題を研究的視点から考察する。多職種と連携・協働しながら、地域における子育て世代を包括的に支援する能力や、産後4 か月程度までの母子のアセスメントを行う能力を養う。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+助産師課程専攻学生必修<BR>対面        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+マネージメント能力<BR>専門領域における実践力                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標（学修成果）</h2>
+                <p id="style">
+地域母子の現状を把握し母子への支援や政策的課題を研究的視点から考察できることで、地域母子保健活動におけるマネージメント能力を養う。さらに、地域母子保健における専門領域の実践力を高める。<BR><BR>1.概念および意義を説明できる<BR>2.我が国の母子保健制度について説明できる<BR>3.我が国における地域母子保健施策と社会背景について説明できる<BR>4.地域母子保健活動の実践方法について学び、実践できるようになる<BR>5.国際協力としての母子保健活動の現状と課題を説明できる<BR>6.グローバル化における母子保健の課題と施策を説明できる<BR>7.地域母子保健における課題を分析し施策を考案できる<BR>8.地域母子保健の課題について研究の視点から検討できる<BR>9.地域母子保健活動の実践を知り、地域連携の必要性を理解できる                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+母子保健 Maternal and Child Health, 地域 Community, 国際 Global, 災害支援Disaster support, 薬物療法Effect of medicine                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+一部のコマにおいて授業形態をe-ラーニングに変更する場合があります。<BR>春A　火曜日3，4限　木曜日3，4限ですが、講師の都合上、変更になっていますので、ご注意ください。<BR>※科目責任者に直接確認の上、履修申請すること                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+4月13日（木）3限：地域母子保健論ガイダンス                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+岩田 裕子                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+4月19日（水）2限：地域母子保健活動における家庭訪問                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+大宮 朋子                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+4月19日（水）3限：家庭訪問先での乳児計測方法の実際                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+岩田 裕子                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+4月19日（水）4限：地域母子保健活動における訪問計画の立て方                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+大宮 朋子                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+4月20日（木）3限：地域母子保健活動における訪問計画の発表                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+大宮 朋子                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6回                                        </th>
+                                        <td>
+4月25日（火）3限：海外の助産・周産期医療（１）                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+福澤 利江子                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第7回                                        </th>
+                                        <td>
+4月25日（火）4限：海外の助産・周産期医療（２）                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+福澤 利江子                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第8回                                        </th>
+                                        <td>
+4月27日（木）3限：産後期の母子の特徴を学ぶ～産後2週間・1ヵ月・4か月（１）                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+岩田 裕子                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第9回                                        </th>
+                                        <td>
+4月27日（木）4限：産後期の母子の特徴を学ぶ～産後2週間・1ヵ月・4か月（２）                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+岩田 裕子                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第10回                                        </th>
+                                        <td>
+5月9日（火）3限：産後期の母子支援の実態調査（１）                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+岩田 裕子                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第11回                                        </th>
+                                        <td>
+5月9日（火）6限：産後期の母子支援の実態調査（２）                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+岩田 裕子                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第12回                                        </th>
+                                        <td>
+5月11日（火）3限：産後期の母子支援の実態調査の発表                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+岩田 裕子                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第13回                                        </th>
+                                        <td>
+5月11日（火）4限：周産期における薬剤使用とその影響【非常勤講師：薬剤師 小西久美】                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+岩田 裕子                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第14回                                        </th>
+                                        <td>
+5月16日（木）3限： グローバル化における母子保健の課題と施策（１）                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+福澤 利江子                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第15回                                        </th>
+                                        <td>
+5月16日（木）4限：グローバル化における母子保健の課題と施策（２）                                         </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+福澤 利江子                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第16回                                        </th>
+                                        <td>
+5月18日（木）3限：助産師に求められる災害支援の実際（１）<BR>【非常勤講師：礒山あけみ】                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+岩田 裕子                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第17回                                        </th>
+                                        <td>
+5月18日（木）4限：助産師に求められる災害支援の実際（２）<BR>【非常勤講師：礒山あけみ】                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+岩田 裕子                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第18回                                        </th>
+                                        <td>
+5月18日（木）5限：地域母子保健と災害                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+岩田 裕子                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第19回                                        </th>
+                                        <td>
+7月27日（木）5限：地域母子保健と地域連携の実際（１）<BR>【ゲストスピーカー：つくば市保健師／場所：未定】                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+大宮 朋子 , 岩田 裕子                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第20回                                        </th>
+                                        <td>
+7月27日（木）6限：地域母子保健と地域連携の実際（２）<BR>【ゲストスピーカー：つくば市保健師／場所：未定】                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+大宮 朋子 , 岩田 裕子                                         </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+なし                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+&lt;評価方法&gt;<BR>1授業内での発表状況および取り組み姿勢:疑問を持ち、研究的視点で発表や質問および課題に臨む姿勢がみられたか。<BR>2レポート課題:地域母子保健における事例を提示し、母子への支援や政策的課題を研究的視点から考察しなさい<BR> A4用紙1枚以内(表紙なし)<BR> 提出期限:2023年5月25日17時<BR> 提出先:ファイル添付で岩田までメールで提出<BR><BR>&lt;配分割合&gt;<BR>1授業内での発表状況および取り組み姿勢:40%<BR>2レポート課題:60%<BR> レポート評価項目<BR>・a~a+:背景がわかりやすく述べられ、問題設定が既存の研究レビューに基づいて明確であり、独創性が見られ、結論には説得力がある<BR>・b:背景の説明と問題設定が適切であり、既存研究のレビューがなされ、明確な結論を導いている<BR>・c:背景と設定が説明され、論旨は理解できるレベルであり結論の間に矛盾はない<BR>・d:背景、設定のいずれかが説明されず、論旨が不明確で結論が唐突である<BR><BR>当科目があげるコンピテンスの習得度を踏まえて評価する。<BR>・講義の参加及びレポート内容においてc評価の場合にはC判定を与える<BR>・2つのコンピテンスのうち1つのコンピテンスが標準的に習得できていると判断されればB判定とする<BR>・2つのコンピテンスが標準的に習得できていると判断されればA判定とする<BR>・2つのコンピテンスが特に優れていると判断されればA+判定とする                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+講義（65％）と演習（35％）を併用する。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+適宜プリントを配布します。したがって、指定テキストはありません。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+岩田 裕子 　                                                        <br>
+                                                                <span class="officehour-address">
+100004748                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+大宮 朋子 　4B棟　410研究室                                                        <br>
+                                                                <span class="officehour-address">
+100001778                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+福澤 利江子 　                                                        <br>
+                                                                <span class="officehour-address">
+100000980                                                                </span>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
+                    <p id="style">
+注1:新型コロナウイルス肺炎の影響などにより，授業日程が変更になる場合があります。<BR>注2:講義形式が変更になる可能性がありますので,その際には連絡致します。                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
+                    <p id="style">
+なし                    </p>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>
