@@ -1,0 +1,578 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2024/HC41031/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+HC41031        </span>&nbsp;
+        <span id="title">
+公衆衛生看護活動方法論        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    4.0 単位,
+            </span>
+            <span id="grade">
+                    4 年次,
+            </span>
+            <span id="timetable">
+春A 集中            </span>
+            <br>
+            <span id="assignments">
+大宮 朋子, 山海 知子, 非常勤講師, 井坂 ゆかり            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+地域で生活している個人および集団、コミュニティの健康を護り、支援する公衆衛生看護活動方法について教授する。公衆衛生看護活動過程、個および集団へのアプローチ方法としての活動手段の理論、技法等を実践的教育方法にて授業する。地域診断方法、地域保健活動計画の策定方法、家庭訪問、健康相談、健康教育の活動方法の各技法等を習得させる。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+看護学類保健師選択学生に限る<BR>4/15-4/26<BR>実務経験教員<BR>対面<BR>日程等詳細は後日通知        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+コミュニケーション能力、データ・情報リテラシー、看護における対象理解、看護の専門知識・技術、看護倫理とケアリング                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
+                <p id="style">
+地域で生活している個人と家族、集団、コミュニティ及び学校及び職域で活動する対象を理解し、彼らの健康を支える保健師の活動方法として必要な知識と技術等を習得する。<BR>公衆衛生看護活動過程である地域診断方法を公的な統計データや質的なデータを用いて指導のもと実施できる。また、地域診断から保健事業計画策定、事業評価方法まで検討することができる。<BR>公衆衛生看護活動の担い手である保健師の活動技法としての家庭訪問、健康相談、健康教育について、その理論、展開方法及び実践的技法等を講義及び演習により学習し、技術を修得する。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+公衆衛生看護, 地域, コミュニティ, 保健師, 地域診断, 家庭訪問, 健康教育, 学校保健, 産業保健                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+基本的に対面の授業とします。オンデマンドとなる場合もあるため、授業予定の周知には留意してください。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+【4月15日(月)2~6限 大宮朋子・山海知子・井坂ゆかり　医学医療系】<BR>2限　公衆衛生看護活動方法の目的公衆衛生看護活動の展開における地域診断<BR>3限　公表データ(e-Stat、人口動態統計)の収集方法とその活用法<BR>4限　地域診断に必要な指標（疫学）の理解と演習<BR>5限　グループワーク①地域診断演習<BR>6限　グループワーク②地域診断演習<BR><BR>---------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+山海 知子 , 大宮 朋子 , 井坂 ゆかり                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+【4月16日(火)2~6限 大宮朋子・山海知子・井坂ゆかり 医学医療系】<BR>地区視診オリエンテーション<BR>2限　グループワーク③地区視診オリ<BR>3限　グループワーク④地区視診、地区診断の分析　地区視診<BR>4限　グループワーク⑤地区視診、地区診断の分析　地区視診<BR>5限　グループワーク⑥地区視診、地区診断の分析　地区視診<BR>6限　グループワーク⑦地区視診、地区診断の分析　地区視診<BR><BR>---------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+大宮 朋子 , 井坂 ゆかり                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+【4月17日(水)2~6限 大宮朋子 ・井坂ゆかり　医学医療系】<BR><BR>家庭訪問<BR>2限　家庭訪問に関する講義・演習①　保健師の家庭訪問とは<BR>3限　家庭訪問に関する講義・演習②　乳児計測<BR>4限　家庭訪問に関する講義・演習③　家庭訪問計画の立て方<BR>5限　産業保健と健康経営（講義）オンデマンド<BR>6限　家庭訪問　児童虐待（講義）オンデマンド<BR><BR>---------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+大宮 朋子 , 井坂 ゆかり                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+【4月18日(木)2~6限 大宮朋子・山海知子・井坂ゆかり　医学医療系】<BR><BR>健康教育演習　プレゼンテーション準備（グループワーク）<BR>2限　健康教育に関する目的・理論・理念・と方法の講義 <BR>3限　健康教育課題ごとに企画・実施に向けた媒体等作成準備（1）<BR>4限　健康教育課題ごとに企画・実施に向けた媒体等作成準備（2）<BR>5限　健康教育課題ごとに企画・実施に向けた媒体等作成準備（3）<BR>6限　健康教育課題ごとに企画・実施に向けた媒体等作成準備（4）<BR><BR>---------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+山海 知子 , 大宮 朋子 , 井坂 ゆかり                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+【4月19日(金)2~6限 大宮朋子・山海知子・井坂ゆかり　医学医療系】<BR>家庭訪問、健康相談　実習オリエンテーション<BR>2限　健康相談・インテーク面接（講義・演習）<BR>3限　家庭訪問演習　発表<BR>4限　乳幼児健診①（4か月）<BR>5限　乳幼児健診②（1歳6か月、3歳児）<BR>6限　学校保健実習に向けてのオリエンテーション（オンデマンド）<BR><BR>---------------------------------------------------------------------------------------------------------<BR><BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+大宮 朋子 , 井坂 ゆかり                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6回                                        </th>
+                                        <td>
+【4月22日(月)2~6限 大宮朋子・井坂ゆかり 医学医療系】<BR><BR>保健事業計画の策定、プレゼンテーション準備（グループワーク）、実習課題の提出と修正<BR>2限　地域診断・保健事業計画の策定<BR>3限　グループワーク⑧地域診断、保健事業計画の策定　※実習課題<BR>4限　グループワーク⑨地域診断、保健事業計画の策定<BR>5限　グループワーク⑩地域診断、保健事業計画の策定<BR>6限　グループワーク⑪プレゼンテーション準備(教員とのディスカッション)<BR>---------------------------------------------------------------------------------------------------------<BR><BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+山海 知子 , 大宮 朋子 , 井坂 ゆかり                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第7回                                        </th>
+                                        <td>
+【4月23日(火)2~6限 大宮朋子・山海知子・井坂ゆかり医学医療系】<BR><BR>健康教育演習と発表<BR>2限　健康教育課題ごとに企画・実施に向けた媒体等作成準備（6）<BR>3限　健康教育課題ごとに企画・実施に向けた媒体等作成準備（7）<BR>4限　健康教育課題ごとに企画・実施に向けた媒体等作成準備（8）<BR>5限　プレゼンテーション（1）　<BR>6限　プレゼンテーション（2）　総括<BR><BR>---------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+山海 知子 , 大宮 朋子 , 井坂 ゆかり                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第8回                                        </th>
+                                        <td>
+【4月25日(木)2~6限 大宮朋子・井坂ゆかり 医学医療系】<BR><BR>地域診断演習（発表）とオリエンテーション<BR>2限　プレゼンテーション資料作成（グループワーク）（1）<BR>3限プレゼンテーション資料作成（グループワーク）（2）<BR>4限　プレゼンテーション（1）<BR>5限　プレゼンテーション（2）<BR>6限　実習オリエンテーション<BR><BR>---------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+大宮 朋子 , 井坂 ゆかり                                         </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+保健師課程履修者に限る                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+レポートや記録等提出物、発表により評価する。地域診断(地域診断、健康課題、保健計画案および評価、プレゼンテーション)45%、健康教育(指導案の作成とプレゼンテーション)35%、家庭訪問(家庭訪問計画と実技演習、提出物、児童虐待含む)20%とする。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+講義40%、グループワーク等(発表含む)60%<BR>授業時間内に指定された課題が終わらない場合には、自己およびグループ学習により期日までに終わらせること。<BR>個人及びグループでの進捗管理に気を付けてください。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+参考教材:コミュニティ・アズ・パートナーモデル(医学書院)、国民衛生の動向                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">単位取得要件</h2>
+                <div id="topics">
+                        <p id="pretopics">
+出欠席(2/3以上の出席が必要)・レポートや記録等提出物、プレゼンテーションによりに評価し、60%以上で単位認定とする。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                    </table>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                        <p id="pretopics">
+大宮 朋子(4B棟410・3405)<BR>山海 知子(4B棟506・3151)<BR>井坂ゆかり（4B棟217・7862)                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+大宮 朋子, 山海 知子, 非常勤講師　                                                        <br>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+井坂 ゆかり 　4B棟217室　内線3245                                                        <br>
+                                                                <span class="officehour-address">
+100004923                                                                </span>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
+                    <p id="style">
+講義とともにグループワークにより授業を進めます。グループで協力して課題に取り組んでください。<BR>個人のパソコンを持っている人は、なるべくご持参ください。国のデータベースにアクセスしてデータ分析をしたり、その他提出資料の作成があります。                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                            <tr>
+                                <th>
+HC37003                                </th>
+                                <td>
+総合実習                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+HC41003                                </th>
+                                <td>
+公衆衛生看護学実習                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+HC41041                                </th>
+                                <td>
+公衆衛生看護管理論                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+HC41051                                </th>
+                                <td>
+公衆衛生看護学応用論                                </td>
+                            </tr>
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>

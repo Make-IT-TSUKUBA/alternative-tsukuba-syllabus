@@ -1,0 +1,790 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2024/HE34035/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+HE34035        </span>&nbsp;
+        <span id="title">
+画像検査学        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    3.0 単位,
+            </span>
+            <span id="grade">
+                    3 年次,
+            </span>
+            <span id="timetable">
+春BC 集中            </span>
+            <br>
+            <span id="assignments">
+磯辺 智範, 町野 智子, 森 祐太郎, 髙田 健太            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+講義と実習を組合わせて実施する。講義では、医療現場で用いられる画像検査について超音波検査とMR検査を中心に、検査の特性、原理、撮像技術、画像解剖について解説する。実習では、超音波検査、MR検査の特性、原理、撮像技術について実際に撮像を行いながら（動画の利用等を含む）学ぶ。また、サーベイメータを用いた実習を通して放射線の基本特性を学び、放射線画像の成り立ちを理解する。さらに、ワークステーションを用いて3次元画像を作成する実習を通して人体解剖を理解し、正常画像と疾患画像を比較して読影法について学ぶ。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+医療科学類生に限る。<BR>実務経験教員<BR>オンライン(オンデマンド型)        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義及び実習･実験･実技        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+医療科学主専攻:臨床検査の知識と実践力<BR>国際医療科学主専攻:医科学分野の知識と技術                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
+                <p id="style">
+(1)	放射線の基礎特性について説明できる。<BR>(2)	造影剤の役割と副作用について説明できる。<BR>(3)	X線画像の特徴について説明できる。<BR>(4)	画像がどの検査によって得られたものなのかを判断できる。<BR>(5)	3次元画像を作成することができる。<BR>(6)	超音波検査装置の仕組みについて説明できる。<BR>(7)	各部位における超音波検査法について説明できる。<BR>(8)	腹部超音波検査を対象とした実習を通して超音波検査技術および超音波像について説明できる。<BR>(9)	MR検査装置の仕組みについて説明できる。<BR>(10)各部位におけるMR検査法について説明できる。<BR>(11)頭部を対象としたMR検査法の実習を通してMR検査技術およびMR画像について説明できる。<BR>(12)各種医用画像について、画像解剖および基本的な異常所見を見つけることができる。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+超音波検査、MR検査、CT検査、単純X線撮影、画像解剖、造影剤                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+	日程：5/13（月）・5/14（火）4～6限／5/15（水）3～6限／5/16（木）4～6限／5/17（金）3～6限／5/20（月）・5/21（火）4～6限／5/22（水）～5/24（金）3～6限／5/28（水）2・3限／5/29（木）3～5限<BR>	オリエンテーション：5月13日（月）4限<BR>	授業は全てオンライン（manaba、オンデマンド）で実施する。<BR>	日程と内容の詳細についてはオリエンテーション時に説明する。<BR><BR><BR>                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+講義-1<BR>磯辺智範<BR>画像検査入門：画像検査の種類、特徴、画像形成原理、必要な検査の選択、画像評価<BR>-------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+講義-2<BR>磯辺智範<BR>画像から見える疾病：各種画像検査による疾病の見え方の違い<BR>-------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+講義-3<BR>磯辺智範<BR>画像検査に使われる薬剤とその安全性：造影剤（超音波、MR、X線）の特徴、安全性、副作用<BR>-------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+講義-4<BR>磯辺智範<BR>生体における超音波の特性：超音波のビーム特性、生体における散乱、吸収の過程などの物理的特性<BR>-------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+講義-5<BR>磯辺智範<BR>超音波装置：画像表示法、画像モード、装置の構成、検査の安全性<BR>-------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6回                                        </th>
+                                        <td>
+講義-6<BR>磯辺智範<BR>超音波検査手法：ドプラ法、ハーモニックイメージ、IVUS（血管内超音波診断法）<BR>-------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第7回                                        </th>
+                                        <td>
+講義-7<BR>磯辺智範<BR>超音波検査のアーチファクト：超音波検査におけるアーチファクトの発生原理・軽減法<BR>-------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第8回                                        </th>
+                                        <td>
+講義-8<BR>髙田健太<BR>腹部超音波検査1：肝・胆・膵の超音波検査法と画像所見<BR>-------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第9回                                        </th>
+                                        <td>
+講義-9<BR>髙田健太<BR>腹部超音波検査2：脾・腎の超音波検査法と画像所見<BR>-------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第10回                                        </th>
+                                        <td>
+講義-10<BR>髙田健太<BR>頸部・表在領域の超音波検査：乳房・甲状腺・血管の超音波検査法と画像所見<BR>-------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第11回                                        </th>
+                                        <td>
+講義-11<BR>町野智子<BR>心臓超音波検査の前に：検査に必要な解剖・生理学<BR>-------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第12回                                        </th>
+                                        <td>
+講義-12<BR>町野智子<BR>心臓超音波検査の基本：検査手技、正常像<BR>-------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第13回                                        </th>
+                                        <td>
+講義-13<BR>町野智子<BR>心臓超音波検査の実践1：疾病と画像所見<BR>-------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第14回                                        </th>
+                                        <td>
+講義-14<BR>町野智子<BR>心臓超音波検査の実践2：定量的な評価<BR>-------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第15回                                        </th>
+                                        <td>
+講義-15<BR>磯辺智範<BR>MR画像の成り立ち：MR現象、画像再構成、画像の特徴<BR>-------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第16回                                        </th>
+                                        <td>
+講義-16<BR>磯辺智範<BR>知っておきたいMR画像：T1強調画像、T2強調画像、拡散強調画像等の見方、MR画像に発生するアーチファクトの種類と特徴<BR>-------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第17回                                        </th>
+                                        <td>
+講義-17<BR>磯辺智範<BR>MR検査の安全性：体内金属の危険性、金属持ち込み事故の事例<BR>-------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第18回                                        </th>
+                                        <td>
+講義-18<BR>磯辺智範<BR>眼底写真撮影：眼底写真の撮影法、読影、機器の構造<BR>-------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第19回                                        </th>
+                                        <td>
+講義-19<BR>森祐太郎<BR>サーモグラフィ：サーモグラフィの構造と利用法<BR>-------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第20回                                        </th>
+                                        <td>
+講義-20<BR>森祐太郎<BR>中性子を利用した画像：中性子線の性質と特徴、医学における利用、中性子イメージング<BR>-------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第21回                                        </th>
+                                        <td>
+実習-1<BR>磯辺智範<BR>3次元画像からみた人体解剖：3次元医用画像ワークステーションを用いてボリュームレンダリング画像から人体解剖について学ぶ<BR>-------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第22回                                        </th>
+                                        <td>
+実習-2<BR>森祐太郎<BR>画像形成に関わる放射線特性：サーベイメータを用いて放射線の基礎特性（距離の逆二乗則、透過作用、測定原理等）を学ぶ。<BR>-------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第23回                                        </th>
+                                        <td>
+実習-3<BR>髙田健太<BR>腹部超音波検査法：ファントムを用いて腹部超音波検査の走査法と得られる画像について学ぶ<BR>-------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第24回                                        </th>
+                                        <td>
+実習-4<BR>磯辺智範<BR>画像読影：MR画像、超音波画像、CT画像について正常画像および疾患画像を参考に読影の仕方について学ぶ<BR>-------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第25回                                        </th>
+                                        <td>
+実習-5<BR>森祐太郎<BR>頭部MR検査法：ファントム等を用いてMR画像を撮像し、撮像法、アーチファクトの低減法に関して学ぶ<BR>-------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+なし                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+期末試験とレポートの点数に基づいて評語（A+～C）で評価する。<BR>講義：対面での試験（70％）、実習：レポート（30％）                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+・授業は「講義2単位、実習1単位」である。<BR>・講義・実習ともに、全てオンライン（manaba、オンデマンド）で実施する。オンデマンド配信のメリットを活かし、必要に応じて繰り返して聴講すること。<BR>・次回の授業範囲を予習し、専門用語の意味等を理解しておくこと。<BR>・毎回の授業後には必ず復習すること。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+適宜manaba（https://manaba.tsukuba.ac.jp/）で資料を配付する。<BR>参考図書                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th>
+1. 磯辺智範 編著 MR・超音波・眼底 基礎知識図解ノート　第2版補訂版（金原出版）                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784307071079" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784307071079                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+2. 長井 裕 絵でみる超音波 改訂第3版（南江堂）                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784524268092" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784524268092                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+3. 東 義孝 パワーアップ いまさら聞けない腹部エコーの基礎　第2版（秀潤社）                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784780908329" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784780908329                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+4. 奥村 明之進, 土岐 祐一郎 編 臨床実習のための画像診断入門（大阪大学出版会）                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784872594560" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784872594560                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+5. 日本アイソトープ協会 編 はじめての放射線測定 －正しく理解し、正しく測ろう放射線－（丸善出版）                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784890732265" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784890732265                                                    </a>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">単位取得要件</h2>
+                <div id="topics">
+                        <p id="pretopics">
+・講義においては2/3以上の出席（聴講）、実習においては全実習への出席（webの場合は聴講）<BR>・期末試験における及第点<BR>・各実習テーマのレポートにおける及第点                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                    </table>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                        <p id="pretopics">
+オフィスアワーは特に定めないが、事前連絡うえ訪問すること。<BR>磯辺智範（4B棟401室）　&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;　 tiso@md.tsukuba.ac.jp&nbsp;&nbsp;&nbsp;　PHS:7834<BR>町野智子　　　　　　&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;　　&nbsp;&nbsp;tomoko-machino@md.tsukuba.ac.jp<BR>森 祐太郎（附属病院E棟502室）&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ymori@md.tsukuba.ac.jp　PHS：90663<BR>髙田健太　　　　　　　　　&nbsp;&nbsp;&nbsp;　&nbsp;&nbsp;&nbsp;&nbsp;k-takada@gchs.ac.jp                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
+                    <p id="style">
+・各講義では開始前にミニテストを実施することがある。<BR>・対面で実習を実施する場合は、小グループを作成し、実習1～5をローテーションする。グループ構成、ローテーションおよび実習スケジュールについては、オリエンテーション時に発表する。実習時には白衣と名札を持参すること。<BR>・授業の進行状況によっては上記のスケジュール通りにならないことがある。                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                            <tr>
+                                <th>
+HE32061                                </th>
+                                <td>
+RI検査技術学                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+HE32071                                </th>
+                                <td>
+医学物理学概論                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+HE34001                                </th>
+                                <td>
+生理機能検査学                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+HE34013                                </th>
+                                <td>
+生理機能検査学実習                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+HE39003                                </th>
+                                <td>
+臨床実習                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+HE39501                                </th>
+                                <td>
+医療安全管理学                                </td>
+                            </tr>
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+                    <p id="style">
+なし                    </p>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>

@@ -1,0 +1,548 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2024/BE21121/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+              最終更新日：2024/03/28
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+BE21121        </span>&nbsp;
+        <span id="title">
+Contemporary World Politics        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    2.0 単位,
+            </span>
+            <span id="grade">
+                    1・2 年次,
+            </span>
+            <span id="timetable">
+秋AB 金5,6            </span>
+            <br>
+            <span id="assignments">
+キンポ ネイサン            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+Contemporary World Politics provides students with an introduction to key theories and issues in global politics. After an overview of the evolution of world politics, the course proceeds to discuss major theoretical perspectives and concepts in international relations. The greater part of the course is devoted to examining major global themes, issues, developments, and institutions. Discussions on overall global processes and trends include: the historical evolution of global politics; the global rise of autocracy; the rise of China and the relative decline of the U.S.; the shift from a unipolar to a multipolar or bipolar world order; and international political economy. Covered among the major global issues are: poverty and inequality; identity politics (nationalism, religion and ethnicity); international migration; conflict and security: human rights, and global environmental challenges. Contemporary World Politics seeks to help students adeptly weave theory, history and current issues in analyzing global politics in all its complexities, and construct their own judgments about contemporary developments.         </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+英語で授業。<BR>G科目<BR>対面        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標（学修成果）</h2>
+                <p id="style">
+Aims of the Course<BR><BR>&bull; To introduce students to key theories and issues in world politics.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<BR>&bull; To help develop the students&rsquo; proficiency in analyzing global issues and developments in all their complexities.<BR><BR>Academic Goal<BR><BR>To help promote the objective of the Undergraduate Program of International Social Studies (TISS) of developing global citizens who can respond to the needs of a global society.                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+October 9 &ndash; Introduction<BR>&bull; Stephanie Lawson, &ldquo;Introducing Global Politics,&rdquo; in Robert Garner, Peter Ferdinand &amp; Stephanie Lawson, Introduction to Politics, 4th edition, Oxford: Oxford University Press, 2020, Chapter 16.<BR>October 16 &ndash; The Historical Evolution of World/Global Politics<BR>&bull; Paul D&rsquo;Anieri, &ldquo;The Historical Evolution of International Politics,&rdquo; in D&rsquo;Anieri, InternatIonal PolItIcs: Power and Purpose in Global Affairs, 5th edition, Boston: Cengage, 2021, Chapter 2.<BR>&bull; Andrew Heywood &amp; Ben Whitlam, &ldquo;Globalization and Its Implications,&rdquo; in Heywood &amp; Whitlam, Global Politics, 3rd edition, London: Bloomsbury Academic, 2023, pp. 9-15.<BR>&bull; Lawson, &ldquo;Traditional Theories in Global Politics,&rdquo; in Garner et al., Chapter 17<BR>October 23 &ndash; Theories of International Relations<BR>&bull; Lawson, &ldquo;Traditional Theories in Global Politics,&rdquo; (continuation) and &ldquo;Critical Approaches in Global Politics,&rdquo; in Garner et al., Chapters 17-18.<BR>&bull; Stephen M. Walt, &ldquo;An International Relations Theory Guide to the War in Ukraine,&rdquo; Foreign Policy, March 8, 2022<BR>October 30 &ndash; The Global Rise of Autocracy<BR>&bull; Anna L&uuml;hrmann &amp; Staffan I. Lindberg, &ldquo;A Third Wave of Autocratization is Here: What is New about It?&rdquo; Democratization, vol. 26, no. 7, 2019, pp. 1095-1113.<BR>&bull; Evie Papada, David Altman, Fabio Angiolillo, Lisa Gastaldi, Tamara Kohler, Martin Lundstedt, Natalia Natsika, Marina Nord, Yuko Sato, Felix Wiebrecht, and Staffan I.<BR>Lindberg. &ldquo;Defiance in the Face of Autocratization,&ldquo; Democracy Report 2023. University of Gothenburg: Varieties of Democracy Institute (V-Dem Institute), pp. 6-22, 33-36, 39.<BR>&bull; Michael Beckley &amp; Hal Brands, &ldquo;China&rsquo;s Threat to Global Democracy,&rdquo; Journal of Democracy, vol. 14, no. 1, 2013, pp. 65-79.<BR>November 7 &ndash; The Rise of China, the Purported Decline of the US and US-China Rivalry<BR>&bull; The Rise of China: Zheng Bijian, &ldquo;China&rsquo;s Path of Peaceful Development,&rdquo; People&rsquo;s Daily, August 7, 2015; Dale Aluf, &ldquo;China Ramps up Its Efforts to Shape a Multipolar World,&rdquo; The China Project, March 31, 2023; Oliver Stuenkel, &ldquo;BRICS Expansion Would Be a Sign of China&rsquo;s Growing Influence,&rdquo; The Economist, August 19, 2023<BR>&bull; The Decline of the U.S.?: William Moloney, &ldquo;American Decline: Perception or Reality?&rdquo; The Hill, April 5, 2021; Chris Patten, &ldquo;The Crisis of American Leadership,&rdquo; Project Syndicate, August 10, 2023; G. John Ikenberry, &ldquo;Why American Power Endures: The U.S.-Led Order Isn't in Decline,&rdquo; Foreign Affairs, vol. 101, no. 6, 2022.<BR>&bull; U.S.-China Rivalry: John J. Mearsheimer, &ldquo;The Inevitable Rivalry,&rdquo; Foreign Affairs, vol. 100, no. 6, 2021, pp. 48-58; Joseph S. Nye, Jr., &ldquo;How Not to Deal with a Rising China: A US Perspective,&rdquo; International Affairs, vol. 98, no 5, 2022, pp. 1635&ndash;1651<BR>&bull; China at Its Peak?: Andrew S. Erickson &amp; Gabriel B. Collins, &ldquo;A Dangerous Decade of Chinese Power Is Here,&rdquo; Foreign Policy, October 18, 2021. Joseph S. Nye, Jr., &ldquo;Peak China?&rdquo; Project Syndicate, January 3, 2023<BR>November 13 &ndash; A Unipolar, Bipolar or Multipolar World Order?<BR>&bull; Foreign Affairs, &ldquo;Did the Unipolar Moment Ever End? (Excerpts),&rdquo; Foreign Affairs, May 23, 2023.<BR>&bull; John J. Mearsheimer, &ldquo;Bound to Fail: The Rise and Fall of the Liberal International Order&rdquo; (excerpt), International Security, vol. 43, no. 4, 2019, pp. 43&ndash;50.<BR>&bull; Michael A. Peters, &ldquo;The Emerging Multipolar World Order: A Preliminary Analysis,&rdquo; Educational Philosophy and Theory, December 2022.<BR>&bull; Stephen M. Walt, &ldquo;America Is Too Scared of the Multipolar World,&rdquo; Foreign Policy, March 7, 2023.<BR>&bull; T. V. Paul, &ldquo;Globalization, Deglobalization and Reglobalization: Adapting Liberal International Order,&rdquo; International Affairs, vol. 97, no. 5, 2021.<BR>November 20 &ndash; International Political Economy; Poverty, Development and Inequality<BR>&bull; Paul D&rsquo;Anieri, &ldquo;The Fundamentals of International Political Economy,&rdquo; in D&rsquo;Anieri InternatIonal PolItIcs: Power and Purpose in Global Affairs, 5th edition, Boston: Cengage, 2021, Chapter 10.<BR>&bull; Carla Norrl&ouml;f, &ldquo;Currency, Conflict, and Global Order,&rdquo; Project Syndicate, July 14, 2023<BR>&bull; Heywood &amp; Whitlam, &ldquo;Poverty, Development and Inequality,&rdquo; in Heywood &amp; Whitlam, 2023, ch. 16<BR>December 4 &ndash; Nationalism, Religion and Ethnicity: Global Migration<BR>&bull; Richard W. Mansbach &amp; Kirsten L. Taylor, &ldquo;Identity Politics,&rdquo; in Mansbach &amp; Taylor, Introduction to Global Politics, 3rd edition, London &amp; New York: Routledge, 2018, Chapter 11. &bull; Hein de Haas, Stephen Castles and Mark Miller, The Age of Migration, 6th edition, London: Red Globe Press, 2020, Chapter 1.<BR>&bull; Pinelopi Koujianou Goldberg, &ldquo;An Immigration Wake-Up Call,&rdquo; Project Syndicate, July 23, 2023<BR>December 11 &ndash; Global Environmental Challenges; States and Artificial Intelligence<BR>&bull; Glenn P. Hastedt &amp; William F. Felice, &ldquo;Global Environmental Challenges: The Global Commons,&rsquo; in Hastedt &amp; Felice, Introduction to International Politics: Global Challenges and Policy Responses, Lanham, MA: Rowman &amp; Littlefield, 2020, Chapter 10.<BR>&bull; Ian Bremmer and Mustafa Suleyman, &ldquo;The AI Power Paradox: Can States Learn to Govern Artificial Intelligence&mdash;Before It&rsquo;s Too Late?&rdquo; Foreign Affairs, September/ October 2023<BR>&bull; Anu Bradford, &ldquo;The Race to Regulate Artificial Intelligence: Why Europe Has an Edge over America and China,&rdquo; Foreign Affairs, June 27, 2023<BR>December 18 &ndash; Security; Human Rights<BR>&bull; Paul D&rsquo;Anieri, &ldquo;International Insecurity and the Causes of War and Peace,&rdquo; in D&rsquo;Anieri, 2021, Chapter 8.<BR>&bull; Heywood &amp; Whitlam, &ldquo;Human Rights and Humanitarian Intervention,&rdquo; in Heywood &amp; Whitlam, 2023, ch. 14.<BR>December 25 &ndash; Final exam                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+1)                                        </th>
+                                        <td>
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+2)                                        </th>
+                                        <td>
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+3)                                        </th>
+                                        <td>
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+4)                                        </th>
+                                        <td>
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+5)                                        </th>
+                                        <td>
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+6)                                        </th>
+                                        <td>
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+7)                                        </th>
+                                        <td>
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+8)                                        </th>
+                                        <td>
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+9)                                        </th>
+                                        <td>
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+10)                                        </th>
+                                        <td>
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+11)                                        </th>
+                                        <td>
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+No formal pre-requisites for enrollment into the course.                     </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+Participation in class discussions/debates: 50% (of overall course mark)<BR>Final exam: 50% <BR><BR><BR>                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+Book chapters and journal articles as indicated below. Plus short articles from newspapers and magazines, especially those containing the latest developments on the course topics.                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
+                    <p id="style">
+Students are expected to attend all sessions, study the assigned readings before class, and participate actively in class discussions and debates. Students may be asked to make individual or group presentations on certain readings.<BR><BR>                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>

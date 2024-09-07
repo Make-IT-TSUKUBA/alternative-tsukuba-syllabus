@@ -1,0 +1,650 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2024/FG55611/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+FG55611        </span>&nbsp;
+        <span id="title">
+振動工学        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    3.0 単位,
+            </span>
+            <span id="grade">
+                    2 年次,
+            </span>
+            <span id="timetable">
+秋ABC 水1,2            </span>
+            <br>
+            <span id="assignments">
+庄司 学, 松田 哲也, 浅井 健彦            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+構造物や機械の自由振動と強制振動に関わる基礎理論を1質点系,多質点系,及び,連続体(弦,はり,膜)の順番で学習する.工学上重要な共振や振動モードの考え方を修得することがポイントとなる.また,ハミルトンの原理とラグランジュの方程式,及び,回転体の振動に関わる応用的な内容についても学習する.        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+振動工学I,振動工学II履修者は履修不可。 FG45611と同一。<BR>FG45611と同一。<BR>対面        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係(学習・教育到達目標との関係)</h2>
+                <p id="style">
+この科目は，「1.2 物理的な自然現象に対する理解」に対応している．                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
+                <p id="style">
+1）1質点系及び多質点系における基本的な振動現象の運動方程式を導出でき，その微分方程式の解を得ることができる．<BR>2）共振，吸振などの現象を理解し，論理的に説明することができる．<BR>3）振動モードに対する考え方を理解して，基本的なモード解析ができるようになる．<BR>4）簡単なプログラミングにより，応答曲線を得ることができる．<BR>5）弦の振動，棒の縦振動，棒のねじり振動，はりの横振動について運動方程式を導くことができ，自由振動および強制振動の特徴を理解することができる．<BR>6）解析力学の基礎的内容であるハミルトンの原理を理解し，それを適用することでラグランジュの方 程式を導くことができる．<BR>7）回転体の振動の基礎的内容である2自由度回転体のたわみ振動の運動方程式を導くことができ，それを踏まえて自由振動および強制振動の特徴を理解することができる．                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+1自由度系・多自由度系の振動，自由振動，強制振動，固有振動数，共振，モード解析，連続体の振動，ラグランジュの方程式，回転体の振動                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+2023年度は講義・期末試験ともに対面とする．                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+振動の種類，⾃由度，調和振動のベクトル表⽰，振動の合成<BR>1⾃由度系の振動：無減衰⾃由振動（復元要素，モデル化と運動⽅程式，固有振動数，重ね合わせの原理）                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+松田 哲也                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+1⾃由度系の振動：無減衰強制振動（調和外⼒，運動⽅程式，共振，うなり，⼒による励振，変位による励振，振動計の原理）                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+松田 哲也                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+1⾃由度系の振動：粘性減衰⾃由振動（減衰要素，運動⽅程式，減衰振動，減衰振動の発⽣条件）                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+松田 哲也                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+1⾃由度系の振動：粘性減衰強制振動（運動⽅程式，共振，無減衰強制振動との相違），地震応答スペクトル                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+松田 哲也                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+2自由度系の振動：無減衰自由振動（運動方程式，固有振動数と規準振動モード，一般解）<BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+庄司 学                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+2自由度系の振動：粘性減衰自由振動，強制振動（無減衰・粘性減衰），応答曲線の意味（伝達関数），動吸振器の原理，応答曲線に関連した数値シミュレーション<BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+庄司 学                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+多自由度系の振動：無減衰自由振動（運動方程式，規準座標，規準振動モードの直交性，一般解）<BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+庄司 学                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+多自由度系の振動：強制振動（無減衰・粘性減衰），モード解析                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+庄司 学                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+1次元連続体の振動：弦の横振動，棒のねじり振動，棒の縦振動，波動方程式，自由振動，一般解，境界条件                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+庄司 学                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+1次元連続体の振動：特別な境界条件，規準振動の直交性，初期値問題                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+庄司 学                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+1次元連続体の振動：強制振動，一般解，定常解，共振                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+庄司 学                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+はりの振動：自由振動，境界値問題と基準振動，基準振動の直交性と初期値問題，強制振動と共振                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+浅井 健彦                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+2次元連続体の振動：膜の振動                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+浅井 健彦                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+ハミルトンの原理とラグランジュの方程式                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+浅井 健彦                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+回転体の振動：回転体，運動方程式，静不釣合い，自由振動，強制振動，危険速度                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+浅井 健彦                                         </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+大学初年度の数学を理解していること．                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+演習・宿題：15％，レポート課題:5%<BR>期末試験：80%<BR>これらを合計し，60%以上となることを合格の条件とする．                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+学修時間の割り当て：<BR>講義（80％）と演習（20％）を併用する．<BR><BR>授業外における学修方法：<BR>授業教材並びに授業中に課される演習問題をもとに，ノートに重要な授業内容を書き写す等して十分に復習を行うこと．<BR><BR>なお，上記にあたっては，授業教材に加え，講義内容に関連した教材・参考書を以下に示すので，それらを読んで応用・発展的な内容をさらに学習するとよい．                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+主に，以下の2冊の書籍の内容に基づいて講義を行う．                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">参考書</h2>
+                <div id="topics">
+                        <p id="pretopics">
+1．吉川孝雄，松井剛一，石井徳章，機械の力学，コロナ社<BR>機械力学の基礎理論から応用までの内容を広範に扱う名著．本講義で取り挙げる理論的な内容をさらに深く勉強する際に役立つ．<BR>2．井上順吉，機械力学（機械工学基礎講座），理工学社<BR>一般的な機械力学のテキスト．本講義で取り挙げた以外の複雑な境界条件の振動についても触れられており参考とすることができる．<BR>3．大崎順彦，建築振動理論，彰国社（建築構造学大系の1つとして附属図書館に配架）<BR>建築工学の分野から振動理論がまとめられている古典的な名著．振動理論に関わる式が丁寧にトレースされていて非常に参考になる．また,「各週授業計画」の4)で勉強する粘性減衰強制振動に関わる理論展開の1つである地震応答スペクトルについてこの著述にまさる説明はない．<BR>4．長松昭男，モード解析，培風館（附属図書館に配架）<BR>モード解析の理論と実践が体系的にまとめられた古典的な名著．「各週授業計画」の8)で学ぶモード解析についておもしろさを感じたなら，是非，この書籍で発展的な学習にトライしてほしい．この書籍も式展開が丁寧で，大変ためになる．<BR>5．J.P. Den Hartog, Mechanical Vibrations, Dover Publications, Inc.（附属図書館に配架）<BR>「各週授業計画」の6)で学ぶ動吸振器の理論を1900年代の前半に体系的に示した歴史的名著．授業で学ぶ内容のバックグランドが示されていて，授業ではそのエッセンスを講述している．応答曲線の理解を感覚的に深めるために，この書籍に即した動吸振器の内容をmatlabによる数値シミュレーションのレポート課題として課している．                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                    </table>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+庄司 学 　随時.ただし,メールでアポイントをとること.　3F114 6190                                                        <br>
+                                                                <span class="officehour-address">
+1002215                                                                </span>
+                                                                <a href="http://www.kz.tsukuba.ac.jp/~gshoji" target="_blank">http://www.kz.tsukuba.ac.jp/~gshoji</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+松田 哲也 　                                                        <br>
+                                                                <span class="officehour-address">
+1002399                                                                </span>
+                                                                <a href="http://www.kz.tsukuba.ac.jp/~matsuda/" target="_blank">http://www.kz.tsukuba.ac.jp/~matsuda/</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+浅井 健彦 　                                                        <br>
+                                                                <span class="officehour-address">
+100001341                                                                </span>
+                                                                <a href="http://www.kz.tsukuba.ac.jp/~asai/" target="_blank">http://www.kz.tsukuba.ac.jp/~asai/</a>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
+                    <p id="style">
+授業の狙い：振動工学は，工学システム全般の振動現象を扱う基礎科目である．このためまず，1質点系及び多質点系の振動理論に関する講義と演習を通じて，論理的・数学的な思考力と解析力を培い，物理的な自然現象に対する理解を深めることを目的とする．さらに，構造物および機械の基礎的な振動系を対象として，連続体の振動（弦，はり，膜など），ハミルトンの原理とラグランジュの方程式，および,回転体の振動についての内容の理解を目標とする．振動現象は工学分野に広く見られ，本講義の内容を把握することにより物理的な自然現象である振動現象を理解することが出来るようになる．<BR><BR>関連情報：本講義で取り扱う1質点系及び多質点系の振動理論は，各種工学システムの振動現象を説明可能な基礎理論であるため，このような現象を取り扱う全ての専門科目において関与することになる．また，連続体の振動および回転体の振動の基礎理論を踏まえた上で，機械力学および機構学をさらに学習し，様々な機構の運動を理解することが推奨される．                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+                    <p id="style">
+TA配置有り．                    </p>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>

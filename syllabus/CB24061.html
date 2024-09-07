@@ -1,0 +1,763 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2024/CB24061/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+              最終更新日：2024/04/02
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+CB24061        </span>&nbsp;
+        <span id="title">
+高等教育論        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    2.0 単位,
+            </span>
+            <span id="grade">
+                    2 年次,
+            </span>
+            <span id="timetable">
+秋AB 金5,6            </span>
+            <br>
+            <span id="assignments">
+立石 慎治            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+高等教育論とは,「現実の高等教育についての問題意識から調査分析をおこない,それを理論化し,そこで得た知見を蓄積することを目的とする」営みです(金子元久(2012)「高等教育論」『日本労働研究雑誌』No.621).対象は高等教育に限定されていますが,様々な研究手法を援用するところに特徴があります.<BR>ところで,学士課程の段階で学ぶ高等教育論には,もうひとつの特徴があります.それは,いままさに自身を取り巻いている環境について知ることになる,ということです.高等教育・大学の制度や仕組み,実態を知ることで,大学に入って不思議に思ったことに答えを与えられるようになったり,疑問にも思わなかったことを疑問に思えるようになったりするかもしれません.ひいては,履修後の学生生活や卒業後に役立てられる知識にめぐり合うこともあるでしょう.こうした&ldquo;将来&rdquo;の場面のことも念頭に置きつつ,本授業では,高等教育論が蓄積してきた知識等を獲得することを目指します.        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+実務経験教員<BR>対面        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+教育学の基礎的体系的知識、教育学における総合的思考力、教育学に関する先導的発信力<BR>                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標（学修成果）</h2>
+                <p id="style">
+1.我が国の高等教育における制度・組織,内容・過程,機能のいずれかの領域に関して知識を身に付けたことを示せる(基礎的体系的知識に対応).<BR>2.学習した内容に関して，量的データを処理した結果等を交え，自身の見解を論理的かつ省察的に述べることができる(総合的思考力に対応).                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+高等教育, 大学, 制度・組織, 内容・過程, 機能，教育データ分析                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+「高等教育論がこれまで対象としてきた3つの問題領域」(金子2012)である,1制度・組織,2内容・過程,3機能について概観するとともに，教育に関する量的データの分析手法について学びます.                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+オリエンテーション:学修・評価に関する合意形成                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+制度・組織：学校制度のなかの高等教育（1）                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+制度・組織：学校制度のなかの高等教育（2）                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+内容・過程：大学生の学習行動とカリキュラム（1）                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+内容・過程：大学生の学習行動とカリキュラム（2）                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6回                                        </th>
+                                        <td>
+機能：大学に入るまでと出てから（1）                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第7回                                        </th>
+                                        <td>
+機能：大学に入るまでと出てから（2）                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第8回                                        </th>
+                                        <td>
+中間まとめ                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第9回                                        </th>
+                                        <td>
+分析環境の導入と基本的操作                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第10回                                        </th>
+                                        <td>
+実態を知りたい:記述統計／層別・可視化                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第11回                                        </th>
+                                        <td>
+比較したい(1):t検定                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第12回                                        </th>
+                                        <td>
+比較したい(2):分散分析                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第13回                                        </th>
+                                        <td>
+関係を調べたい(1):相関                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第14回                                        </th>
+                                        <td>
+関係を調べたい(2):単回帰分析                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第15回                                        </th>
+                                        <td>
+関係を調べたい(3):重回帰分析1                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第16回                                        </th>
+                                        <td>
+関係を調べたい(4):重回帰分析2                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第17回                                        </th>
+                                        <td>
+個人プロジェクト(1):仮説を立てる                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第18回                                        </th>
+                                        <td>
+個人プロジェクト(2):分析してみる                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第19回                                        </th>
+                                        <td>
+個人プロジェクト(3):結果を解釈し，報告にまとめる                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第20回                                        </th>
+                                        <td>
+最終まとめ                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                        <p id="pretopics">
+1. 受講者数と受講者の既習事項，学修の進捗状況に応じて，内容を調整する可能性があります．<BR>2. データ分析技法の習得のパートでは，デモンストレーションが多めになります．数理的な説明については別途参考資料を案内します．<BR>3. SSDSE(独立行政法人統計センターが教育用標準データセット)，もしくは，SSJ（東京大学社会科学研究所附属社会調査・データアーカイブ研究センター）のデータアーカイブから貸借するデータを利用する予定です．                        </p>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+・2024年度開講分に関しては，原則として，第9回以降の授業に自前の(ノート)パソコンを御持参いただける方の受講に限ります<BR>　受講を希望するけれども（デスクトップパソコン等の）持ち運べない端末しかお持ちではない方は，事前に御相談の連絡をお願いします（状況を伺って私にできることがないかを探ってみますが，受講を確約するものではありません．あらかじめ御了承ください．）．                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+・レポート:100%<BR>　「高等教育に関連するテーマを1つ選び,学んだデータ分析技法を用いて，高等教育に関する(社会)事象を解釈ないし説明する」レポートを作成してもらいます．<BR>　＊詳細な採点基準は授業内で提示されます．                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+授業内：講義(70%),演習(30%)<BR>授業外：予習復習として，配布資料の読解とまとめ，及び，分析技法修得のためのエクササイズが予定されています．また，個人の分析プロジェクトにも授業外学習の時間で取り組んでいただく予定です．                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+橋本鉱市・阿曾沼昭裕編著『高等教育論』ミネルヴァ書房<BR>耳塚寛明監修・中西啓喜編著『教育を読み解くデータサイエンス：データ収集と分析の論理』ミネルヴァ書房<BR>参考文献は以下に示すとおりです.                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th>
+1. 橋本鉱市・阿曾沼昭裕編著 『高等教育論』ミネルヴァ書房                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784623091133" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784623091133                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+2. 耳塚寛明監修・中西啓喜編著 『教育を読み解くデータサイエンス：データ収集と分析の論理』ミネルヴァ書房                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784623091720" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784623091720                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+3. 有本章・山野井敦徳・羽田貴史編著 『高等教育概論―大学の基礎を学ぶ』ミネルヴァ書房.                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784623040827" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784623040827                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+4. 安原義仁・大塚豊・羽田貴史編著 『大学と社会』放送大学教育振興会.                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784595308024" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784595308024                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+5. 高鳥正夫・舘昭編 『短大ファーストステージ論』東信堂.                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784887132832" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784887132832                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+6. 舘昭編 『短大からコミュニティ・カレッジへ―飛躍する世界の短期高等教育と日本の課題』東信堂.                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784887134324" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784887134324                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+7. 清水一彦 『日米の大学単位制度の比較史的研究』風間書房.                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784759910841" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784759910841                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+8. 藤田晃之 『キャリア教育基礎論』実業之日本社.                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784408416694" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784408416694                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+9. 伊藤宏・高橋修・松阪暢浩 『大学生のための実践的キャリア&amp;就活講座』中央経済社.                                         </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784502328411" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784502328411                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+10. 小杉礼子 『若者と初期キャリア―「非典型」からの出発のために』勁草書房.                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784326602278" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784326602278                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+11. Rによる教育データ分析                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784274225918" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784274225918                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+12. RユーザのためのRStudio[実践]入門&minus;tidyverseによるモダンな分析フローの世界&minus;                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784774198538" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784774198538                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+13. RユーザのためのRStudio[実践]入門&minus;tidyverseによるモダンな分析フローの世界&minus; 改訂2版                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784297121709" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784297121709                                                    </a>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                        <p id="pretopics">
+＊必要に応じて，各人に適した参考資料を別途紹介することがあります．                        </p>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
+                <div id="topics">
+                        <p id="pretopics">
+研究室もしくはオンラインにて対応します．<BR>オフィスアワーの時間帯及び場所については，授業内で提示されますので御注意ください．<BR>                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+立石 慎治 　                                                        <br>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
+                    <p id="style">
+〇のぞむこと<BR>・いま学んでいる大学という場が,どのようにして成り立っているのかについて関心がある方の受講をお待ちしています.<BR><BR>〇注意点<BR>・1週間に2コマ連続を2回実施することになり，予習復習が更にありますので，負荷は少し高めになるかもしれません．<BR>　もし特定のトピックやテーマ，特定の分析技法にだけ関心があり，全部学ばなくてもいい，という場合は，相談に乗りますので授業開始前にお知らせください．<BR>・初回で内容ならびに成績評価方法について合意形成を行うので,特別な事情がないかぎり,初回は御参加ください.<BR>・データ分析技法のパートは，ごく初歩的なところからスタートします．統計分析を既に学習されている方については別途対応しますので，お申し出ください．<BR><BR>〇その他<BR>・本授業は「比較高等教育論」「比較高等教育論演習」にも関連する部分があります．高等教育への関心が特に高い方は，併修をお勧めします．                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                            <tr>
+                                <th>
+CB25191                                </th>
+                                <td>
+比較高等教育論                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+CB25192                                </th>
+                                <td>
+比較高等教育論演習                                </td>
+                            </tr>
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>

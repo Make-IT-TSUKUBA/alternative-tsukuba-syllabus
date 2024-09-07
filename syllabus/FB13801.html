@@ -1,0 +1,461 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2024/FB13801/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+              最終更新日：2024/03/25
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+FB13801        </span>&nbsp;
+        <span id="title">
+測量学        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    2.0 単位,
+            </span>
+            <span id="grade">
+                    3 年次,
+            </span>
+            <span id="timetable">
+春AB 集中            </span>
+            <br>
+            <span id="assignments">
+山下 祐司, 三島 研二            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+測量器械理論,水準測量,測地学,多角測量,誤差論,写真測量,応用測量などについて,講述する.        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+EC33241と同一。<BR>4/27,5/11,5/25,6/1<BR>実務経験教員<BR>対面        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+専門コンピテンス（生物資源学類）: 1.生物資源学（農学)に関する体系的な専門知識、4.生物資源学（農学)に関するICTの活用力、5.生物資源学（農学)に関する問題意識の醸成力<BR><BR>専門コンピテンス（数学類）：1.自然科学の基礎知識                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標（学修成果）</h2>
+                <p id="style">
+（生物資源学類）<BR>1.生物資源学（農学)に関する体系的な専門知識：『無人化農作業』等で必要とされる地球上の位置の表示方法およびその求め方の知識&amp;能力を習得する。圃場整備や土地改良、農道・林道建設に関わる測量技術の知識を習得する。<BR>4.生物資源学（農学)に関するICTの活用力：マトリックス計算に関するプログラミングを用いて測定誤差の取り扱い方法を習得する。<BR>5.生物資源学（農学)に関する問題意識の醸成力：大規模農場経営管理などに必要となるGIS（地理情報システム:Geographic Information System）に関する知識を習得する。<BR><BR>（数学類）<BR>1.自然科学の基礎知識：地球上の位置の表示方法およびその求め方の知識&amp;能力を習得する。地球上における距離や角度の測定精度と誤差に関する知識を習得する。宇宙空間を利用した幾何学的な位置関係を決定する方法を習得する。<BR><BR><BR>                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+TS測量, GPS測量, 水準測量, 地球楕円体, クロソイド曲線, 誤差論, 線形代数, 最小2乗法                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+山頂の三角点の幾何学的な位置関係を求め、三角点から土地の面積を求めるのが測量、という時代が少し前まで続いていた。現在では、カーナビなどで聞き慣れたGPS衛星をはじめとした人工衛星を利用したGNSS測量が普及しており、2018年11月には我が国の測位衛星が4基体制で本格的に始動した。すなわち近代の測量は、「宇宙空間を利用した幾何学的な位置関係を決定する学問」といっても過言ではない。土木の施工現場でも最新の技術は省力化施工であり、原発事故以来、無人化施工がキーワードである。あるいは、生物資源学類の受講者に身近なキーワードは『無人化農作業』かもしれない。これらは位置情報を得ることが必要であり、すなわち測量の技術なしには語れない。このような変わりゆく測量の役割に対応すべき知識&amp;能力を取得するために次のスケジュールで講義を計画している。<BR><BR>ー4/27ーーーーーーーーーーーーーーーーーーーーーーーーーーーーー	<BR>第1回 ガイダンス、測量法<BR>第2回 測量器械理論: 角度および距離の測定と器械理論<BR>第3回 測量器械理論: 角測量および水準測量（演習）<BR>第4回 測量器械理論: 座標差(GPS&amp;GNSS&amp;QZSS)の測定と特徴などの器械理論<BR>第5回 測量器械理論: 器械の精度維持あるいは高精度化の方法<BR><BR>ー5/11ーーーーーーーーーーーーーーーーーーーーーーーーーーーーー	<BR>第6回 測量概論: 地球上の位置の表現方法（経度緯度、地球中心3次元座標系、ジオイド等）<BR>第7回 測量概論: 日本国内の位置の表現方法（公共平面直角座標系）<BR>第8回 基準点測量: 多角測量の理論<BR>第9回 基準点測量: 多角測量の座標計算<BR>第10回 基準点測量: 多角測量の座標計算（演習）<BR><BR>ー5/25ーーーーーーーーーーーーーーーーーーーーーーーーーーーーー		<BR>第11回 誤差論: 誤差の種類と測定精度<BR>第12回 誤差論: 誤差伝搬の法則<BR>第13回 誤差論: 誤差分布（ガウス分布、正規分布等、&chi;2乗分布等）<BR>第14回 誤差論: 最小二乗法<BR>第15回 誤差論: 最小二乗法の行列計算による解法（演習）<BR>誤差論: 大科学者カール・フリードリッヒ・ガウスは、物理、数学で数々の業績を残しているが、測量に関する誤差論を研究して統計学を確立したといわれる。それほど測量と誤差論は切っても切り離せない関係である。測定に誤差は必ず混入する、それならばいかに合理的に誤差を処理するかが大きな課題である。Excelで行列計算するので、PC持参が望ましい。<BR>ー6/1ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー		<BR>第16回 路線測量<BR>第17回 路線測量（演習）<BR>第18回 写真測量・リモートセンシング・GIS<BR>第19回 写真測量・リモートセンシング・GIS（演習）<BR>第20回 国土地理院「地図と測量の科学館」での実習<BR>・応用測量:生物資源学類の受講者にとっては農業用水を引くための河川工事に伴う「河川測量」、圃場整備・土地改良に役立つ「用地測量」なども重要な応用測量であるが、本講義では主に自動車用道路、農道・林道などの道路測量を対象とする「路線測量」を中心に講義する。路線測量は直線と円曲線が複雑に交差する幾何学的な問題であるが、緩和曲線などの特殊な曲線を挿入することが問題を複雑にする。本講義では緩和曲線で一般的なクロソイド曲線（数学類の受講生にとっては「コルニュ螺線」の方が一般的か?）を中心に講義する。<BR>・写真測量・リモートセンシング・GIS: 写真測量では地図を作成するためには航空機あるいは人工衛星からの写真を図化する手法を紹介する。リモートセンシングではフィルターの異なるセンサーで撮影した写真によって人間の目には見えない変化を捉える技術を紹介する。さらに測量によって得られた情報をデータベースにして評価・検討に利用する手法GIS（地理情報システム:Geographic Information System）について紹介する。生物資源学類の受講者としては大規模農場の経営管理などには重要な技術と思われる。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                        <p id="pretopics">
+※4日間で20コマ(2単位)分の集中講義を実施する(5コマ/日&times;4日)                        </p>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+履修条件は定めないが、「測量学実習(生物資源学類開講)」を受講することでこの授業の理解が一層深まる。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+レポート20%,筆記試験80%                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+毎回配布する資料を中心に講義する。<BR><BR>&lt;参考書&gt;                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
+                <div id="topics">
+                        <p id="pretopics">
+山下祐司(生物資源学類)<BR>yamashita.yuji.gm@u.tsukuba.ac.jp                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+山下 祐司 　生農棟C202                                                        <br>
+                                                                <span class="officehour-address">
+23052421                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
+                    <p id="style">
+詳細はmanabaを通じて告知する。<BR><BR>・数学類の測量学（FB13801）と共通<BR>・いずれの講義も関数電卓、コンパス、定規等を持参すること。<BR>・関数電卓は、度分秒(&deg;&prime;&prime;&prime;)&hArr;ラジアンの変換、三角関数などを完熟のこと。<BR>・測量器械理論では実機で説明。                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                            <tr>
+                                <th>
+EC33443                                </th>
+                                <td>
+測量学実習                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+FB13801                                </th>
+                                <td>
+測量学                                </td>
+                            </tr>
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>

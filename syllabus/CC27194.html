@@ -1,0 +1,551 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2024/CC27194/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+CC27194        </span>&nbsp;
+        <span id="title">
+心理学上級(発達臨床心理学演習)        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    2.0 単位,
+            </span>
+            <span id="grade">
+                    3・4 年次,
+            </span>
+            <span id="timetable">
+春AB 火3,4            </span>
+            <br>
+            <span id="assignments">
+濱口 佳和, 松田 侑子            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+幼児期から青年期までの子どもの社会性とパーソナリティの発達、心理社会的不適応、問題行動、精神疾患および親の発達や育児の問題についての内外の文献を輪読し、専門分野の理解を深める。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+「発達心理学」「臨床心理学」領域の演習に相当。<BR>対面        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義及び演習        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+1. 汎用コンピテンス<BR> コミュニケーション能力、批判的・創造的思考力、データ・情報リテラシー、心身の健康と人間性・倫理性、協働性・主体性・自律性<BR>2.専門コンピテンシー<BR> 行動分析力、心理学的支援力、普遍性と多様性の理解、心理学的問題解決実践志向、実証的な志向性と探究心                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
+                <p id="style">
+1.児童・青年の心理社会的適応・不適応とその規定要因に関する様々な概念と関連する理論について説明することができる<BR>2.児童・青年の心理社会的適応・不適応とその規定要因に関する実証的研究論文の内容を論理的に理解することができる<BR>3.児童・青年の心理社会的適応・不適応とその規定要因に関する実証的研究で使用される様々な統計的分析法の持つ意味について理解できる<BR>4.児童・青年の心理社会的適応・不適応とその規定要因に関する既存の実証的研究を批判的に検討し、自分自身で研究を構想することができる                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+養育行動 児童虐待 教師 仲間関係 外在化問題 攻撃行動 いじめ 反社会的行動 非行 内在化問題 抑うつ 不安症 アサーション                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+児童・青年の心理社会的不適応とその規定要因や保護要因について、基礎理論の講義を受けたうえで、個々のトピックスに関する実証的研究論文を精読し、発達臨床心理学の研究の実際を学ぶ。各回の授業で学んだことについてショート・レポートの提出を求める。1回2時限分の割り当てになる。第1回~第6回は児童・青年の仲間関係と心理社会的不適応について、主に攻撃行動に焦点を当てて、この分野で世界的に影響を与えた優れた英文論文を取り上げる。一流の研究論文を精読することで実力をつけることを狙いとする。第7回~第10回は、抑うつ,アサーティブネス、養育行動をとりあげ、各分野における研究の背景説明を講師が行ったうえで、国内の一流誌に掲載された論文を取り上げて精読する。適宜参考となる論文を示すので、たくさんの研究論文を読破し、児童期青年期の発達臨床心理学のテーマの多様性に目を向け,研究の組み立てや論文のまとめ方を学ぶことを目的とする第8回~第10回は、抑うつをとりあげ、児童青年の抑うつについて、国内の一流誌に掲載された論文を取り上げて精読する。適宜参考となる論文を示すので、たくさんの研究論文を読破し、児童期青年期の発達臨床心理学の研究の組み立てや論文のまとめ方を学ぶことを目的とする。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+4月18日(火)12:15~4月24日(月)24時　オンデマンド開講　仲間から受け入れられる子どもと拒否される子どもの違いは何?<BR>児童期の仲間関係と社会的行動ーソシオメトリック地位類型の観点から―<BR>仲間関係の発達と適応に関する講義と下記論文の精読<BR>Coie,Dodge, &amp; Coppotelli(1982). Dimensions and types of socsial status: A cross-age perspective. Developmental psychology, 18, 557-570.                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+4月25日(火)12:15~15:00　仲間に対する子どもの行動の違いは何に起因するのか?【第1回】<BR>児童の社会的情報処理(social information-processing)と攻撃行動<BR>社会的情報処理(SIP)モデルが生み出された歴史的背景についての解説と下記論文の精読並びにSIPモデル研究のその後の展開についての解説<BR>Dodge, Pettit, McClaskey &amp; Brown(1986). Social competence in children. Monographs of Society for Research inChikd development. No.213,51,1-79(一部)&nbsp;&nbsp;第2回はINTRODUCTIONのpp.1-8とStudy2のpp.27-33                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+5月2日(火)12:15~15:00　仲間に対する子どもの行動の違いは何に起因するのか?【第2回】<BR>児童の社会的情報処理(social information-processing)と攻撃行動<BR>社会的情報処理(SIP)モデルが生み出された歴史的背景についての解説と下記論文の精読並びにSIPモデル研究のその後の展開についての解説<BR>Dodge, Pettit, McClaskey &amp; Brown(1986). Social competence in children. Monographs of Society for Research inChikd development. No.213,51,1-79(一部)<BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+5月9日(火)12:15~15:00&nbsp;&nbsp;2タイプの攻撃行動―暴発と支配ー<BR>能動的攻撃(proactive aggression)と反応的攻撃(reactive aggression):2種類の攻撃概念についての理論的背景の概説と下記論文の精読<BR>Dodge &amp; Coie(1987). Social information-processing factorsin reactive and proactive aggression. Journal of Personality &amp; Social Psychology, 53,1146-1158.<BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+5月16日(火)12:15~5月22日(月)24時　オンデマンド開講&nbsp;&nbsp;児童期の能動的・反応的攻撃が青年期の心理・社会的不適応に弁別的に及ぼす影響ーそしてそれは親の異なった養育行動によって調整されるー<BR>下記論文の精読<BR>Brendgen, Vitaro, Tremblay, &amp; Lavoie(2001). Reactive and proactive aggression: Predictions to psychological violence in gifferent contexts and moderating effects of parental monitoring and care giving behavior. Journal of Abnormal Child Psychology,29, 4, 293-30                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6回                                        </th>
+                                        <td>
+5月30日(火)12:15~15:00　攻撃行動は手荒な養育で獲得される<BR>親の養育行動・養育スタイルについての説明と下記論文の精読<BR>Xu, Faver, &amp; Zhung(2009). Temperament, harsh and indulgent parenting, and Chinese children's proactive and reactive aggression. Child Development, 80, 244-258<BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第7回                                        </th>
+                                        <td>
+6月6日(土)12:15~15:00　不都合な真実ー青年期の関係性攻撃は仲間内の地位を向上させるー<BR>関係性攻撃(relational aggression)の概念と児童期における関係性攻撃の心理社会的影響への関連の説明と下記論文の精読<BR>Cillessen &amp; Mayeux(2004). From censure to reinforcement :Developmental change in the association between aggression and social status. Child Development, 75,147-163.<BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第8回                                        </th>
+                                        <td>
+6月13日(火)12:15~6月19日(月)24時　オンデマンド開講　児童の抑うつに関する研究―うつは大人だけじゃない<BR>下記論文の精読<BR>竹島克典・松見淳子(2015).児童期の抑うつと対人関係要因の関連:コーピング, ソーシャルサポート, 仲間関係, 対人ストレッサーに焦点をあてた前向き研究 発達心理学研究, 26(2),158-167.                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第9回                                        </th>
+                                        <td>
+6月20日(火)12:15~13:30 道徳不活性化理論（講義）　TF渡邉健蔵（心理学DP後期3年）　<BR>　　　　　　13時45分～15：00　子どもの子どもの抑うつを予防する（濱口）<BR>　　　　　下記論文の精読<BR>　　　　　堤亜美(2015)中学・高校生に対する抑うつ予防心理教育プログラ　　　　　　　<BR>　　　　　ムの効果の検討　教育心理学研究, 63, 323-337                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第10回                                        </th>
+                                        <td>
+6月27日(火)12:15~15:00 児童青年の抑うつとその発達臨床心理学的支援<BR>第8回・第9回の講義内容を補足するために，子どもと青年の抑うつについて，定義，症状，アセスメント法，心理的介入法について概説する                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                        <p id="pretopics">
+各回の授業は原則対面で行うが、下記の会はオンライン・オンデマンド方式により実施する。<BR>第1回4月18日12時15分～4月24日24時、第5回5月16日12時15分～5月22日24時、第8回6月13日12時15分～6月19日24時<BR>動画視聴はMsTeamsにより制限をかける。受講生は各自で，この授業のTeamsに登録しておくこと。チーム名は「CC27194発達臨床心理学演習」<BR>チームコードは　pydv2yx　である。<BR>受講生は、manabaのこの授業のコースで各回に指定された論文を各自がダウンロードし、予め読んでおくこと。<BR>manabaのコンテンツ上でにURLとハンドアウトを提示する。動画視聴・ハンドアウト利用期間は講義のある日時から1週間を期限とする。manabaのこの科目のコースのコンテンツとして添付されている資料を各自がダウンロードして閲覧すること。学期末にレポート課題を課す。<BR>                        </p>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+6回以上の出席を最低の履修条件とする。出席が6回に満たない場合は不可となる。<BR>出席はmanabaのレスポンを用いるので，予めmanabaのマニュアルで操作手順を確認しておくこと                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+Responで各回の出欠をとる。また，Responの機能を用いて各回の小課題を課す。小課題への回答状況、学期末に提出を求めるレポートによって評価する。比重は１：１とする。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+各回で取り上げられた論文の中で出てきた統計分析法                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+各回の授業の中で紹介する                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                        <p id="pretopics">
+教員への連絡はe-mailによって行う                         </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+濱口 佳和 　                                                        <br>
+                                                                <span class="officehour-address">
+1001205                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
+                    <p id="style">
+発達臨床心理学の様々な現象に触れ、研究上の問題意識を高めること<BR>内外の一流雑誌に掲載されている研究論文を精読することにより、心理学の研究論文に内在する論理構造に対する感性を研ぎ澄ませること<BR>特に優れた英文の論文の精読を自発的に多く行ってほしい                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+                    <p id="style">
+渡邉健蔵(TF)　心理学学位プログラム後期3年　s2130323@s.tsukuba.ac.jp                    </p>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>

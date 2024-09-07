@@ -1,0 +1,455 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2024/VB30012/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+VB30012        </span>&nbsp;
+        <span id="title">
+Seminars on Global Issues B-I        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    6.0 単位,
+            </span>
+            <span id="grade">
+                    2 年次,
+            </span>
+            <span id="timetable">
+秋AB 水4,5,金2,3; 秋C 水1,2,4-5            </span>
+            <br>
+            <span id="assignments">
+秋山 肇, サンドバール フェリーぺ, 森尾 貴広            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+These seminars will approach a wide range of academic knowledge, evaluation methods, and coping and preventive strategies related to the issues of social diversity-inclusion as well as human health-wellbeing. <BR>&nbsp;&nbsp;&nbsp;&nbsp;For the former part, the course will provide a variety of global issues concerning the disciplines of humanities and social sciences. Students will learn what are problems and discuss how we can resolve them.<BR>&nbsp;&nbsp;&nbsp;&nbsp;As for the latter part, the course will approach the health matters of aged people, as contemporary society requires information literacy and care of the elderly. Students will learn basic concepts and techniques of a survey to grasp problems in a real situation, processing methods, and interpretative strategies for gathered information (documents, data). In the end, students will come up with an action plan and/or original research project aiming at finding and solving problems in a real situation.        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+This course is for BPGI students, or students who have earned credits of VB10001 and VB10011.<BR>英語で授業。<BR>主専攻必修科目<BR>対面        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+演習        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+This coursework links up with the academic goal of the BPGI &quot;Social diversity-inclusion&quot; and &quot;Health and wellbeing,&quot; with a special focus on:<BR>- [Specific competences] <BR>&nbsp;&nbsp;&nbsp;Basic knowledge for working on the Global Issues<BR>&nbsp;&nbsp;&nbsp;Imagination, creativity, and application for future plans<BR>&nbsp;&nbsp;&nbsp;Communication with other fields and presentation skills&nbsp;&nbsp;<BR>&nbsp;&nbsp;&nbsp;Analysis and management for solving the issues<BR>&nbsp;&nbsp;&nbsp;Research and inventiveness for addressing the issues                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標（学修成果）</h2>
+                <p id="style">
+[Health &amp; Wellness Issues]<BR>-To understand and explain health problems in the population, in each generation and in special populations<BR>-To search the prevention and promotion strategies implemented at global level and in each country, discuss the problem and solution strategies from multiple perspectives with classmates and instructors. <BR>-To understand basic concepts and techniques of a research to grasp health problems in a real situation, analyzing methods, and interpretative strategies for gathered information (documents, data) and to develop an action or research plan aiming at finding and solving problems in a real situation. <BR><BR>[Social Issues]&nbsp;&nbsp;&nbsp;<BR>-To understand and explain global social problems.<BR>-To propose a solution to for these social issues referring to some examples.<BR>                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+Public space, discourse, Identity, social discrimination, chronic diseases, health behaviors behavior modification, segmentation, ecological model                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+[Health &amp; Wellness Issues]<BR>Health part: Fall AB Friday 2 &amp; 3 periods (10:10-11:35, 12:15-13:30) <BR>Medical part: Fall C Wednesday 1 &amp; 2 periods (8:40-9:55; 10:10-11:35)<BR>10/7 (Fri) Guidance; Introduction of public health <BR>10/14 (Fri) Introduction of epidemiology<BR>10/21 (Fri) Health problems in general population (Student presentation)&nbsp;&nbsp;<BR>10/28 (Fri) Health problems in each generation (children, older adults)<BR>11/9 (Wed) Experiencing older adult (activity-based class; submitting report later)<BR>11/11 (Fri) Sport and people with disabilities<BR>11/18 (Fri) Overview of para-sport <BR>12/2 (Fri) Cognitive and physical function in older adults<BR>12/9 (Fri) Age-friendly cities: The road to inclusiveness<BR>12/16 (Fri) Well-being and age discrimination<BR>1/12 (Wed) Questions and Problems in Global Health and Medical Sciences<BR>1/19 (Wed) Primary, Secondary and Tertiary sources in the Health Science<BR>1/26 (Wed) Scientific Methods and Approaches in Health Science<BR>2/2 (Wed) Developing Scientific Proposals. Hypothesis, Objectives, and Aims<BR>2/9 (Wed) Presentation and Group Discussion<BR><BR>[Social Issues]<BR>Fall ABC Wednesday 4 &amp; 5 periods (13:45-15:00, 15:15-16:30) <BR>10/5 (W) Peace and Human Rights (1)<BR>10/12 (W) Peace and Human Rights (2)<BR>10/19 (W) International Education<BR>10/26 (W) TBC<BR>11/12 (W) TBC<BR>11/16 (W) Unconscious Bias (1)<BR>11/25 (W) Unconscious Bias (2)<BR>12/7 (W) No lecture<BR>12/14 (W) Global Health (1)<BR>12/21 (W) Global Health (2)<BR>12/28 (W) Integral Studies<BR>1/11 (W) Integral Studies<BR>1/18 (W) TBC<BR>1/25 (W) TBC<BR>2/1 (W) International Relations in Europe<BR>2/8 (W) Different Aspects of SDGs (1)<BR>2/15 (W) Different Aspects of SDGs (2)<BR>                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+Lectures are conducted in English.<BR>Required course.<BR>This course is for BPGI students, or students who have earned credits of VB10001 and VB10011.                     </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+This course is evaluated by the mixture of both health &amp; wellness issues and social issues. The evaluation in each issue is converted into 100 points and the final evaluation is made on the average of the two scores.<BR><BR>[Health &amp; Wellness Issues]<BR>Focusing on the three items listed in the attainment objectives, grading is based on achievement through 1) proactivity by discission in class, 2) response sheets (summary of key points and feedback), 3) presentations, and 3) reports.<BR><BR>1)	Proactivity by discission in class (30%)<BR>2)	Response sheet (10%) <BR>3)	presentations (30%)<BR>4)	reports and response sheets (30%)	<BR><BR>* The class proactivity and response sheets in each session are scored at 10 points each, and the average score is then calculated. Each report and presentation is also scored at 10 points each, and then the average scores for the report and presentation are calculated. Finally, the four evaluation items are scored by proportion of the four evaluation items.<BR><BR>[Social Issues]&nbsp;&nbsp;&nbsp;<BR>Weekly assignment on reflection of the class and further research on the topic: 100%<BR>-	Some classes may require students to present, in such a case, presentation will be the basis of the evaluation.<BR>                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法学修時間の割り当て及び授業外における学修方法（本授業は1単位当たり45時間の学修時間が必要です。対面授業と合わせ以下に記載する授業外学修を行ってください。）</h2>
+                    <p id="style">
+Note that one credit course requires 30 hours of self-study outside of class in addition to 15 hours of contact hours. <BR>To prepare for class topics before each meeting day.                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+To be indicated during classes                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
+                <div id="topics">
+                        <p id="pretopics">
+By appointment                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+秋山 肇 　以下のURLからご確認ください。　人文社会学系棟B307
+オンラインでの対応も可能です。
+Meeting ID: 935 7962 7022 Password: 6qNjgV
+029-853-4063                                                        <br>
+                                                                <span class="officehour-address">
+100003532                                                                </span>
+                                                                <a href="https://researchmap.jp/akiyama_hajime" target="_blank">https://researchmap.jp/akiyama_hajime</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
+                    <p id="style">
+Be proactive to have basic and solid knowledge, without being lost on the Internet.<BR>Be eager to build an original perspective. <BR>Be interactive during classes, and do not be afraid to make mistakes.                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>

@@ -1,0 +1,679 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2024/HE31013/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+HE31013        </span>&nbsp;
+        <span id="title">
+病理組織学実習        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    2.0 単位,
+            </span>
+            <span id="grade">
+                    3 年次,
+            </span>
+            <span id="timetable">
+春AB 集中            </span>
+            <br>
+            <span id="assignments">
+加藤 光保, 柴 綾, 沖田 結花里, 村田 佳彦            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+病気を診断する病理検査学の実習として、生体から採取された組織に,試薬や器具を用いて検査の目的に合わせた適切な標本を作成する技術とその背景論理を身につける。具体的には組織標本、細胞診などの検体材料の取り扱い、固定、包埋、薄切、染色方法、さらに適正な標本とはどういうものであるかについて、病理診断を支援するという立場から説明する。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+医療科学類学生に限る。<BR>詳細後日周知<BR>対面(オンライン併用型)        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+実習･実験･実技        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+医療科学主専攻:臨床検査の知識と実践力<BR>国際医療科学主専攻:医科学分野の知識と技術                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
+                <p id="style">
+病理組織学や細胞検査学で学習した内容を、医療の現場で病理検査として技術支援するためにその手法を学ぶ。生体から検体として採取された組織や細胞に、試薬や器具を用いて検査の目的に合わせた適切な標本を作成する技術を身につける。また、細胞検査の手技と診断の実技を行う。実習中に染色法について、簡単な実験を行い発表し、理論背景の確認とその応用力を身につける。また細胞診の検体作成とともに診断も行い、細胞診についての理解を深める。これらの実習を通して、臨床検査技師国家試験への基礎知識も養う。 本授業は以下のことを目標とする。<BR>1.	病理検査の実際と検査技師の役割を理解できる。<BR>2.	病理組織標本作製の手順とその理論背景を知り、標本を作製できる。<BR>3.	各染色の利点と病理診断へ意義について説明できる。<BR>4.	免疫染色、FISHの技術と理論背景を説明できる。<BR>5.	細胞診の基礎とスクリーニングの実際、重要疾患の所見を説明できる。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+病理標本作成手技；細胞検査実技と診断                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+実習解説:病理検査の成り立ち（迅速検査を含む病理診断、細胞診、病理解剖など）と各臓器の取り扱い、肉眼的観察方法、組織観察、写真撮影などについて解説する。また、組織標本、細胞診などの検体材料の取り扱い方法、固定、包埋、薄切、染色方法（HE染色、特殊染色、免疫染色）、さらに適正な標本作成に必要な精度管理や標準化についての学習を促す。病理検査においてもゲノム検査の適応が広まっている現状を踏まえ、ゲノム医療時代の病理診断の実際について解説する。<BR>実技:実際の臓器を対象として、切り出し、肉眼像の把握、ブロックの作製、薄切、各種染色の技能を養う。グループごとに染色の実験を行い、結果を発表する。細胞診の代表的な固定法や染色法を実習し、典型例の標本の観察を通して、細胞診の診断を体験する。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+5/30 (木) 3・4限<BR>（解説1）実習の目的と進め方（オリエンテーション）（加藤・柴）<BR>（解説2）臓器の固定法、固定液の種類と特徴（柴）<BR>（解説3）パラフィンブロック（ブロック）の作製（包埋）（沖田）<BR>（解説4）ブロックの薄切法（ミクロトームの種類、使用法）（沖田）                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+加藤 光保 , 柴 綾 , 沖田 結花里                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+5/31 (金) 3・4限<BR>（実技）<BR>1.ブロック薄切<BR>2.剖検臓器の観察と切り出し                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+柴 綾 , 沖田 結花里                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+6/5 (水) 3・4・5限<BR>（実技） <BR>1.ブロック包埋<BR>2.ブロックの薄切 (HE染色用)<BR>3.脱パラ、脱水透徹用ドーゼの準備                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+柴 綾 , 沖田 結花里                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+6/6 (木) 3・4・5限<BR>(Web解説①）ヘマトキシリン・エオジン（HE)染色（沖田）<BR>（実技）<BR>1.脱パラ、脱水透徹系列の準備<BR>2.ヘマトキシリン・エオジン（HE）染色<BR>3.ブロックの薄切<BR>4.ブロック包埋<BR>（レポート①）HE染色&nbsp;&nbsp;                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+柴 綾 , 沖田 結花里                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+6/7 (金)3・4・5限 <BR>（Web解説②）多糖体染色法（沖田）<BR>（実技）<BR>1.中性粘液多糖体の染色（PAS)<BR>2.酸性粘液多糖体の染色（ALB, TB）<BR>3.ブロックの薄切<BR>（レポート②）多糖体染色                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+柴 綾 , 沖田 結花里                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6回                                        </th>
+                                        <td>
+6/12 (水) 3・4・5限 <BR>（Web解説③）結合組織染色法（柴）<BR>（実技）<BR>1.マッソントリクローム（MT）染色<BR>2.ブロックの薄切<BR>（レポート③）MT染色、エラスチカワンギーソン染色                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+柴 綾 , 沖田 結花里                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第7回                                        </th>
+                                        <td>
+6/13 (木) 3・4・5限<BR> (実技)<BR>1.PAM染色<BR>2.ブロックの薄切<BR>（レポート④）PAM染色<BR>＊実験テーマの決定およびプロトコール作成（この回までに終わらせる）                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+柴 綾 , 沖田 結花里                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第8回                                        </th>
+                                        <td>
+6/14 (金) 3・4・5限 <BR>（Web解説④）免疫染色・in-situ Hybridization・電子顕微鏡（柴）<BR>(実技)<BR>1.免疫組織化学（免疫染色）<BR>2.実験に必要な試薬などの準備<BR>3.実験に必要なブロックの選定と薄切<BR>（レポート⑤）免疫染色・in-situ Hybridization・電子顕微鏡                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+柴 綾 , 沖田 結花里                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第9回                                        </th>
+                                        <td>
+6/19 (水) 3・4・5限<BR>（Web解説⑤）細胞検査標本作製法： 検体処理、染色（村田）<BR> (実技)<BR>1.検体処理、固定<BR>2.パパニコロウ染色<BR>（レポート⑥）細胞診                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+村田 佳彦 , 柴 綾 , 沖田 結花里                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第10回                                        </th>
+                                        <td>
+6/20 (木) 3・4・5限<BR> (実技)<BR>追加画像データ取得（予備日）・発表資料作成・グループ発表の準備                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+村田 佳彦 , 柴 綾 , 沖田 結花里                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第11回                                        </th>
+                                        <td>
+6/21 (金) 3・4限 <BR>(発表①）細胞診について<BR>＊発表スライドを提出（班で１つ）                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+村田 佳彦 , 柴 綾 , 沖田 結花里                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第12回                                        </th>
+                                        <td>
+6/25 (火) 3・4限<BR>標本観察日<BR>（実技）<BR>1. ブロックの薄切 （必要な人）<BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+柴 綾 , 沖田 結花里                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第13回                                        </th>
+                                        <td>
+6/26 (水) 3・4・5限<BR>（実技）<BR>染色実験・画像データ取得・発表資料作成<BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+柴 綾 , 沖田 結花里                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第14回                                        </th>
+                                        <td>
+6/27 (木) 3・4・5限<BR>（実技）<BR>染色実験（実験失敗時の予備日）・画像データ取得・グループ発表の準備<BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+柴 綾 , 沖田 結花里                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第15回                                        </th>
+                                        <td>
+6/28 (金) 3・4限 <BR>(発表②）染色実験について<BR>＊発表スライドを提出（班で１つ）                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+柴 綾 , 沖田 結花里                                         </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+医療科学類生に限る。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+期末試験（100%）。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+実習（100％）※ 30コマを使って45時間の学修を授業内で行う。※残り45時間は授業時間外に予習とレポート作成などの自己学習を行う。実習で得られた画像データ（組織・細胞）はその所見とともに電子ファイル上で整理しておく。各回のWeb解説は事前に視聴してから実習に臨むこと。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+Web解説および配布資料は適宜manabaを介して共有する。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th>
+1. S. Kim Suvarna, Christopher Layton and John D. Bancroft Bancroft's Theory and Practice of Histological Techniques 8th Edition                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9780702068874" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9780702068874                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+2. Paulsen Douglas Histology and Cell Biology: Examination and Board Review, 6th Edition                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9781264269921" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9781264269921                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+3. 松原修 [ほか] 著&nbsp;&nbsp;病理学/病理検査学                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784263223642" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784263223642                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+4. 坂本穆彦編 細胞診を学ぶ人のために(医学書院)                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784260037990" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784260037990                                                    </a>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">単位取得要件</h2>
+                <div id="topics">
+                        <p id="pretopics">
+３分の２以上の出席、レポート（①－⑥）の提出、発表スライドの提出（①、②）を単位取得要件とする。前述の成績評価に基づくC以上の成績判定（評語）をもって単位取得とする。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                    </table>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+加藤 光保 　                                                        <br>
+                                                                <span class="officehour-address">
+1001158                                                                </span>
+                                                                <a href="http://www.md.tsukuba.ac.jp/epatho/" target="_blank">http://www.md.tsukuba.ac.jp/epatho/</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+沖田 結花里 　                                                        <br>
+                                                                <span class="officehour-address">
+100002128                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
+                    <p id="style">
+備考:いろいろな手法の目的と原理を理解し、実技としての基本を厳守しながら技術的な工夫をする。作製した標本を観察し結果を正しく評価する。現在学んでいる技術がどのように医療現場で役立つかについて理解する。実習中には待ち時間が生じることもあるので、時間の活用を十分に考える。<BR>実習に際しては、教科書や参考書を持参する。実習室では白衣および名札を着用。                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>

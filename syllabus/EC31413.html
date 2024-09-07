@@ -1,0 +1,838 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2024/EC31413/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+EC31413        </span>&nbsp;
+        <span id="title">
+農林生物学実験        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    3.0 単位,
+            </span>
+            <span id="grade">
+                    3 年次,
+            </span>
+            <span id="timetable">
+春AB秋AB 木4-6            </span>
+            <br>
+            <span id="assignments">
+野中 聡子, 木下 奈都子, 古川 誠一, 菅谷 純子, 上條 隆志, 野村 港二, 加藤 盛夫, 瀬古澤 由彦, 礒田 博子, 清野 達之, 川田 清和, 岡根 泉, 門脇 正史, 浅野 敦之, 吉岡 洋輔, 柴 博史, 草野 都, 王 寧, 津村 義彦, 津田 吉晃, 高橋 真哉, 阿部 淳一, 藏滿 司夢            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+本実験は,代表的な資源生物を観察することから始め,生物生産を行う上で基盤となる資源生物の形態,生理,生態学的なとらえ方を学び,その特性について理解を深めるための基礎的知識と技術の取得を目的とする。春学期は農林生物学に必要な基礎技術及び解析法について,秋学期はさらに発展させた技術及び研究を行う上での考え方について学ぶ。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+組換えDNA実験を含まない。<BR>対面        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+実習･実験･実技        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・専門コンピテンスとの関係</h2>
+                <p id="style">
+1 体系的な専門知識、2 問題意識の醸成力                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
+                <p id="style">
+専門コンピテンス1 体系的な専門知識<BR>農林生物学に関連する資源生物の形態、生理、生態学を研究するための実験技術を体系的に実習すると共に、実践的な実験を通して得られた結果の解析手法や基盤となる専門知識について学修する。<BR><BR>専門コンピテンス2 問題意識の醸成力<BR>農林生物学を取り巻く様々な国際的問題を解決するために、技術がどのように貢献できるか問題意識を持つ。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+生物生産, 資源生物, 生態, 形態, 生理                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+春AB(第1回から第10回)では農林生物学の基礎的技術と解析法を習得するため、受講生全員が下記の実験課題に取り組む。秋ABでは第11回から第13回をブロックA、第14回から第16回をブロックB、第17回から第20回をブロックCとし、各ブロックには複数の実験課題を設定する。受講生は各ブロックで実験課題を1つ選択し、全期間で3つの異なる実験課題に取り組む(4年次で配属を希望する研究室が推奨する課題を選択することが望ましい)。非組換え実験を含まない。第1回（4月18日）の前までに、ガイダンスビデオを視聴すること。これとは別に教員の紹介等を対面ガイダンスで実施する。また、グループ分けのため、第1回の2日前までに履修登録をすること。2D312、2D315、2D316で開講する。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+ガイダンス・天然基質からの菌類の分類(培地作成)                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+門脇 正史 , 野村 港二 , 加藤 盛夫 , 礒田 博子 , 菅谷 純子 , 阿部 淳一 ピーター, 上條 隆志 , 清野 達之 , 古川 誠一 , 瀬古澤 由彦 , 川田 清和 , 野中 聡子 , 津村 義彦 , 岡根 泉 , 浅野 敦之 , 吉岡 洋輔 , 柴 博史 , 草野 都 , 木下 奈都子 , 王 寧 , 津田 吉晃 , 高橋 真哉                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+植物病原菌の接種試験                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+阿部 淳一 ピーター                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+植物病原菌の分離試験                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+阿部 淳一 ピーター                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+昆虫の血液の観察                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+古川 誠一                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+動物培養細胞からの総RNA抽出                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+高橋 真哉                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6回                                        </th>
+                                        <td>
+資源植物由来タンパク質の分離同定(1)                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+菅谷 純子 , 野中 聡子                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第7回                                        </th>
+                                        <td>
+資源植物由来タンパク質の分離同定(2)                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+菅谷 純子 , 野中 聡子                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第8回                                        </th>
+                                        <td>
+野外調査法(里山見学)                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+門脇 正史 , 川田 清和                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第9回                                        </th>
+                                        <td>
+精子の急速凍結保存法：理論と実際                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+浅野 敦之                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第10回                                        </th>
+                                        <td>
+植物組織の高分子化合物を見る                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+木下 奈都子                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第11回                                        </th>
+                                        <td>
+Aブロック (秋学期・木4~6限)<BR>蔬菜花卉 世話人:有泉(ゲノム解析手法)<BR>発現代謝 世話人:柴、王(DNAメチル化状態の確認法)<BR>応&nbsp;&nbsp;動 世話人:古川(昆虫の野外観察と同定)<BR>森&nbsp;&nbsp;林 世話人:川田・上條(ガイダンス)<BR>---------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+門脇 正史 , 川田 清和 , 野中 聡子 , 柴 博史 , 草野 都                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第12回                                        </th>
+                                        <td>
+Aブロック (秋学期・木4~6限)<BR>蔬菜花卉 世話人:有泉(ゲノム解析手法)<BR>発現代謝 世話人:柴、王(DNAメチル化状態の確認法)<BR>応&nbsp;&nbsp;動 世話人:古川(昆虫の行動解析)<BR>森&nbsp;&nbsp;林 世話人:門脇(水生生物の調査法)<BR>---------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+門脇 正史 , 川田 清和 , 野中 聡子 , 柴 博史 , 草野 都                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第13回                                        </th>
+                                        <td>
+Aブロック (秋学期・木4~6限)<BR>蔬菜花卉 世話人:有泉(ゲノム解析手法)<BR>発現代謝 世話人:草野(代謝物質の分析)<BR>応&nbsp;&nbsp;動 世話人:古川(昆虫の内部構造観察)<BR>森&nbsp;&nbsp;林 世話人:川田・上條(植生調査)<BR>---------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+門脇 正史 , 川田 清和 , 野中 聡子 , 柴 博史 , 草野 都                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第14回                                        </th>
+                                        <td>
+Bブロック (秋学期・木4~6限)<BR>森&nbsp;&nbsp;林 世話人:川田・上條(植生データ解析)<BR>育 種 世話人:津田(麻)(アブラナ科植物の種同定と交雑親和性評価の方法)<BR>果 樹 世話人:菅谷、瀬古澤( 未定&nbsp;&nbsp;)<BR>寄生菌 世話人:阿部、阿部( 未定&nbsp;&nbsp;)<BR>---------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+菅谷 純子 , 阿部 淳一 ピーター, 岡根 泉 , 浅野 敦之 , 吉岡 洋輔                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第15回                                        </th>
+                                        <td>
+Bブロック (秋学期・木4~6限)<BR>森&nbsp;&nbsp;林 世話人:川田・上條(植生データ解析)<BR>育 種 世話人:津田(麻)(アブラナ科植物の種同定と交雑親和性評価の方法)<BR>果 樹 世話人:菅谷、瀬古澤( 未定&nbsp;&nbsp;)<BR>寄生菌 世話人:阿部、阿部( 未定&nbsp;&nbsp;)<BR>---------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+菅谷 純子 , 阿部 淳一 ピーター, 岡根 泉 , 浅野 敦之 , 吉岡 洋輔                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第16回                                        </th>
+                                        <td>
+Bブロック (秋学期・木4~6限)<BR>森&nbsp;&nbsp;林 世話人:川田・上條(筑波山)<BR>育 種 世話人:津田(麻)(アブラナ科植物の種同定と交雑親和性評価の方法)<BR>果 樹 世話人:菅谷、瀬古澤( 未定&nbsp;&nbsp;)<BR>寄生菌 世話人:阿部、阿部( 未定&nbsp;&nbsp;)<BR>---------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+菅谷 純子 , 阿部 淳一 ピーター, 岡根 泉 , 浅野 敦之 , 吉岡 洋輔                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第17回                                        </th>
+                                        <td>
+Cブロック (秋学期・木4~6限)<BR>蔬菜花卉 世話人:有泉、野中( 未定&nbsp;&nbsp;)<BR>発現代謝 世話人:柴、草野(未定)、王(ゲノム転写制御因子の解析)<BR>応&nbsp;&nbsp;動 世話人:古川(昆虫、ダニからの核酸およびタンパク質の抽出)<BR>森&nbsp;&nbsp;林 世話人:津田(吉)(種子調査)<BR>育 種 世話人:吉岡( 植物のDNA分析&nbsp;&nbsp;)<BR>果 樹 世話人:菅谷、瀬古澤<BR>寄生菌 世話人:石賀<BR>畜 産 世話人:浅野(動物の形と機能)<BR>食資源 世話人:磯田、高橋(食品の機能性評価法)<BR>作 物 世話人:加藤(作物の水耕栽培)<BR>---------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+門脇 正史 , 野村 港二 , 加藤 盛夫 , 礒田 博子 , 菅谷 純子 , 阿部 淳一 ピーター, 上條 隆志 , 清野 達之 , 古川 誠一 , 瀬古澤 由彦 , 川田 清和 , 野中 聡子 , 津村 義彦 , 岡根 泉 , 浅野 敦之 , 吉岡 洋輔 , 柴 博史 , 草野 都 , 木下 奈都子 , 王 寧 , 津田 吉晃 , 高橋 真哉                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第18回                                        </th>
+                                        <td>
+Cブロック (秋学期・木4~6限)<BR>蔬菜花卉 世話人:有泉、野中( 未定&nbsp;&nbsp;)<BR>発現代謝 世話人:柴、草野(未定)、王(ゲノム転写制御因子の解析)<BR>応&nbsp;&nbsp;動 世話人:古川(昆虫、ダニからの核酸およびタンパク質の抽出)<BR>森&nbsp;&nbsp;林 世話人:津村(樹木の栽培環境と遺伝子との関連調査)<BR>育 種 世話人:吉岡(植物のDNA分析&nbsp;&nbsp;)<BR>果 樹 世話人:菅谷、瀬古澤( 未定&nbsp;&nbsp;)<BR>寄生菌 世話人:石賀( 未定&nbsp;&nbsp;)<BR>畜 産 世話人:浅野(動物の形と機能)<BR>食資源 世話人:磯田、高橋(食品の機能性評価法)<BR>作 物 世話人:加藤(作物の成長解析)<BR>---------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+門脇 正史 , 野村 港二 , 加藤 盛夫 , 礒田 博子 , 菅谷 純子 , 阿部 淳一 ピーター, 上條 隆志 , 清野 達之 , 古川 誠一 , 瀬古澤 由彦 , 川田 清和 , 野中 聡子 , 津村 義彦 , 岡根 泉 , 浅野 敦之 , 吉岡 洋輔 , 柴 博史 , 草野 都 , 木下 奈都子 , 王 寧 , 津田 吉晃 , 高橋 真哉                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第19回                                        </th>
+                                        <td>
+Cブロック (秋学期・木4~6限)<BR>蔬菜花卉 世話人:有泉、野中( 未定&nbsp;&nbsp;)<BR>発現代謝 世話人:柴、草野(未定)、王(ゲノム転写制御因子の解析)<BR>応&nbsp;&nbsp;動 世話人:古川(昆虫、ダニからの核酸およびタンパク質の抽出)<BR>森&nbsp;&nbsp;林 世話人:清野(毎木調査)<BR>育 種 世話人:吉岡( 植物のDNA分析&nbsp;&nbsp;)<BR>果 樹 世話人:菅谷、瀬古澤( 未定&nbsp;&nbsp;)<BR>寄生菌 世話人:石賀( 未定&nbsp;&nbsp;)<BR>畜 産 世話人:浅野(動物の形と機能)<BR>食資源 世話人:磯田、高橋(食品の機能性評価法)<BR>作 物 世話人:加藤(作物体成分の分析1(炭素・窒素))<BR>---------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+門脇 正史 , 野村 港二 , 加藤 盛夫 , 礒田 博子 , 菅谷 純子 , 阿部 淳一 ピーター, 上條 隆志 , 清野 達之 , 古川 誠一 , 瀬古澤 由彦 , 川田 清和 , 野中 聡子 , 津村 義彦 , 岡根 泉 , 浅野 敦之 , 吉岡 洋輔 , 柴 博史 , 草野 都 , 木下 奈都子 , 王 寧 , 津田 吉晃 , 高橋 真哉                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第20回                                        </th>
+                                        <td>
+Cブロック (秋学期・木4~6限)<BR>蔬菜花卉 世話人:有泉、野中( 未定&nbsp;&nbsp;)<BR>発現代謝 世話人:柴、草野(未定)、王(ゲノム転写制御因子の解析)<BR>応&nbsp;&nbsp;動 世話人:古川(昆虫、ダニからの核酸およびタンパク質の抽出)<BR>森&nbsp;&nbsp;林 世話人:上條(野生動物(小型哺乳類))<BR>育 種 世話人:吉岡( 植物のDNA分析&nbsp;&nbsp;)<BR>果 樹 世話人:菅谷、瀬古澤( 未定&nbsp;&nbsp;)<BR>寄生菌 世話人:阿部( 未定&nbsp;&nbsp;)<BR>畜 産 世話人:浅野(動物の形と機能)<BR>食資源 世話人:磯田、高橋(食品の機能性評価法)<BR>作 物 世話人:加藤(作物体成分の分析2(糖分))<BR>---------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+門脇 正史 , 野村 港二 , 加藤 盛夫 , 礒田 博子 , 菅谷 純子 , 阿部 淳一 ピーター, 上條 隆志 , 清野 達之 , 古川 誠一 , 瀬古澤 由彦 , 川田 清和 , 野中 聡子 , 津村 義彦 , 岡根 泉 , 浅野 敦之 , 吉岡 洋輔 , 柴 博史 , 草野 都 , 木下 奈都子 , 王 寧 , 津田 吉晃 , 高橋 真哉                                         </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+「農林生物学基礎実験」を履修しておくことが望ましい。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+原則学期ごとに全出席のものを評価の対象とし、実験の理解度やレポート等により評価する（100%）。春学期AB、 秋学期ABの評価を総合して成績を決定する（100%）。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+適宜プリントを配布する。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                        <p id="pretopics">
+農林生物学実験世話人 野中　聡子 （nonaka.satoko.gt@u.tsukuba.ac.jp）<BR>E-mailでアポイントメントをとって下さい。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+野中 聡子 　8:40から18:00まで　（ただし要事前相談）　遺伝子実験センター308号室 
+029-853-7726                                                        <br>
+                                                                <span class="officehour-address">
+1002612                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+木下 奈都子 　                                                        <br>
+                                                                <span class="officehour-address">
+100000090                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+古川 誠一 　.　生物・農林学系C棟 C406 4706                                                        <br>
+                                                                <span class="officehour-address">
+1002235                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+菅谷 純子 　                                                        <br>
+                                                                <span class="officehour-address">
+1001634                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+上條 隆志 　                                                        <br>
+                                                                <span class="officehour-address">
+1001801                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+野村 港二 　                                                        <br>
+                                                                <span class="officehour-address">
+1001167                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+加藤 盛夫 　                                                        <br>
+                                                                <span class="officehour-address">
+1001342                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+瀬古澤 由彦 　                                                        <br>
+                                                                <span class="officehour-address">
+1002493                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+礒田 博子 　                                                        <br>
+                                                                <span class="officehour-address">
+1001445                                                                </span>
+                                                                <a href="http://www.sakura.cc.tsukuba.ac.jp/~isoda/index.html" target="_blank">http://www.sakura.cc.tsukuba.ac.jp/~isoda/index.html</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+清野 達之 　八ヶ岳演習林                                                        <br>
+                                                                <span class="officehour-address">
+1001994                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+川田 清和 　10:00-17:00　総合研究棟A510                                                        <br>
+                                                                <span class="officehour-address">
+1002533                                                                </span>
+                                                                <a href="http://www.u.tsukuba.ac.jp/~kawada.kiyokazu.gu/" target="_blank">http://www.u.tsukuba.ac.jp/~kawada.kiyokazu.gu/</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+岡根 泉 　事前にメールまたは電話にて連絡ください。　生物農林学系棟C405 6687 / 生物農林学系棟E305 4707                                                        <br>
+                                                                <span class="officehour-address">
+1011079                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+門脇 正史 　                                                        <br>
+                                                                <span class="officehour-address">
+1001125                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+浅野 敦之 　                                                        <br>
+                                                                <span class="officehour-address">
+23051002                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+吉岡 洋輔 　随時(事前にe-mail等で連絡すること)　                                                        <br>
+                                                                <span class="officehour-address">
+23051886                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+柴 博史 　                                                        <br>
+                                                                <span class="officehour-address">
+100000088                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+草野 都 　生物・農林学系B棟 
+代謝ネットワーク科学研究室                                                         <br>
+                                                                <span class="officehour-address">
+100000089                                                                </span>
+                                                                <a href="https://www.metabolic-network-biology-lab.com/" target="_blank">https://www.metabolic-network-biology-lab.com/</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+王 寧 　                                                        <br>
+                                                                <span class="officehour-address">
+100000121                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+津村 義彦 　総合A棟512 029-853-4629                                                        <br>
+                                                                <span class="officehour-address">
+1006989                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+津田 吉晃 　                                                        <br>
+                                                                <span class="officehour-address">
+100001004                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+高橋 真哉 　                                                        <br>
+                                                                <span class="officehour-address">
+100001556                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+阿部 淳一 ピーター　生物農林学系棟C404 
+029-853-4791                                                        <br>
+                                                                <span class="officehour-address">
+1001660                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他</h2>
+                    <p id="style">
+詳細はmanabaを通じて告知する。<BR>連絡等にはmanabaを用いる。<BR>実験に際しては薬品、実験材料による汚染があるので、白衣と靴(かかとの低いもの)の着用が望ましい。実験の材料、準備などの関係により、順番が変わる可能性がある。                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>

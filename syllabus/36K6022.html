@@ -1,0 +1,425 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2024/36K6022/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+36K6022        </span>&nbsp;
+        <span id="title">
+基礎スペイン語AII        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    1.0 単位,
+            </span>
+            <span id="grade">
+                    1 年次,
+            </span>
+            <span id="timetable">
+秋ABC 金2            </span>
+            <br>
+            <span id="assignments">
+メルチー ヤスキン            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+初修者を対象にしたこのスペイン語の授業では、4技能(聞く・読む・話す・書く)の総合的な修得に配慮しながら、とくに基本文法(基礎レベル)の修得を目指す。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+国際・情報・総学6組対象。主に日本語で授業。英語での対応可能。<BR>G科目<BR>対面        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+演習        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+1.コミュニケーション能力<BR>2.批判的・創造的思考力<BR>4.広い視野と国際性<BR>6.協働性・主体性・自律性                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
+                <p id="style">
+(1)直説法現在のすべての不規則動詞の人称変化形を理解し、使うことができる。<BR>(2)直接目的格・間接目的格・前置詞格の人称代名詞を理解し、使うことができる。<BR>(3)101から1億までの基数詞を使うことができる。<BR>(4)Gustar型動詞を理解し、使うことができる。<BR>(5)再帰動詞を理解し、使うことができる。<BR>(6)無人称表現を理解し、使うことができる。<BR>(7)動詞の命令法を理解し、使うことができる。<BR>(8)不定詞の役割を理解し、使うことができる。<BR>(9)動詞の現在分詞の役割と進行形的な表現を理解し、使うことができる。<BR>(10)動詞の過去分詞の役割と直説法現在完了(複合過去)を理解し、使うことができる。<BR>(11)動詞の直説法点過去(単純過去)を理解し、規則動詞も不規則動詞も使うことができる。<BR>(11)3種類の受動文の違いを理解し、使い分けることができる。<BR>(12)縮小辞や増大辞に込められたニュアンスをある程度理解できる。<BR>(13)知覚・使役・放任・命令・許可の動詞を理解し、使うことができる。<BR>(14)否定語と、その反対語である不定語の用法と役割を理解し、使うことができる。<BR>(15)動詞の直説法線過去(不完了過去)を理解し、使うことができる、<BR>(16)動詞の直説法過去完了(大過去)を理解し、使うことができる。<BR>(17)間接疑問文を作ることができる。<BR>(18)因果関係を表す接続詞を理解し、使うことができる。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+スペイン語, 正書法, 基礎文法                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+第1回 スペイン語についての概説、履修上の注意など<BR>第2回 Lecci&oacute;n 7.A<BR>1.直説法現在-不規則活用(verbos irregulares en presente de indicativo). <BR>第3回 Lecci&oacute;n 7.B<BR>2.目的格人称代名詞(pronombres personales objeto) 3.基数詞(101〜100.000.000, numerales cardinales).<BR>第4回. Lecci&oacute;n 8.A<BR>1.前置詞(preposiciones) 2.前置詞格人称代名詞(pronombres personales con preposiciones).<BR>第5回. Lecci&oacute;n 8.B<BR>3.gustar 型動詞.<BR>第6回. Lecci&oacute;n 9.A<BR>1.再帰動詞(verbos reflexivos). <BR>第7回. Lecci&oacute;n 9.B<BR>2.無人称文(oraciones impersonales) 3.曜日・日付の表現(los d&iacute;as de la semana y del mes).<BR>第8回. Lecci&oacute;n 10.A<BR>1.命令法(imperativo) 2.不定詞(infinitivo).<BR>第8回-9回. Lecci&oacute;n 10.B<BR>3.過去分詞(participio pasado) 4.現在分詞(gerundio).<BR>第10回. Lecci&oacute;n 11.A<BR>1.直説法現在完了(pret&eacute;rito perfecto de indicativo) 2. 直説法点過去-規則活用(pret&eacute;rito indefinido).<BR>第11回. Lecci&oacute;n 11.B<BR>3.受動文(oraciones pasivas) 4.縮小辞と増大辞(diminutivos y aumentativos).<BR>第12回. Lecci&oacute;n 12.A<BR>1.直説法点過去-不規則活用(verbos irregulares en pret&eacute;rito indefinido). <BR>第13回. Lecci&oacute;n 12.B<BR>2.知覚・使役・放任・命令・許可の動詞(verbos de percepci&oacute;n, permiso y mandato).<BR>第14回. Lecci&oacute;n 12.C y Lecci&oacute;n 13.A<BR>3.不定語と否定語(indefinidos y negativos).<BR>1.直説法線過去(pret&eacute;rito imperfecto de indicativo) <BR>第15回. Lecci&oacute;n 13.B<BR>2.直説法過去完了(pret&eacute;rito pluscuamperfecto de indicativo) 3.間接疑問文(oraciones interrogativas indirectas)&nbsp;&nbsp;4.因果関係を表す接続表現(causales y consecutivas).<BR>第16回. 期末試験<BR>                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+期末試験の点数と、普段の授業への取り組み（小テスト、課題提出の状況など）に基づいて成績評価を行う。具体的には、期末試験（中間テスト等も含む）70％、課題提出等の平常点30％を標準とする。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+1)授業に参加する。<BR>2)各回の新しい文法項目を学習し、練習する。<BR>3)小テストのための勉強をする。<BR>4) 宿題をする。<BR>5) 学期末の文法筆記試験                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+1. 教科書(受講者は全員必ず購入してください)<BR><BR>Atsuko Wasa, Gram&aacute;tica elemental del espa&ntilde;ol, Tercera Edici&oacute;n, Editorial Asahi を教科書として使用する。<BR><BR>2.参考書(購入の義務はありません)<BR><BR>瓜谷良平、瓜谷望『スペイン語入門』新版、白水社。<BR>廣康好美、VIVANCOS Josefa『すぐわかるスペイン語』東京図書<BR><BR>3. 単語集(購入の義務はありません)<BR><BR>GIDE語彙研究班編『スペイン語語彙練習帳』朝日出版社<BR>GIDE語彙研究班編『スペ単!―頻度で選んだスペイン語単語集(練習問題つき)』朝日出版社<BR><BR>                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                        <p id="pretopics">
+MELCHY RAMOS Yaxkin （メルチー　ラモス　ヤスキン）<BR>木曜5・6限は在室の可能性が高いと思われます。CEGLOC棟CA309　研究室<BR>melchy.yaxkin.ga@u.tsukuba.ac.jp                         </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
+                    <p id="style">
+出席、課題の提出、積極性、リスニングはこの授業を受ける上で、また、スペイン語を習得する上でもとても大切です。スペイン語の発音は日本語に似ているので、日本人の学生にとって親しみやすい言語だと思います。                    </p>
+            </div>
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>

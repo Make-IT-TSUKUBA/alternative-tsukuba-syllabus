@@ -1,0 +1,446 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2024/HC40023/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+              最終更新日：2024/03/27
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+HC40023        </span>&nbsp;
+        <span id="title">
+応用看護学実習        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    2.0 単位,
+            </span>
+            <span id="grade">
+                    4 年次,
+            </span>
+            <span id="timetable">
+春BC 集中            </span>
+            <br>
+            <span id="assignments">
+岡山 久代 他看護学類教員            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+看護に関連する領域を学生自身の関心によって選択し、それぞれの場所（病院、関連施設など）で実習を行う。この実習における看護過程を通して、看護の理念、知識、方法の統合をはかる。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+看護学類生に限る<BR>6/3-7/4,7/5-7/31<BR>実務経験教員<BR>対面<BR>詳細後日通知        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+実習･実験･実技        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+コミュニケーション能力<BR>協働性・主体性・自律性<BR>看護における対象理解<BR>看護の専門知識・技術<BR>科学的根拠に基づく看護の実践力<BR>医療における連携・協働<BR>看護倫理とケアリング                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
+                <p id="style">
+1年から4年までに修得した看護実践能力の評価を踏まえ、保健・医療・福祉の包括的な視点から看護の総合的な実践能力を高めるため、学生自らが実習を企画し実施し評価できることを目的とする。あわせて将来の自らの看護の発展と方向性を探求することを目的とする。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+看護の総合的実践力, 科学的根拠に基づく看護の実践力, 医療における連携, 協働                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+応用看護学実習では、各担当教員の方針に従い実習を実施するが、共通する実習方法について以下に掲げる。<BR><BR>１．各自の関心に基づき実習課題及びフィールドを選択し、担当教員の指導のもとで、実習内容に合った実習場所を決める。<BR>２．実習課題を達成するために、担当教員の指導のもとで、実習計画書を完成させる。<BR>３．各実習施設で実習計画にそって、臨床指導者のアドバイスを得ながら看護過程を展開し、実習を遂行する。<BR>４．実習最終日に、実習内容の発表及び討議を行い、学生自らが計画立案した看護について評価する。<BR>５．実習内容についてレポートにまとめて提出する。<BR><BR><BR>　■■■選択領域（教員名）と概要■■■<BR><BR>【グローバルヘルス看護学領域】<BR>（柴山大賀、阿部吉樹、工藤理恵、菅谷智一、Togoobaatar Ganchimeg）<BR><BR>国内外の地域の健康問題とその背景、保健活動の実際や看護の役割について、グローバルな視点で学ぶことを目的に、各自の関心に基づき実習のフィールドおよび課題を選択し、それに沿った実習内容を担当教員と共に計画し実施する。<BR>実習中は、学生は教員と振り返りの時間を持ち、その日の実習で学んだことや験したことが、実習における学習目標、学生が選択したトピックスについての学習目標が達成できているかの確認をおこなう。実習修了後は総括レポートを各学生がまとめ、日々の記録と共に担当教員に提出する。<BR><BR>◆予定される実習内容(2週間相当)<BR>各自の課題に合わせて国内のフィールドで、外来・入院患者や患者家族への看護ケア、外国人児童・生徒への健康教育の計画・実施などをおこなう<BR><BR>◆予定される実習場所：筑波大学附属病院、Liberty International School<BR><BR>◆実習可能な主なテーマ(担当教員)<BR>　柴山：糖尿病の自己管理支援（在留外国人患者や経済的要支援患者への対応など）<BR>　阿部：慢性疾患患者の看護<BR>　工藤：糖尿病患者の口腔管理<BR>　菅谷：精神看護、森林療法、児童精神科看護<BR>　Togoobaatar：母子保健、健康サービスとケアの質評価、二次データ分析<BR><BR>※上記に限らず、希望する実習内容に応じて可能な限り柔軟に対応する<BR><BR>-------------------------------------------------------------------------------<BR>【療養調整看護学領域】<BR>（落合亮太、目麻里子、山下美智代）<BR><BR>1. 実習のテーマを設定する<BR>2. 実習テーマを達成するための実習目標を設定する<BR>3. 実習目標に基づいた実習計画表を作成する。<BR>4. 実習施設で臨床指導者や病棟看護師等の助言を得てケアを実施する。<BR>5. 実習目標に沿って、自身の実習について評価する。<BR><BR>◆実習施設：筑波メディカルセンター病院、筑波大学附属病院<BR><BR>-------------------------------------------------------------------------------<BR>【国際発達ケア学領域】<BR>（安梅　勅江、涌水　理恵）<BR><BR>◆主な実習施設:在日外国人学校<BR>　　担当教員：安梅 勅江&nbsp;&nbsp;&nbsp;<BR>コミュニティ・エンパワメント、生涯発達ケア、国際保健福祉のいずれかに関する基礎的な知識と技術を学ぶ。<BR>特に実践研究に結びつく情報収集の方法と活用について、具体的な課題を通して習得する。学生の関心に応じてテーマを設定し、学習目標を達成するために個別およびグループで実習を行う。学習内容を定期的に発表し、コメントを参考にして自らの理解をさらに深める。<BR>世界の人々の生涯におよぶ発達を理解し、健やかな生活を維持増進するエンパワメントのケア理論と技法を学ぶ。<BR>在日外国人学校での国際交流や、学生自身が関心を持つ国の健康や発達課題に焦点を当て、実践と理論を踏まえた根拠に基づくケアについて理解する。<BR><BR>◆主な実習施設:筑波大学附属病院（小児科病棟/GCU/小児科外来）、都内療育センター<BR>　　担当教員：涌水理恵 <BR>&bull; 学生が各自で実習テーマを設定し、担当教員の指導のもとで、実習内容に合った実習場所を決める。<BR>&bull; 担当教員指導のもとで、各自の実習目標に沿った実習計画書を完成させる。<BR>&bull; 各自実習施設で臨床実践指導者の指導を受けながら、実習計画に沿って実習を実施する。<BR>&bull; 実習最終日にカンファレンスを開催し、担当教員・臨床実践指導者らと実習内容の発表および討議を行い、計画し実施した看護について学生自らが評価する。<BR>&bull; 実習内容についてレポートにまとめて提出をする。<BR><BR>-------------------------------------------------------------------------------<BR>【看護実践・ケアシステム開発学領域】<BR>（水野　道代、伊藤　智子）<BR><BR>1. 学生が各自で実習テーマを設定し、担当教員の指導のもとで、実習内容に合った実習場所を決める。<BR>2. 担当教員の指導のもとで、各自の実習目標にそった実習計画書を完成させる。実習計画書には、以下の内容を必ず含める。学籍番号、氏名、実習テーマ、テーマ設定の理由、実習目標(評価可能なもの)、実習内容(目標を達成するための具体的な計画)、2週間のスケジュール、緊急連絡先<BR>3. 各実習施設で実習計画にそって、臨床・臨地指導者のアドバイスを得ながら看護過程を展開し、実習を遂行する。<BR>4. 実習最終日に実習内容を発表し、討議する。<BR>5. 実習内容について担当した事例を中心にレポートにまとめて提出する。<BR><BR>◆主な実習施設<BR>筑波大学附属病院 成人系病棟<BR>つくば市近辺の訪問看護ステーションなど<BR><BR>-------------------------------------------------------------------------------<BR>【看護理工学・ウィメンズヘルス看護学・発達支援学領域】　<BR>（岡山　久代、岩田　裕子、水野　智美）　<BR><BR>実習目標<BR>＜看護理工学・ウィメンズヘルス看護学分野＞<BR>1.包括的視野をもって、周産期の事例における看護展開をする。<BR>　自己の課題やテーマに基づいて、対象に合わせた看護ケアを実施し、評価する。<BR>2.ウィメンズヘルス看護領域における関心について実習を通して深める。<BR>　対象の看護展開を振り返り、対象のニーズにあわせた保健指導を計画・実施する。ウィメンズヘルス看護領域への興味・関心を向上させ、看護への探求の発展や方向性を深める。<BR>3.看護実践における課題やニーズに対する関心について実習を通して深める。<BR>　看護実践における課題やニーズの抽出を行い、改善・開発に向けたアクションプランを作成する。<BR> <BR>＜発達支援学＞<BR>1. 発達的支援、医療的支援を必要とする子どもに対する看護展開をする。<BR>　自己の課題やテーマに基づいて、対象に合わせた看護ケアを実施し、評価する。<BR>2. 医療、福祉、教育の連携のあり方について包括的に学ぶ。<BR>　対象の子どもを取り巻く医療、福祉、教育の連携について総合的に学ぶとともに、連携における課題やニーズの抽出を行う。<BR>3. 発達支援領域における関心を深める。<BR>　発達支援領域への興味・関心を向上させ、看護への探求の発展や方向性を深める。<BR> <BR>主な実習施設<BR>　筑波大学附属病院けやき棟5東病棟、万博公園どろんこ保育園<BR><BR>-------------------------------------------------------------------------------<BR>【高齢者ヘルスプロモーション領域】※実習期間：6/17～28<BR>（橋爪　祐美）<BR><BR>1. 実習のテーマを設定する<BR>2. 実習テーマを達成するための実習目標を設定する<BR>3. 実習目標に基づいた実習計画表を作成する。<BR>4. ケアを実施する際は、実習施設の臨床指導者や病棟看護師等の助言を『得る。』<BR>5. 実習目標に沿って、自身の実習について評価する。<BR><BR>◆実習施設：筑波大学附属病院<BR><BR>-------------------------------------------------------------------------------<BR>【公衆衛生看護学領域】<BR>（山海知子、大宮朋子、井坂ゆかり）<BR><BR>公衆衛生看護の対象となる個人、家族、集団、組織への看護活動を通して、地域における保健・医療・福祉システムの現状と公衆衛生看護のあり方を学ぶ。<BR>茨城県内の保健所での実習を通して、保健所の機能、公衆衛生看護の担い手である保健師の役割を学ぶとともに保健師に必要な技法等を習得する。<BR>また、事業所、学校での実習を通して、産業保健、学校保健における看護職の機能と役割を学ぶ。<BR>実習目標:保健所の機構と機能、保健所保健師の役割を学び、活動内容について説明できる。<BR>学校現場における児童生徒及び教職員への健康支援について学び、学校におけるヘルスプロモーションについて説明できる。<BR>公衆衛生看護を実践する保健師に必要な能力と態度を養い、産業保健師の役割と健康経営について説明できる。<BR><BR>実習：1茨城県内の保健所 1週間<BR>　　　2筑波大学附属久里浜特別支援学校<BR>　　　3茨城県内の企業、東京都内の企業<BR>見学、演習、実習、カンファレンスを含む。<BR><BR>-------------------------------------------------------------------------------                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+3年次までの科目及び実習の単位をすべて取得していること                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+【グローバルヘルス看護学領域】<BR>日々の記録(30%)、総括レポート(50%)、実習への積極的な態度(20%)などから目標達成状況(計100%)を評価する。<BR>なお、遅刻・早退は5点/回、欠席は10点/回の減点とする。<BR><BR><BR>【療養調整看護学領域】<BR>実習計画書20%、実習内容50%、レポート30%<BR>遅刻・早退は総点から-5点、欠席は-10点とする<BR><BR><BR>【国際発達ケア学領域】<BR>実習記録、実習成果( レポート) などから目標達成状況( 100% )で評価する<BR><BR><BR>【看護実践・ケアシステム開発学領域】<BR>実習計画書20点、実習内容60点、発表内容10点、レポート10点の配分で評価する。<BR><BR><BR>【看護理工学・ウィメンズヘルス看護学・発達支援学領域】<BR>実習計画書10%、実習内容40%、保健指導の計画・実施40%、レポート10％<BR><BR><BR>【高齢者ヘルスプロモーション領域】<BR>実習目標の到達に伴う行動(50%)、実習記録の記述と提出(50%)<BR>遅刻・早退は5点/回、欠席は10点/回の減点とする。<BR><BR><BR>【公衆衛生看護学領域】<BR>実習目標の達成状況40%(課題レポート、記録物を含む)、施設での取り組み状況40%(施設カンファレンスでの発表と内容、<BR>実習への積極性や住民への誠実性、メンバーシップの状況など)、学内学習状況(期間中の学習状況・事後の成果発表など)20%<BR>                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+授業外では、各自が設定した実習課題、あるいは課題の関連事項について、文献を用いて主体的に学習すること                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">単位取得要件</h2>
+                <div id="topics">
+                        <p id="pretopics">
+4/5以上の出席、目標達成度60%以上で単位を認定する<BR><BR>【出席についての注意事項】<BR>●実習の単位認定に必要な出席日数<BR>実習日数の4/5 以上出席した者を評価の対象とする。なお出席日数を満たしても、それだけで単位認定を保証するものではない。<BR><BR>●遅刻、早退の取り扱い<BR>実習における遅刻や早退は0.5 日の欠席とみなし、出席日数から減算する。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                    </table>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>

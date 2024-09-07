@@ -1,0 +1,797 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2024/FG19113/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+FG19113        </span>&nbsp;
+        <span id="title">
+工学システム基礎実験B        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    2.0 単位,
+            </span>
+            <span id="grade">
+                    2 年次,
+            </span>
+            <span id="timetable">
+秋ABC 月3-5            </span>
+            <br>
+            <span id="assignments">
+中内 靖, 藪野 浩司, 上原 皓, 星野 准一, 澁谷 長史, 髙谷 剛志, 山口 友之, 橋本 悠希, 文字 秀明, 金久保 利之, 八十島 章, 山本 亨輔, 松島 亘志, SHEN Biao, 小平 大輔, 武若 聡, 磯部 大吾郎, 羽田野 祐子, 松田 昭博, 三目 直登            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+動的システム、回路とコンピュータ、センサとアクチュエータ、機構、固体の力学、流体の粘性、温度の計測など、幾つかの基本的なテーマで実験を行い、基本法則、実験技術、レポートの作成方法について学ぶ。さらに製図の基礎についてもこの中で実習する。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+必修科目<BR>工学システム学類生に限る<BR>世話人:山口, 八十島<BR>対面        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+実習･実験･実技        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係(学習・教育到達目標との関係)</h2>
+                <p id="style">
+この科目は,「3.2 プレゼンテーション能力」に対応している.                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
+                <p id="style">
+工学システム学類の基礎科目および基礎技術に関して実験を通して習熟し,実験結果および考察をレポートにまとめることで,論理的な記述力,プレゼンや討議等のコミュニケーション能力,自主的かつ継続的に学習できる能力を形成する.                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+工学システム, 測定原理, 物性・力学, 電気.電子工学, 制御工学, 設計工学                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+幾つかの基本的なテーマで実験を行い,基本法則,実験技術,レポートの作成方法について学ぶ.さらに製図およびMATLABの基礎についてもこの中で実習する.全12テーマの内6テーマについて,各テーマを2週にわたり実験を行い,レポートを作成する.                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+1)                                        </th>
+                                        <td>
+固体の力学                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+2)                                        </th>
+                                        <td>
+流体の粘性                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+3)                                        </th>
+                                        <td>
+振動測定                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+4)                                        </th>
+                                        <td>
+変圧器の特性とインピーダンス                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+5)                                        </th>
+                                        <td>
+温度の計測                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+6)                                        </th>
+                                        <td>
+製図                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+7)                                        </th>
+                                        <td>
+システム制御工学基礎実験                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+8)                                        </th>
+                                        <td>
+演算増幅器による線形システムの基礎                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+9)                                        </th>
+                                        <td>
+ダイオードとトランジスタ                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+10)                                        </th>
+                                        <td>
+論理回路とコンピュータの基礎                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+11)                                        </th>
+                                        <td>
+DCモータの製作と制御                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+12)                                        </th>
+                                        <td>
+機構と機械要素                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+1年生における必修科目を理解していること.                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+各テーマについて提出される実験レポート(100%)により評価する.各テーマの実験レポートを100%満点で評定し,6テーマ分の評定の平均点として総合評価する.なお,総合評価における60%以上を単位取得の要件とする.                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+受講前に,その週に行う実験に対応する実験テキストの部分を読んでくること.特に「実験心得およびレポート作成要領」を熟読すること.また,用語や理論についての理解が不十分であれば事前に自分で調べておくこと.<BR>各テーマについて，レポートを課しているがテキスト内に課題が記載されている．受講前にそれぞれのテーマにおいてどのような課題が課せられているかを確認した上で実験に臨むこと．また課題に対して，レポートにどのように記載すべきかを想定しておき，不明なことがあれば実験当日に教員ならびにTAよりアドバイスをもらうこと．<BR>実験後の翌週までにレポートを作成して提出することになるが，レポート作成において不明なことがあれば，担当教員に相談すること．                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+実験開始時のガイダンスにおいて実験テキストを配布する.また,実験テキストにあげられている参考文献をいくつか記す.                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th>
+1. 阿部龍蔵 サイエンスライブラリー物理学3,サイエンス社                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+2. 三輪光雄(編) 「理論・応用物理学演習第1巻」,森北出版                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+3. 竹田宏 「教養課程物理学(1)」,朝倉書店                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+4. 谷口修・遠藤満 「力学」,理工学基礎講座14巻,朝倉書店                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+5. 大沢胖・他 「構造の動的解析」,新建設学大系38巻,彰国社                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+6. 吉川孝雄・松井剛一・石井徳章 「機械の力学」,コロナ社                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+7. 柴田望洋 「新・明解C言語 入門編」,SBクリエイティブ                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+8. 服部延春 「新訂版 機械製図-理論と実際-」,工学図書                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+9. 松澤昭 「基礎電子回路工学 -アナログ回路を中心に-」,電気学会                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+10. 浜辺隆二 「論理回路入門」,森北出版                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+11. 谷一郎 「流れ学」,岩波全書                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+12. 真島正市,磯部孝 「計測法通論」,東京大学出版会                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+13. 小郷寛,石亀篤司,小亀英己 「基礎からの交流理論」, 電気学会                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">参考書</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                    </table>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+中内 靖 　                                                        <br>
+                                                                <span class="officehour-address">
+1001518                                                                </span>
+                                                                <a href="http://hri.iit.tsukuba.ac.jp/" target="_blank">http://hri.iit.tsukuba.ac.jp/</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+藪野 浩司 　                                                        <br>
+                                                                <span class="officehour-address">
+1001346                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+上原 皓 　                                                        <br>
+                                                                <span class="officehour-address">
+100004811                                                                </span>
+                                                                <a href="https://sanlab.iit.tsukuba.ac.jp/" target="_blank">https://sanlab.iit.tsukuba.ac.jp/</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+星野 准一 　                                                        <br>
+                                                                <a href="http://www.entcomp.iit.tsukuba.ac.jp" target="_blank">http://www.entcomp.iit.tsukuba.ac.jp</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+澁谷 長史 　                                                        <br>
+                                                                <span class="officehour-address">
+1002722                                                                </span>
+                                                                <a href="http://www.mil.iit.tsukuba.ac.jp/" target="_blank">http://www.mil.iit.tsukuba.ac.jp/</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+髙谷 剛志 　                                                        <br>
+                                                                <span class="officehour-address">
+100004025                                                                </span>
+                                                                <a href="https://cigl.iit.tsukuba.ac.jp" target="_blank">https://cigl.iit.tsukuba.ac.jp</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+山口 友之 　                                                        <br>
+                                                                <span class="officehour-address">
+23051362                                                                </span>
+                                                                <a href="http://ice.iit.tsukuba.ac.jp/" target="_blank">http://ice.iit.tsukuba.ac.jp/</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+橋本 悠希 　                                                        <br>
+                                                                <span class="officehour-address">
+23051604                                                                </span>
+                                                                <a href="http://hashimoto.iit.tsukuba.ac.jp/" target="_blank">http://hashimoto.iit.tsukuba.ac.jp/</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+文字 秀明 　月曜日　13:30-16:00　                                                        <br>
+                                                                <span class="officehour-address">
+1001294                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+金久保 利之 　                                                        <br>
+                                                                <span class="officehour-address">
+1001779                                                                </span>
+                                                                <a href="http://www.kz.tsukuba.ac.jp/~kanakubo/" target="_blank">http://www.kz.tsukuba.ac.jp/~kanakubo/</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+八十島 章 　                                                        <br>
+                                                                <span class="officehour-address">
+1002643                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+山本 亨輔 　3F111                                                        <br>
+                                                                <span class="officehour-address">
+23051312                                                                </span>
+                                                                <a href="http://www.kz.tsukuba.ac.jp/~yamamoto_k/" target="_blank">http://www.kz.tsukuba.ac.jp/~yamamoto_k/</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+松島 亘志 　                                                        <br>
+                                                                <span class="officehour-address">
+1001763                                                                </span>
+                                                                <a href="http://www.kz.tsukuba.ac.jp/~tmatsu/index.html" target="_blank">http://www.kz.tsukuba.ac.jp/~tmatsu/index.html</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+SHEN Biao 　メールでの事前連絡は必要になります。　                                                        <br>
+                                                                <span class="officehour-address">
+100003452                                                                </span>
+                                                                <a href="http://www.kz.tsukuba.ac.jp/~b.shen" target="_blank">http://www.kz.tsukuba.ac.jp/~b.shen</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+小平 大輔 　                                                        <br>
+                                                                <span class="officehour-address">
+100004465                                                                </span>
+                                                                <a href="https://sites.google.com/view/daisukekodaira03en" target="_blank">https://sites.google.com/view/daisukekodaira03en</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+武若 聡 　                                                        <br>
+                                                                <span class="officehour-address">
+1001395                                                                </span>
+                                                                <a href="http://cecom.kz.tsukuba.ac.jp" target="_blank">http://cecom.kz.tsukuba.ac.jp</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+磯部 大吾郎 　                                                        <br>
+                                                                <span class="officehour-address">
+1001650                                                                </span>
+                                                                <a href="http://www.kz.tsukuba.ac.jp/~isobe/" target="_blank">http://www.kz.tsukuba.ac.jp/~isobe/</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+羽田野 祐子 　随時　総合B棟710室                                                        <br>
+                                                                <span class="officehour-address">
+1001589                                                                </span>
+                                                                <a href="http://www.kz.tsukuba.ac.jp/~hatano" target="_blank">http://www.kz.tsukuba.ac.jp/~hatano</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+松田 昭博 　                                                        <br>
+                                                                <span class="officehour-address">
+1002255                                                                </span>
+                                                                <a href="http://poly.kz.tsukuba.ac.jp/" target="_blank">http://poly.kz.tsukuba.ac.jp/</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+三目 直登 　                                                        <br>
+                                                                <span class="officehour-address">
+100002921                                                                </span>
+                                                                <a href="https://www.kz.tsukuba.ac.jp/~mitsume/" target="_blank">https://www.kz.tsukuba.ac.jp/~mitsume/</a>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
+                    <p id="style">
+授業の狙い:実験を通して,主専攻で必要となる知識ならびに実験技術を習得する.                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+                    <p id="style">
+TA配置有り(各テーマ1名程度)                    </p>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>

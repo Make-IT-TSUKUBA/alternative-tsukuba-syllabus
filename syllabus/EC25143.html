@@ -1,0 +1,634 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2024/EC25143/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+              最終更新日：2024/04/08
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+EC25143        </span>&nbsp;
+        <span id="title">
+生物資源生産科学実習II        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    1.0 単位,
+            </span>
+            <span id="grade">
+                    2 年次,
+            </span>
+            <span id="timetable">
+秋AB 木4,5            </span>
+            <br>
+            <span id="assignments">
+浅野 敦之, 津田 吉晃, 康 承源, 瀬古澤 由彦, 清野 達之, 福田 直也, 加藤 盛夫, 門脇 正史, 松倉 千昭, 王 寧, トファエル アハメド, ロンバルド ファビエン            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+本実習は,生物資源生産科学入門のための基礎的実習科目である。実習はT-PIRC農場と山岳科学センター筑波実験林で行われ,生物資源生産学の理論と技術を体験的に理解・習得することを通じ,生物資源生産科学への認識を深めることを目的とする。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+(コース共通）農林生物学コース　応用生命化学コース　環境工学コース　社会経済学コース　EC25123を修得済みの者は履修できない。<BR>対面        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+実習･実験･実技        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・専門コンピテンスとの関係</h2>
+                <p id="style">
+農林業現場における作物や家畜および樹木などの管理作業および農業機械の操作体験を通して、関連する農林業の基本的知識を体系的に学び、生物資源学の基礎となる教養を習得すると共に、生物資源学の農林業生産現場に関する問題意識を醸成する。<BR>1農学に関する体系的な専門知識、2農学に関する専門の基礎となる教養、3農学に関するICTの活用力、4農学に関する問題意識の醸成力                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
+                <p id="style">
+1農学に関する体系的な専門知識<BR>・農林業の各現場(水田、畑作、果樹、蔬菜、花卉、畜産、樹木、農業機械)における基本的作業の流れを実践的に体験し、関連する農林業の知識を理解する<BR>2農学に関する専門の基礎となる教養<BR>・農林業の各分野(水田、畑作、果樹、蔬菜、花卉、畜産、樹木、農業機械)における、基本的な作業の特性を説明できる<BR>・農林業の各分野(水田、畑作、果樹、蔬菜、花卉、畜産、樹木、農業機械)の、食料生産や環境保全活動における位置づけや役割を説明できる<BR>3農学に関するICTの活用力<BR>・学習管理システム(manaba)使用して、講義資料の取得やレポート課題の提出を行うことができる<BR>・スマート農業技術の特性や導入事例を説明できる<BR>4農学に関する問題意識の醸成力<BR>・国内外における農林業の役割について問題意識を持つ<BR>・将来の持続的食料生産農林業技術開発について問題意識を持つ<BR>・環境保全のあり方について問題意識を持つ                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+農作業, 水田・畑作, 畜産, 園芸, 森林, 農業機械                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+本実習は生物資源生産科学入門のための基礎的実習科目である。実習はT-PIRC農場と山岳科学センター筑波実験林で行われ,生物資源生産学の理論と技術を体験的に理解・習得することを通じ,生物資源生産科学への認識を深めることを目的とする。農林業生産現場に関わる内容を総括的に体験できるようにプログラムを編成しており,各回完結型の内容により,様々な分野を網羅している.受講人数が多数の場合,二班編制として,プログラム内容を受講班毎にずらして実施するが,いずれの班でもシラバスで予定している内容は全て体験する.                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+水田-2:水稲の収穫 <BR>果樹-3:果実の収穫                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+加藤 盛夫 , 松倉 千昭 , 瀬古澤 由彦 , 王 寧                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+果樹-3:果実の収穫<BR>水田-2:水稲の収穫                                         </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+加藤 盛夫 , 松倉 千昭 , 瀬古澤 由彦 , 王 寧                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+花卉-2:草花の鉢上げと鉢替え<BR>畑作-2:落花生・サツマイモの収穫                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+加藤 盛夫 , 松倉 千昭 , 康 承源 , 王 寧                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+畑作-2:落花生・サツマイモの収穫<BR>花卉-2:草花の鉢上げと鉢替え                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+加藤 盛夫 , 松倉 千昭 , 康 承源 , 王 寧                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+畜産-2:ホルスタインの体重・体尺測定                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+浅野 敦之                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6回                                        </th>
+                                        <td>
+樹木-2:材積測定およびきのこ等の収穫<BR>蔬菜-2:温室栽培果菜類の管理作業                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+門脇 正史 , 福田 直也 , 清野 達之 , 津田 吉晃                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第7回                                        </th>
+                                        <td>
+樹木-2:材積測定およびきのこ等の収穫<BR>蔬菜-2:温室栽培果菜類の管理作業                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+門脇 正史 , 福田 直也 , 清野 達之 , 津田 吉晃                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第8回                                        </th>
+                                        <td>
+農機-2:管理用小型トラクタと作業機の取扱                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+トファエル アハメド                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第9回                                        </th>
+                                        <td>
+畜産-3:牛のえさ                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第10回                                        </th>
+                                        <td>
+総合実習                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                        <p id="pretopics">
+講義等の詳細や変更については、manabaを通じて連絡する。                        </p>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+・学生教育研究災害傷害保険(学研災)に加入していること。<BR>・生物資源学類生優先。<BR>・EC25123を修得済みの者は履修できない。<BR>・「生物資源生産科学実習I」(EC25133)を履修していることが望ましい（最新版で変更）                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+成績評価は期末に実施する試験、もしくは課題の提出の評点により行う（100％）.ただし,出席日数が全体の60%未満であった場合には評価の対象外とする.なお,試験および課題は,実習テキストならびに実習中に解説した内容から出題するものとする.                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+毎回,manaba よりダウンロードの上,各自印刷をして持参する.                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+浅野 敦之 　                                                        <br>
+                                                                <span class="officehour-address">
+23051002                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+津田 吉晃 　                                                        <br>
+                                                                <span class="officehour-address">
+100001004                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+康 承源 　生物・農林学系B棟 Sei-No B706 4807                                                        <br>
+                                                                <span class="officehour-address">
+23051072                                                                </span>
+                                                                <a href="https://kanglabo.wixsite.com/main" target="_blank">https://kanglabo.wixsite.com/main</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+瀬古澤 由彦 　                                                        <br>
+                                                                <span class="officehour-address">
+1002493                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+清野 達之 　八ヶ岳演習林                                                        <br>
+                                                                <span class="officehour-address">
+1001994                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+福田 直也 　                                                        <br>
+                                                                <span class="officehour-address">
+1001758                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+加藤 盛夫 　                                                        <br>
+                                                                <span class="officehour-address">
+1001342                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+門脇 正史 　                                                        <br>
+                                                                <span class="officehour-address">
+1001125                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+松倉 千昭 　                                                        <br>
+                                                                <span class="officehour-address">
+1002323                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+王 寧 　                                                        <br>
+                                                                <span class="officehour-address">
+100000121                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+トファエル アハメド 　                                                        <br>
+                                                                <span class="officehour-address">
+1002501                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他</h2>
+                    <p id="style">
+詳細はmanabaを通じて告知する。<BR>・本授業は,各教員は実習のポイントなどを指示し,受講生が各テキスト付録の記録ノート等にその要点を書き込む形式で進行する.学期末に実施する試験は,農業生産に関わる基本的な項目を中心とした内容となります.<BR>・本実習での服装について,基本的に,ゴム長靴,長袖・長ズボン,かつ作業のできる格好(ジャージ等)を着用.晴天の場合は帽子など日よけ対策,雨天の場合は雨具等を準備すること.また,作業によっては,農作業用の手袋の着用をお薦めします.<BR>・更衣室内のロッカーを各自に割り当てますので,実習期間中は割り当てられたロッカーを使用してください.                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>

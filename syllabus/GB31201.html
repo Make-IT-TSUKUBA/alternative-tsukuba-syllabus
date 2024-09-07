@@ -1,0 +1,708 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2024/GB31201/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+GB31201        </span>&nbsp;
+        <span id="title">
+VLSI工学        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    2.0 単位,
+            </span>
+            <span id="grade">
+                    3・4 年次,
+            </span>
+            <span id="timetable">
+春AB 火3,4            </span>
+            <br>
+            <span id="assignments">
+山口 佳樹, 金澤 健治            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+VLSI(大規模集積回路)は,スーパーコンピュータからスマートフォン,組み込み機器に至るまで,全ての情報通信システムのハードウェア基盤となる.本講義では,VLSIの構成,動作,設計に関する基本事項を論理VLSI,メモリVLSIを中心に解説する.さらに,高速処理にとって重要な演算回路の構成と設計について解説する.        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+授業形態の変更等，授業情報はmanabaにて連絡する．<BR>対面        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+汎⽤コンピテンス<BR>2.	批判的・創造的思考⼒<BR>4.	広い視野と国際性<BR>・専⾨コンピテンス<BR>3.	情報システム分野の専⾨能⼒<BR>6.	実践的技術⼒と問題解決能⼒<BR>7.	情報専⾨技術者としての倫理                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
+                <p id="style">
+トランジスタ、論理ゲート、そしてそのハードウェア実現を学び、効率的に VLSI 設計できるようになる。<BR>半導体の基礎とトランジスタの基本動作について知り、説明できるようになる。<BR>トランジスタを用いた論理回路（例: CMOS論理回路）の基礎と設計方法を理解し、説明できるようになる。<BR>トランジスタを使った記憶回路の原理、主記憶やフラッシュメモリなどに使われる構造を知り、その違いを理解する。<BR>VLSIの高性能化と低消費電力化に必要な技術と解析手法を知り、効率的に設計できるようになる。<BR>VLSIの製造プロセスと高密度実装技術について理解し、説明できるようになる。<BR>ASICやFPGAなど、VLSIの種類と構造を理解し、説明できるようになる。<BR>計算機の基本的な演算器が論理回路によってどのように構築されるかを理解し、その違いを説明できるようになる。<BR>回路規模と演算性能の見積りが行えるようになり、それに基づいて各種構成方法のトレードオフを把握できるようになる。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+VLSI, 集積回路, トランジスタ, CMOS, 論理回路, メモリ, FPGA, 算術演算回路                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+【論理ゲートとトランジスタ】<BR>VLSI(大規模集積回路)の基本となる論理ゲート(AND,OR,NOTなど)がトランジスタによって実現できることを学ぶ.<BR>トランジスタの材料である半導体とその基本動作について理解する.<BR>--------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+山口 佳樹                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+【トランジスタによる論理回路】<BR>トランジスタを用いたプロセッサなどの論理回路の設計について,CMOS論理回路を中心に理解する.<BR>VLSIの動作速度と消費電力がどのようなメカニズムで決まるかを学ぶ.<BR>--------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+山口 佳樹                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+【ラッチとメモリ】<BR>トランジスタを用いた記憶回路(ラッチとメモリ)の原理について学ぶ.<BR>コンピュータの主記憶などに使われるDRAM,USBメモリやSSDに利用されるフラッシュメモリについて理解する.<BR>--------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+山口 佳樹                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+【VLSI(大規模集積回路)の構造と製造・設計技術】<BR>トランジスタの構造とその製造技術(クリーンルーム内でどのようにVLSIチップが製造されているか)について学ぶ.<BR>何故,1億個以上のトランジスタが1センチメートル四方のチップに集積できるのか理解する.<BR>VLSI(大規模集積回路)の設計フローについて学び,ハードウェア記述言語やCADツールの位置づけを学ぶ.<BR>VLSIの大規模,高性能化には,高位ハードウェア記述言語や高性能CADが不可欠であることを理解する.<BR>高密度実装技術(パッケージングとプリント基板への搭載技術)について学ぶ.<BR>--------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+山口 佳樹                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+【VLSI(大規模集積回路)の種類と構成】<BR>ASICやFPGAなどの集積回路の種類とその構成,方式について学ぶ.<BR>集積回路の実装技術が高性能IT機器には不可欠であることを理解する.<BR>--------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+山口 佳樹                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6回                                        </th>
+                                        <td>
+【VLSI設計の概要】<BR>論理回路の設計方法と，そのCMOSによる実装方法．<BR><BR>【算術演算回路: 加算器】<BR>加算器の構成方法とその高速化 (桁上げ伝播加算, 桁上げ選択加算,桁上げ先見加算,並列prefix加算など)．<BR>--------------------------------------------------------------------------<BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+金澤 健治                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第7回                                        </th>
+                                        <td>
+【算術演算回路: 減算器】<BR>2の補数による負数表現の導入と，それに基づく減算器の構成方法．<BR>オーバーフローの発生条件と検出方法．<BR>符号拡張．<BR>--------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+金澤 健治                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第8回                                        </th>
+                                        <td>
+【算術演算回路: 乗算器】<BR>・直接法，配列型，tree型，Booth法，Baugh-Wooly法など<BR>--------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+金澤 健治                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第9回                                        </th>
+                                        <td>
+【算術演算回路: 除算器】<BR>・減算シフト型除算(回復法，非回復法など)，乗算型除算(Newton法，Goldschmidt法など)<BR>--------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+金澤 健治                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第10回                                        </th>
+                                        <td>
+【算術演算回路: 浮動小数点演算器】<BR>浮動小数点数の数表現 (IEEE-754),浮動小数点数の加減乗除のハードウェア実装<BR>--------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+金澤 健治                                         </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+「論理回路」、「論理回路演習」、「論理システム」、「論理システム演習」を受講済であることが望ましい.<BR>組み合わせ回路・順序回路の概念と設計方法について十分に復習していること.                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+期末テストによって評価する(100点満点．配点は前半分が50点，後半分が50点)．                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+毎回の授業範囲を復習すること．<BR>参考文献における関連事項を理解すること.<BR>演習問題が課された場合はそれを解き，自身や教員の解答の妥当性や別解の有無などの考察を行うこと．<BR>                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+本授業は配布資料で行う。<BR>【配布資料】と書かれているもの以外は全て補助教材であり、教科書ではないため購入する必要はない。<BR>講義のWebページは、「https://manaba.tsukuba.ac.jp/ct/course_2911217」である。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th>
+1. 山口佳樹、金澤健治 【配布資料】講義ノート、授業スライド（manabaで配布、PDF形式）                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+2. 天野 英晴 ディジタル設計者のための電子回路（コロナ社）                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784339007695" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784339007695                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+3. 飯田全広 はじめての論理回路（近代科学社）<BR>                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784764905719" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784764905719                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+4. 田丸 啓吉 論理回路の基礎 (改訂版) (工学図書)                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784769202042" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784769202042                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+5. 宇佐美 公良 (監訳), ほか ウェスト&amp;ハリス CMOS VLSI 回路設計 基礎編（丸善出版）                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784621087213" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784621087213                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+6. 宇佐美 公良 (監訳), ほか ウェスト&amp;ハリス CMOS VLSI 回路設計 応用編（丸善出版）                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784621087206" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784621087206                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+7. 小林和淑, ほか SystemVerilogによるFPGA/ディジタル回路設計入門（オーム社）                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784274231018" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784274231018                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+8. 高木 直史 算術演算のVLSIアルゴリズム (並列処理シリーズ)（コロナ社）                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784339025859" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784339025859                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+9. 永田 穰、柳井 久義 新版 集積回路工学(I)（コロナ社）                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784339001440" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784339001440                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+10. 永田 穰、柳井 久義 新版 集積回路工学(II)（コロナ社）                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784339001457" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784339001457                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+11. 安永 守利 集積回路工学（森北出版）                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784627775718" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784627775718                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+12. David A. Patterson and John L. Hennessy (成田 訳) コンピュータの構成と設計 MIPS Edition 第6版 上（日経BP）                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784296070091" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784296070091                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+13. David A. Patterson and John L. Hennessy (成田 訳) コンピュータの構成と設計 MIPS Edition 第6版 下（日経BP）                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784296070107" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784296070107                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+14. David A. Patterson and John L. Hennessy Computer Organization and Design RISC-V Edition : The Hardware Software Interface (2ND Edition)（Morgan Kaufmann Publishers）                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9780128203316" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9780128203316                                                    </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+15. David A. Patterson and John L. Hennessy (中條 訳) コンピュータアーキテクチャ　定量的アプローチ第4版                                        </th>
+                                        <td>
+                                                    <a href="https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784798114408" target="_blank">
+https://tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:9784798114408                                                    </a>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+山口 佳樹 　面接を希望する場合はメールで事前に希望日時の調整をお願いします　                                                        <br>
+                                                                <span class="officehour-address">
+1002505                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+金澤 健治 　メールでアポイントメントをとってもらえれば随時　                                                        <br>
+                                                                <span class="officehour-address">
+23051795                                                                </span>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                            <tr>
+                                <th>
+GB10804                                </th>
+                                <td>
+論理回路                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+GB12017                                </th>
+                                <td>
+論理回路演習                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+GB12801                                </th>
+                                <td>
+論理システム                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+GB12812                                </th>
+                                <td>
+論理システム演習                                </td>
+                            </tr>
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+                    <p id="style">
+TA配置有り（1人）                    </p>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>

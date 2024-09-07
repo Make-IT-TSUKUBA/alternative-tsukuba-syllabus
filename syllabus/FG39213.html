@@ -1,0 +1,664 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2024/FG39213/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+FG39213        </span>&nbsp;
+        <span id="title">
+知的・機能工学システム実験        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    6.0 単位,
+            </span>
+            <span id="grade">
+                    3 年次,
+            </span>
+            <span id="timetable">
+春ABC 火3-5; 秋ABC 木3-5,金5,6            </span>
+            <br>
+            <span id="assignments">
+矢野 博明, 北原 格, 若槻 尚斗, 延原 肇, 前田 祐佳, 河合 新, 相山 康道, 鈴木 健嗣, 海老原 格, 善甫 啓一, 家永 直人, YEM Vibol            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+春ABC火345, 秋ABC 木345は,<BR>制御系設計,システムの最適化,センサとディジタル信号処理,センサとアナログ信号処理,画像処理,メカトロニクスなどに関する実験を行う.<BR><BR>秋ABC金56は,複数の実験テーマから一つを選択して,秋学期を通してテーマ毎にこれまでに修得した広範囲な工学知識を基に,具体的なシステムをデザインする能力を養う.そして,デザインしたシステムを複数のメンバーと協調して完成させる過程で,チームとして特定のプロジェクトをマネジメントする力を養成する.<BR>最終的に提出される課題(レポートやプレゼンテーション)により実験成果を評価する.        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+工学システム学類生に限る<BR>FG29213と同一。<BR>主専攻必修科目<BR>所属主専攻の科目番号で履修登録すること<BR>対面<BR>世話人:矢野。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+実習･実験･実技        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係(学習・教育到達目標との関係)</h2>
+                <p id="style">
+「専門実験」は,「3.3 自主性と行動力」に対応している.<BR>「応用実験」の前半「応用実験(デザイン)」は,工学システム学類の学習・教育到達目標「2.4 具体的なシステムを設計し運用する能力 (ii)エンジニアリング・デザイン能力」,後半「応用実験(チームワーク)」は,「2.4 具体的なシステムを設計し運用する能力 (iii)チームワーク力」に対応している.                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
+                <p id="style">
+「専門実験」は<BR>●各テーマについての物理的意義が理解できる。<BR>●論理的・数学的思考及び解析力、問題発見及び問題解決能力の基本が習得できる。<BR>●口頭、文書(レポート)等によって第三者に対して客観的な理論展開ができる。<BR>「応用実験」は<BR>●それぞれのテーマについて,その物理的意義が理解できるようになる.<BR>●それぞれのテーマに取り組むことで,問題設定及び問題解決能力の基本が習得できるようになるとともに,チームとして特定のプロジェクトをマネジメントすることができる.<BR>●口頭,文書(レポート)等によって第三者に対して客観的な理論展開ができるようになる.                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+「専門実験」は31-cd, 32-op, 33-sd, 34-sa, 35-ip, 36-mcの6つのテーマを履修する。<BR>「応用実験」は37-ro, 37-em, 37-hu, 37-co, 37-icの中から1つを選択して履修する。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+[31-cd]制御系設計: 3L103-N+S(河合):<BR>MatlabとSimulinkの基礎的な概念と操作を学び、多数存在するツールのひとつであるControl Toolboxを利用して制御系設計を行う。またこの制御系を検証するために Simulinkを用いてシミュレーションを実行する。これら一連のCADツールを利用してグループごとに制御系設計のプロジェクトを実施する。                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+河合 新                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+[32-op]システムの最適化:3L204-S(延原):<BR>最急降下法、最小二乗法、遺伝的アルゴリズム等の最適化手法に関する基礎的な演習を行うとともに、データ駆動型AIの基礎の習得、実装を行い、それらに関する自由研究課題を実習する。                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+延原 肇                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+[33-sd]センサとディジタル信号処理: 3L108-S(若槻):<BR>心電図、筋電図の生体信号の取得、Z変換によるノイズ除去ディジタルフィルタの作成に関する基礎実験。光・音響・振動センサ等と組み合わせた生体計測等に関する自由企画研究を実施しコンテスト形式で発表する。                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+若槻 尚斗                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+[34-sa]センサとアナログ信号処理: 3L108-N(前田):<BR>トランジスタ・オペアンプ増幅回路設計及びその特性評価法、電子回路を含むセンサ~アクチュエータの複素伝達特性の測定法、遅延線発振回路の構成法等のアナログ計測の実験。Lego Mindstorms NXTのセンサ、アクチュエータを利用を含めて自由企画研究を実施し、コンテスト形式で発表する。                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+前田 祐佳                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+[35-ip]画像処理: 3L303-S(北原):<BR>画像データのコピー・スケーリングなど基礎的な画像データ操作手法の習得、多視点画像を用いた3次元形状の復元、コンピュータグラフィックス技術を適用した自由視点映像の生成・提示など。                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+北原 格                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+[36-mc]メカトロニクス: 3L303-N(矢野):<BR>1自由度サーボ系、2軸水平多関節型マニュピレータ、インタラクティブシステム作製など。                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+矢野 博明                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+[37-ro]ロボットシステム: 3L103-N+S(相山):<BR>１　これまでに学習した,機械力学,材料工学,制御工学等を実際に応用して,安定,かつ高速に動作する2リンクのロボットマニピュレータシステムの設計,製作,軌道設計,制御を行う.最終的にはチームによるコンテスト形式でプレゼンテーション及び評価を行う.<BR>２　前半 応用実験(デザイン):<BR>既定の可動範囲を有し,既定のモータにより与えられたコースを最短時間で移動可能な2リンクロボットマニピュレータの設計を行う.2つのリンクのリンク長,リンクの質量比,コースを辿る軌道の加速度,減速度等により,移動時間および各モータに必要となる駆動トルクは大きく変動する.多数の設計要素があり,唯一最適な解が存在しない課題に対し,評価基準を定め,3次元CAD及びCAD上の動作シミュレーションツール等を駆使し,最も良いと思われるシステムデザインを完成させる.3名程度のチームを作り,各チームごとにシステムデザインを行い,プレゼンテーション及び設計レポートの提出を行う.評価基準の設定とそれに基づいた正しい設計が行われているか,その内容を評価する.<BR>３　後半 応用実験(チームワーク):<BR>応用実験(デザイン)で設計した2リンクマニピュレータシステムを,3名程度からなるチームで協働して製作する.実機に対して設計どおりの制御,動作軌道を与え,設計・シミュレーション通り動作するか否か確認を行う.実際にはモデル化されていない要因,たとえば摩擦やリンクのたわみ,加工時の誤差等により設計どおりには動作しない場合がほとんどである.これに対し,どのような修正を加えれば実機として安定,かつ高速に動作できるのか,各チームごとにこれまでに学んできた知識を基に検討を行い,実機,制御系,動作軌道等の改良を行う.最終的には全チームで実機を動かしてみせるコンテストを行う.コンテストの後に,プレゼンテーションを行い,最終報告レポートを完成させる.一人では行う作業が膨大なシステム開発をどのようにチームで完成させ,自分が担当した仕事が全体でどこに位置づけられるのか,その理解度を評価する.                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+相山 康道                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+[37-em]組込システムによるハードウェア設計: 3L108-S(善甫):<BR>１　これまでに修得した広範囲な工学知識(具体的には数学,電気回路,電子回路,プログラミングなど)を応用し,組込システムの上で動作する実践的なソフトウェアの設計を行い,チームで協力して周辺回路(ハードウェア)の設計・制御を行う.<BR>２　前半 応用実験(デザイン):<BR>これまでのパソコンによるC言語から,組込システムの上で動作する実践的なソフトウェアのデザイン・設計を行う.マイコンを使用したシステム(信号処理やハードウェアの制御等)をPCから独立して実際に動かす(機能させる)こと技術を習得することを前半の実験目的としている.具体的にはマイコンにセンサからの信号が入力でき,この信号をマイコンにて処理を行い,外部機器に出力することができるようになることが重要である.デザイン・設計したシステムをレポートにまとめ,その内容を評価する.<BR>３　後半 応用実験(チームワーク):<BR>複数名からなるチームで自主課題に取り組む.応用実験(デザイン)でシステムを設計した経験を生かし,後半の応用実験で取り組むテーマをチームで協働し,システムを完成させる.「マイコンの性能」,「センサの種類・特性」,「出力機器の種類・特性」等の制約下で,どれだけ有益なシステムをチームで完成させるかが重要な課題である.また限られた時間内に目標達成するためにはチームで仕事を行うことも重要であり,チーム内の適切な役割分担やメンバーの進捗状況の把握,実状に沿ったスケジューリングなどが必要となる.システムが完成した後は,完成させたシステムについてチーム毎にプレゼンテーションおよびシステムのデモを行う.最終的に完成したシステムの概要と工夫した点,また自分が担当した仕事の全体に対する位置づけをレポートにまとめ,その内容を評価する.                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+善甫 啓一                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+[37-hu]上肢の運動特性の計測: 3L204-M(鈴木):<BR>１　これまでに修得した力学,機構学,機械設計,制御工学,電気回路,生体工学,プログラミング等を応用し,上肢の運動特性の計測及び運動支援を題材として,実際に人と協調して機能するシステムについての理解を深める.<BR>２　前半 応用実験(デザイン):<BR>上肢動作支援システムを用い,人の上腕の静的および動的特性を計測し,人と協調して働くシステムの制御アルゴリズムについて学ぶ.また,生体電位信号(表面筋電位)計測や,光学式3次元モーションキャプチャーシステムによる動作計測の技術を学ぶ.さらに,計測した上肢の運動や表面筋電位を用いて筋骨格系のモデリングや運動特性の評価を行うことで,人と協調して機能するシステムのデザインが出来るようにする.最終的に学習内容をレポートにまとめる.<BR>３　後半 応用実験(チームワーク):<BR>応用実験(デザイン)で得られた知識を利用して,上肢の運動特性に基づき運動を支援するシステムの制御アルゴリズムについて,複数名からなるチームで協働し,完成させる.各チームで達成目標を定め,リーダーを中心に役割分担を明確化するとともに,チーム内の情報共有や相互調整を図るチームワーク力を養う.デモンストレーションとプレゼンテーションを通じ,構築したシステムの内容と評価,およびチームワークにおいて工夫した点と困難さについて発表する.                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+鈴木 健嗣                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+[37-co]コミュニケーションシステムの創作: 3L108-N(海老原):<BR>１　これまでに修得した広範囲な工学知識(具体的には数学,電気回路,電子回路,プログラミングなどを応用し,光デジタルコミュニケーションシステムを設計する.そして,設計したシステムを実際にチームで協力して完成させる.<BR>２　前半 応用実験(デザイン):<BR>まず信号の変復調原理や特徴,信号の周波数帯域など,通信に関する基礎的な知識を実験により確認する.これによりコミュニケーションシステムを設計する上で留意すべき点などを身につけることが出来る.続いて,光デジタルコミュニケーションシステムの要求仕様を提示し,それを満たすシステムを設計する.設計した内容は一人一人プレゼンテーションを行うが,そこではなぜそのような設計を行ったのか,数学,電気回路,電子回路の知識を基に,根拠を持って第三者にわかりやすく説明が出来るよう指導する.そして,最終的に設計内容をレポートにまとめ,その内容を評価する.<BR>３　後半 応用実験(チームワーク):<BR>応用実験(デザイン)で設計したシステムを複数名からなるチームで協働し,完成させる.設計した内容を実際のシステムに落とし込む過程では,数学やプログラミングの能力が必要となる.限られた時間で目標(要求仕様)を達成するためには,実装の過程で設計を見直したりする必要性も出てくるであろう.そこで,メンバーの能力(得意分野)を意識しながらタスクを割り振り,意思疎通を密にしつつ,時に必要な判断と決定を迅速に行うことが求められる.システムが完成した後は,チーム毎に完成させたシステムについてプレゼンテーションを行う.そこではチームで仕事をする上でどのようなことを留意すべきかなど,チームワークの重要性と難しさについて,自分たちの言葉で発表する.最終的に完成したシステムの概要と工夫した点,また自分が担当した仕事の全体に対する位置づけをレポートにまとめ,その内容を評価する.                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+海老原 格                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+[37-ic]画像分類システム:3L205(家永):<BR>１　これまでに修得した広範囲な工学知識(特にプログラミングや線形代数などの数学)を応用し,基本的なConvolutional Neural Network(CNN)による画像分類システムを実装する.後半には,チームごとに協力して問題設定,データセット収集,システムの改良を行い,設計したシステムを実問題に適用する.<BR>２　前半 応用実験(デザイン):<BR>まず,CNNの実装において広く利用されるPythonについて学習する.また,CNNを設計するための各要素,例えば,畳み込み層,プーリング層,活性化関数,最適化アルゴリズムなどについて,手を動かしながら理論と実装の両面を学習する.そして,画像のデータセットを使い,高精度な分類を可能とするCNNモデルを実装・評価することで,CNNによる基本的な画像分類システムのデザインを習得する.ここまでの実装を発表してレポートにまとめ,プログラムとともに提出する.それらの内容が評価される.<BR>３　後半 応用実験(チームワーク):<BR>応用実験(デザイン)でシステム設計した経験を生かし,3名程度からなるチームで新しい画像分類システムを設計・実装する.CNNの特性を十分に理解した上で,有益で魅力的かつ実現可能なシステムを設計することが重要である.また,限られた時間の中でデータセットの構築,モデルの設計・チューニングなどを完了させるには,チームでの適切な役割分担やコミュニケーションが必要不可欠である.最後にはチームごとに実装したシステムについて発表する.システムの概要と工夫した点,また各自が担当した仕事の全体に対する位置づけなどをレポートにまとめ,プログラムとともに提出する.それらの内容が評価される.                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+家永 直人                                         </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+１　専門実験<BR>(1) すべてのテーマに対して実験への参加・レポート提出等完了させること。テーマ毎に実験不参加日数、遅刻の程度、発表、口頭試問、レポート完成度などで評価する。全部不参加及びレポート未提出の場合はそのテーマはDとする。<BR>(1) 6テーマの成績を数値化した総合評価とし成績評価する(追試・再試は実施しない)。1テーマでもD評価があると総合評価も原則Dとする。<BR>(3) 実験実施中における理解度等は、試問・プレゼンテーション等によって確認し、レポート作成に着手してよいレベルに達していれば通常は専門実験の成績評価の30%程度を取得したこととする。<BR>(4) 残りの70%は、期限内に提出されたレポートによって評価する。<BR>(5) テーマごとに1・2・3・4・5・6ポイントで評価し、6個テーマの平均点を20倍にして、59％以下の場合はD、60％以上を合格とする。<BR><BR>２　応用実験<BR>(1) 前半 応用実験(デザイン): 実験への参加と課題提出の完了が必須である.実験不参加日数,遅刻の程度,発表・口頭試問への取り組み方によっては課題の得点から減点される. <BR>(2) 後半 応用実験(チームワーク): 実験への参加と課題提出の完了が必須である.実験不参加日数,遅刻の程度,発表・口頭試問への取り組み方によっては課題の得点から減点される. <BR><BR>３　総合評価<BR>専門実験の課題75％、応用実験(デザイン)の課題12.5%+応用実験(チームワーク)の課題12.5%=100%で,A+, A, B, Cの評価がされる.課題が一つでも未提出の場合は得点によらずDとする.追試・再試は実施しない.<BR>                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+事前学習：実験前に，基礎実験や制御，最適化，信号処理，画像処理，メカトロニクス分野の関連科目を復習しておくこと．また，各実験の前には，必ず実験テキストに目を通して予習しておくこと．<BR>事後学習：実験の内容や考察を，文書(レポート)等によって第三者に対して客観的な理論展開に基づいて説明出来るようになっているか，振り返りを行うこと．仮に不足がある場合には，関連科目の復習や参考書を参照しながら，自らの言葉で内容を説明できるようにしておくこと．<BR><BR>[31-cd]制御系設計:<BR>伝達関数や状態方程式による動的システムの表現法と基礎的なアナログ制御の概念は制御理論に関する基本的な概念として簡単には実験中に説明するが、理論そのものには深く立ち入らない。そのため、「線形システム制御」や「フィードバック制御」の授業内容を復習しておくとよい。<BR><BR>[32-op]システムの最適化: <BR>本テーマで学ぶ最小二乗法、最急降下法に関しては、「線形代数」や「解析学」が基礎となっているので、それらの復習をしておくとよい。また、組み合わせ最適化に関しては、「離散数学」や「システム最適化」の授業内容を復習しておくとよい。<BR><BR>[33-sd]センサとディジタル信号処理:<BR>実験項目として扱うサンプリング定理やエイリアシングについて「ディジタル信号処理」の授業内容を予習あるいは復習しておくと良い。ただし同科目を履修していない場合でも実験テキストを見て予習しておけば支障なく実験を進めることはできる。<BR><BR>[34-sa]センサとアナログ信号処理:<BR>トランジスタ・オペアンプ増幅回路設計及びその特性評価に関する基礎的な知識を実験により確認する。「電気回路」「電子回路」で学習した内容に加え、LTspiceによる電子回路のシミュレーションに関する基礎的な知識を提示された課題により習得すること。<BR>[35-ip]画像処理: 本実験は、画像処理、パターン認識などの知識を総合して、画像情報から被写体の３次元形状を復元する処理について学ぶ。「プログラミング序論A~D」で学習したC言語によるプログラミングの基礎的知識を復習した上で取り組むことが望ましい。<BR><BR>[36-mc]メカトロニクス: <BR>運動学、逆運動学を用いてマニピュレータの制御を行うため、「機械設計」、「メカトロニクス機構解析」、「ロボット工学」で学んだ内容やC言語によるプログラミングを復習しておくとよい。<BR><BR>[37-ro] ロボットシステム<BR>本実験は,機構設計,動作設計,加工,組み立て,制御,と多岐にわたる内容を含んでいる.これらを限られた時間でしっかりと進めるためには,チーム内での作業分担が重要である.もちろん他人が分担している内容を理解することも重要であるが,各自がその分担を責任を持って進め,全体を効率よく進めることが大事である.<BR><BR>[37-em] 組込システムによるハードウェア設計 <BR>本実験では回路設計およびプログラミング言語に関する基礎的な知識を実験により確認するが,その理論的な内容は「電気回路」,「電子回路」,「プログラミング序論A~D」で学修した内容に基づいている.最低限,これらの科目の受講内容を復習するか,電子回路およびC言語の基本演算子・標準入出力関数・数値処理について,基本的な説明ができるようにしておくこと.<BR><BR>[37-hu] 上肢の運動特性の計測<BR>本実験は,モータ特性,信号処理,モータ制御,運動特性の計測,と多岐にわたる内容を含んでいる.特に、異なる力学的特性を有する人と機械が接触し,同時に動作するというモデル化が困難な系を理解するためには,チーム内での協力分担が重要である.<BR>特に、各自がその理論的背景を理解するとともに、新たな力学的モデルを仮定しながら問題を設定し、実験機によって検証するという挑戦的な課題に意欲的に取り組んでもらいたい.<BR><BR>[37-co] コミュニケーションシステムの創作<BR>本実験では通信に関する基礎的な知識を実験により確認するが,その理論的な内容は「確率統計」「ディジタル信号処理」「電気回路」で学修した内容に基づいている.最低限,これらの科目の受講内容を復習するか,「サンプリング定理」「正規分布」「フーリエ変換」については「参考図書」を元に,基本的な説明ができるようにしておくこと.<BR><BR>[37-ic] 画像分類システム<BR>本実験では,PythonやCNNに関しては実験において確認するが,基本的なプログラミングやアルゴリズムについては「プログラミング序論A~D」にて学習したことをしっかりと復習した上で本授業に取り組むこと.数学については「線形代数1~3」や「微積分1~3」で学習した,基本的なことは復習しておくこと.「人工知能」を受講しておくと,CNNに対する理解がより深まる.                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+各テーマごとに実験説明資料を配布する．                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">参考書</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                    </table>
+                </div>
+                    <p id="pretopics">
+7. ロボットメカニクス,オーム社	<BR>8. ロボット制御基礎論,コロナ社	<BR>9. 電子回路,コロナ社[37-em](FG24341,FG34341,FG54731電子回路 教科書)	<BR>10. 電気回路ノート,コロナ社[37-em](FG20151,FG30151電子回路 教科書)	<BR>11. 力学の基礎とバイオメカニクス、コロナ社	<BR>12. 表面筋電図、東京電機大学出版局	<BR>13. 信号処理入門,コロナ社(付属図書館配架)	<BR>14. 確率と確率過程, 朝倉書店(付属図書館配架)	<BR>15. 図解LabVIEW入門,森北出版(付属図書館配架)	<BR>16. LabVIEW8プログラミングガイド,アスキー・メディアワークス(付属図書館配架)	<BR>17. Pythonで学ぶディープラーニングの理論と実装 ゼロから作るdeep learning 斎藤康毅著<BR><BR>1,2 は[35-ip]用。画像処理に関する説明が網羅的かつ明確に書かれており、本実験内容を理解するうえで役に立つ参考図書である。<BR>3は[36-mc]用。機構や制御に関する説明が書かれており、本実験内容を理解する上で役に立つ参考図書である。<BR>4は[32-op]用。離散数学の授業テキストでもあり、本テーマに関する話題として第6章を読んでおくとよい。<BR>5は[31-cd]用｡実験で使用するMATLAB/Simulinkによる例も多く書かれており、実験内容の理解に役に立つ参考図書である｡<BR>6は[33-sd]用。ディジタルフィルタの設計法について平易に解説され、多重ノッチフィルタの設計も実例として詳しく紹介されている。<BR>7は[37-ro]用。ロボット(リンク機構)の機構学および機械要素に関する説明がしっかりと書かれており,本実験で設計する2リンクマニピュレータの構成を理解するうえで役に立つ参考図書である.<BR>8は[37-ro]用。ロボットの運動学,逆運動学,動力学,逆動力学,軌道生成に関する説明がしっかりと書かれており,本実験で重要な要素となる動作軌道とトルクの関係を理解する上で役に立つ参考図書である.<BR>9,10は37-em用。本実験の前半で扱う「各種センサの入出力」において必要な知識が解説されており,各種センサの取り扱いを理解する上で役に立つ参考図書である.<BR>11は37-hu用。イオメカニクス、力学の基礎から筋骨格系の力学までの記載がなされており、本実験で設計する上肢外骨格型ロボットとそれに伴う人の力学特性を理解するうえで役に立つ参考図書である.<BR>12は37-hu用。表面筋電図の概要について計測方法から症例まで記載されており,本実験重要な要素となる人の運動特性を理解するための筋電信号の取り扱いを理解する上で役に立つ参考図書である.<BR>13は37-co用。本実験の前半で扱う信号処理,特に,信号の表現(第1章),フーリエ変換(第1章),離散時間フーリエ変換(第5章)についての説明が充実している.<BR>14は37-co用。本実験の前半で扱う雑音,特に,確率変数(第2章)についての説明が充実している.<BR>15は37-co用。本実験の後半で扱うプログラムLabVIEWと,それを用いた計測システムの構築について,初学者向けに平易にまとめられている.<BR>16は37-co用。LabVIEWに関するプログラミング技法が広くカバーされている(LabVIEWプログラミングができる人はこの本から読み始めると良い).特にサンプルプログラムが充実しているので,LabVIEWの自学自習には適している.<BR>17は37-ic用。ディープラーニングの基礎知識を解説しつつ,PythonによるNNやCNNの実装例が充実しており,PythonによりCNNを実装する上で役に立つ参考書である.<BR>                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                        <p id="pretopics">
+随時（e-mailで予約してください）                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+矢野 博明 　3M204                                                        <br>
+                                                                <span class="officehour-address">
+1002153                                                                </span>
+                                                                <a href="http://www.vrlab.iit.tsukuba.ac.jp" target="_blank">http://www.vrlab.iit.tsukuba.ac.jp</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+北原 格 　                                                        <br>
+                                                                <span class="officehour-address">
+1002336                                                                </span>
+                                                                <a href="http://www.image.esys.tsukuba.ac.jp/" target="_blank">http://www.image.esys.tsukuba.ac.jp/</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+若槻 尚斗 　                                                        <br>
+                                                                <span class="officehour-address">
+1002256                                                                </span>
+                                                                <a href="http://www.aclab.esys.tsukuba.ac.jp/~wakatuki/" target="_blank">http://www.aclab.esys.tsukuba.ac.jp/~wakatuki/</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+延原 肇 　                                                        <br>
+                                                                <span class="officehour-address">
+1002458                                                                </span>
+                                                                <a href="http://www.nobuharaken.com" target="_blank">http://www.nobuharaken.com</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+前田 祐佳 　                                                        <br>
+                                                                <span class="officehour-address">
+23051317                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+河合 新 　随時:メールでの予約が好ましい　                                                        <br>
+                                                                <span class="officehour-address">
+100002682                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+相山 康道 　　　居室：3M102                                                        <br>
+                                                                <span class="officehour-address">
+1001846                                                                </span>
+                                                                <a href="https://sites.google.com/ms.esys.tsukuba.ac.jp/www/" target="_blank">https://sites.google.com/ms.esys.tsukuba.ac.jp/www/</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+鈴木 健嗣 　                                                        <br>
+                                                                <span class="officehour-address">
+1002460                                                                </span>
+                                                                <a href="http://www.iit.tsukuba.ac.jp/~kenji/" target="_blank">http://www.iit.tsukuba.ac.jp/~kenji/</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+海老原 格 　随時（メールで事前に連絡してください）　                                                        <br>
+                                                                <span class="officehour-address">
+1002728                                                                </span>
+                                                                <a href="www.aclab.esys.tsukuba.ac.jp" target="_blank">www.aclab.esys.tsukuba.ac.jp</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+善甫 啓一 　                                                        <br>
+                                                                <span class="officehour-address">
+100000059                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+家永 直人 　                                                        <br>
+                                                                <span class="officehour-address">
+100004343                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
+                    <p id="style">
+授業の狙い:<BR>専門実験<BR>●論理的・数学的な思考力と解析力及び物理的な自然現象に対する理解が深まるように2専攻共通の6テーマを準備している。実験結果の口頭試問、実験成果のプレゼンテーション・デモンストレーションの実施、説得力のあるレポートの作成等を通じて、「自主性と行動力」を発揮して積極的に実験に臨めるように、きめの細かい指導を実施するよう心がけている。<BR>●基本的にはテーマ毎に与えられる複数の課題を適切な手法により解決する能力が付与されるように工夫されているが、自由研究課題が付与されて新たな技術を企画・立案するテーマやコンピュータを利用して情報を取得・処理するテーマも準備されている。<BR><BR>応用実験<BR>●論理的・数学的な思考力と解析力及び物理的な自然現象に対する理解が深まるように,秋ABC学期を通してのテーマを準備している.<BR>●前半の応用実験(デザイン)では,テーマ毎にこれまでに修得した広範囲な工学知識を基に,具体的なシステムをデザインする.そして,デザインしたものを第三者に論理的かつ明快に説明できるよう,口頭試問やレポート(仕様書等)の作成指導をきめ細かく行う.これにより,「エンジニアリング・デザイン能力」を養う.<BR>●後半の応用実験(チームワーク)では,デザインしたシステムを複数のメンバーと協調して完成させる過程でチームワーク力,つまりチームとして特定のプロジェクトをマネジメントする力を養成する.グループ毎に目標を定め,適切な役割分担をして,期限までに協力してデザインしたシステムを完成させる機会を提供することで,「チームワーク力」を付与する.<BR>●設計・システム系科目群を修得して得られた目標2.4(i)問題解決能力に加え,応用実験(デザイン)と応用実験(チームワーク)それぞれで目標2.4(ii)エンジニアリング・デザイン能力,2.4(iii)チームワーク力を養成することで,具体的なシステムを設計し運用する能力を養い,広い視野を持った仕事の遂行能力を身につけることができる.<BR><BR>受講生にのぞむこと:<BR>●実験に積極的に参加し、発表、試問、レポートを必ず完了させること。<BR>●準備学習として、基礎実験や制御、最適化、信号初期、画像処理、メカトロニクス分野の関連科目を復習しておくこと。                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>

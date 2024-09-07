@@ -1,0 +1,558 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2024/FCC2733/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+              最終更新日：2024/03/25
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+FCC2733        </span>&nbsp;
+        <span id="title">
+物理学実験I        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    2.0 単位,
+            </span>
+            <span id="grade">
+                    2 年次,
+            </span>
+            <span id="timetable">
+春AB 月3-6            </span>
+            <br>
+            <span id="assignments">
+物理学類2年実験担当            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+理学の基本的な実験を行うことを通じて、物理学の基本法則を理解するともに、実験データの取り扱い、実験装置操作法、データ解析とプレゼンテーションの方法、コンピュータープログラミングによる測定装置制御などの実験物理学的手法の基礎を習得する。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+令和元年度までの「物理学実験2」(FCC2703)を履修済みの者は履修できない。<BR>対面(オンライン併用型)<BR>対面。履修希望者は、第１回目のガイダンスに必ず出席すること。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+実習･実験･実技        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+汎用コンピテンス：コミュニケーション能力、批判的・創造的思考力、協働性・主体性・自律性<BR>専門コンピテンス：実験分析能力                 </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標（学修成果）</h2>
+                <p id="style">
+物理学の基本的な実験を行うことを通して、以下の学習成果を目指す。<BR>・物理学の基本法則を理解する。<BR>・実験データの取り扱い方、実験装置操作法、データ解析とプレゼンテーションの方法、コンピュータプログラミングによる測定器制御などの実験物理学的手法の基礎を習得する。<BR>本科目では、力学、放射線、オシロスコープによる信号計測、プログラミングによる計測器の制御、光学、演算増幅器、電磁気学、波動に関する8テーマの実験を行う。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+力学, 重力加速度, 放射線, ベータ線, ガンマ線, オシロスコープ, 信号計測, CR回路, LCR回路, プログラミング, 計測器の制御, LabView, 光学, 波動, 干渉, 回折, 演算増幅器, オペアンプ, 直流増幅, 交流増幅, 電磁気学, 等電位線, 電磁誘導, ビオ・サバールの法則, 音波, 理想気体, 熱力学, 圧縮率, 比熱比, 誤差, 不確かさ, 研究倫理                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+本科目では、1回目のガイダンス講義と、8回の日程を使って行う8テーマの実験授業を行う。<BR>残りの日程は予備日とし、実験授業の日程を変更する必要がある場合や、補講に充てる。該当しない履修生は自習に使ってください。<BR><BR>1回目はガイダンスを行い、本科目の受講の仕方を説明する。引き続き、講義を行い、研究倫理、誤差の概念と評価方法、レポートの書き方について学習する。<BR>6、11回目の授業日を予備日とする。<BR>実験のレポートは、原則的に1週間後までに提出する。<BR><BR>実験授業は履修生を4グループに分けて行う。<BR>2～5回目は次の（2）～（5）、7～10回目は（7）～（10）の実験を、1回につき1実験履修してもらう。<BR>                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+(1)                                        </th>
+                                        <td>
+第1回には、ガイダンスを行い、本科目の受講の仕方、科目の概要、スケジュール、注意事項を説明する。また班分けを行う。受講希望者は必ず出席すること。<BR>ガイダンスに続いて、本科目で扱う実験の内容紹介、研究倫理、レポートの書き方、不確かさについての講義を行う。<BR><BR>&nbsp;&nbsp;&nbsp;担当教員:森口哲朗<BR>&nbsp;&nbsp;&nbsp;連絡先:moriguchi_AT_tac.tsukuba.ac.jp&nbsp;&nbsp;(_AT_を@に読み替えてください)<BR>&nbsp;&nbsp;&nbsp;連絡方法:面談での相談を希望する場合は、メール連絡で都合を確認し、アポイントメントのうえで会いに来てください。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+(2)                                        </th>
+                                        <td>
+----------------------------------------<BR>デジタルオシロスコープによる信号計測(CR回路、LCR回路の過渡特性)<BR>エレクトロニクスは物理学のあらゆる分野で不可欠な技術である。本実験では、抵抗、コンデンサ、コイルをつないだ基礎的な回路の過渡的な時間応答と、周波数応答を測定し、理解する。エレクトロニクスの時間応答を測定するうえで基本的な計測器であるオシロスコープの使い方を学び、使いこなせるようになる。<BR>&nbsp;&nbsp;&nbsp;担当教員:佐藤構二<BR>&nbsp;&nbsp;&nbsp;連絡先:ksato_AT_hep.px.tsukuba.ac.jp&nbsp;&nbsp;(_AT_を@に読み替えてください)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+(3)                                        </th>
+                                        <td>
+----------------------------------------<BR>ボルダの振り子と不確かさの解析<BR>実験物理学において正確な測定はすべての基本となる。本実験では、簡単な構造を持ちながら馴染みのある振り子を用いて、重力加速度を測定する。得られたデータを解析することにより、測定値の不確かさを見積もる。それにより、不確かさの伝播を理解し、測定の重要性を理解する。<BR>&nbsp;&nbsp;&nbsp;担当教員:皇甫度均(ファンボ ドギュン)<BR>&nbsp;&nbsp;&nbsp;連絡先:hwangbo_AT_prc.tsukuba.ac.jp&nbsp;&nbsp;(_AT_を@に読み替えてください)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+(4)                                        </th>
+                                        <td>
+----------------------------------------<BR>放射線(&beta;線と&gamma;線)<BR>放射線は様々な分野で利用され、我々の身近にも存在することから、放射線を正しく理解することは重要である。本実験では、放射線源から発生するベータ線やガンマ線をガイガーミュラー計数管によって検出し、放射線と放射線計測の基礎を学習する。<BR> 担当教員:森口哲朗<BR> 連絡先:moriguchi_AT_tac.tsukuba.ac.jp (_AT_を@に読み替えてください)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+(5)                                        </th>
+                                        <td>
+----------------------------------------<BR>LabVIEWを使ったプログラミングと計測器の制御<BR>機械や装置のコンピュータ制御は、研究や開発において欠くことのできない技術となっている。本実験では、グラフィカル型言語であるLabVIEWを用いてプログラミングを行い、計測器をコンピュータ制御する。プログラミングの基本的な考え方と計測器を制御する方法を学ぶ。<BR> 担当教員:笠井秀隆<BR> 連絡先:kasai.hidetaka.fw_AT_u.tsukuba.ac.jp (_AT_を@に読み替えてください)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+(6)                                        </th>
+                                        <td>
+予備日                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+(7)                                        </th>
+                                        <td>
+----------------------------------------<BR>演算増幅器(オペアンプ:直流増幅・交流増幅)<BR>物理計測に必要なセンサー類から送られる電気信号の増幅、波形整形や、信号処理、演算等を行う電気回路において最も代表的な素子が演算増幅器(オペアンプ)である。電源、および、少数個の抵抗やコンデンサーを接続するだけで定まった増幅率の信号増幅器(アンプ)として機能する電子素子であり、さらに入力信号の微分や積分、加減算を出力するアナログ計算機の素子でもある。本実験では直流・交流入力における演算増幅器回路の動作を計測、評価し、使い方について学ぶ。<BR> 担当教員:久保敦<BR> 連絡先:kubo.atsushi.ka_AT_u.tsukuba.ac.jp&nbsp;&nbsp;(_AT_を@に読み替えてください)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+(8)                                        </th>
+                                        <td>
+----------------------------------------<BR>電流の作る等電位線と、円環電流の作る軸上磁場の測定<BR>前半は、抵抗物質が塗られたアナライザーペーパーに電流を流し発生する電位分布を測定する。オームの法則から導かれる電位分布との比較を行う。後半は、円環コイルに発生する磁場分布を測定し、ビオ・サバールの法則を検証する。<BR> 担当教員:森口哲朗<BR> 連絡先:moriguchi_AT_tac.tsukuba.ac.jp (_AT_を@に読み替えてください)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+(9)                                        </th>
+                                        <td>
+----------------------------------------<BR>光学(干渉・回折)<BR>光が電磁波の一種であり横波であることは、よく知られた事実である。ここでは、レーザー光を利用して、光の波としての性質に基づく現象(干渉と回折)を観察する。前半では、マイケルソン干渉計を用いて2つの波を位相差を変化させて重ね合わせ、干渉の様子を調べる。また、これを利用して気体の屈折率と分極率を求める。後半では、フラウンホーファー回折の実験を行う。回折によってスリットから広がるように出ていく波がつくる様々な干渉パターンを調べる。<BR>&nbsp;&nbsp;&nbsp;担当教員:冨本慎一<BR>&nbsp;&nbsp;&nbsp;連絡先:tomimoto.shinichi.ft_AT_u.tsukuba.ac.jp&nbsp;&nbsp;(_AT_を@に読み替えてください)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+(10)                                        </th>
+                                        <td>
+----------------------------------------<BR>音波(理想気体の熱力学:音速、圧縮率、比熱比)<BR>気柱共鳴法を用いて、気体を伝わる音波の音速を測定し、圧縮率や比熱比などを求める。これによって理想気体の熱力学、統計力学的性質を理解する。本実験において、&ldquo;LabVIEWを使ったプログラミングと計測器の制御&rdquo;を活かしてコンピュータを用いた自動測定を行う。<BR> 担当教員:池沢道男<BR> 連絡先:ikezawa.michio.fu_AT_u.tsukuba.ac.jp (_AT_を@に読み替えてください)                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+(11)                                        </th>
+                                        <td>
+予備日                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                        <p id="pretopics">
+授業は、対面授業で実施する。<BR><BR>2024年度の授業日程は以下です。<BR>4/15(月)　ガイダンス<BR>4/22(月)　第1実験テーマ<BR>5/ 7(火)　第2実験テーマ<BR>5/13(月)　第3実験テーマ<BR>5/20(月)　第4実験テーマ<BR>5/27(月)　予備日<BR>6/ 3(月)　第5実験テーマ<BR>6/10(月)　第6実験テーマ<BR>6/17(月)　第7実験テーマ<BR>6/24(月)　第8実験テーマ<BR>7/ 1(月)　予備日<BR>                        </p>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+物理学類生のみ履修可能。<BR>また、令和元年度までの「物理学実験2(FCC2703)」を履修済みの者は履修できない。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+レポート100％。実験原理および実際に行った実験に対する理解度、得られたデータを正しく分析、考察できているかを評価する。<BR>それぞれの実験授業でレポートを提出してもらい、8本のレポート点数の総和で成績評価する。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+1回あたり4コマの実験授業です。<BR>レポート課題と次の実験授業の予習に、授業時間の半分（3時間）を充てることを標準とする。<BR>予習課題のレポートは、その実験の開始時に提出すること。<BR>                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+「物理学実験Iテキスト」 (ガイダンス時に配布)                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
+                <div id="topics">
+                        <p id="pretopics">
+テーマごとに異なる教員が担当する。各テーマに関する連絡は、「授業計画」欄を見て、それぞれの教員に問い合わせてください。<BR>科目全般に関する質問、連絡は、moriguchi_AT_tac.tsukuba.ac.jp&nbsp;&nbsp;(_AT_を@に読み替えてください)、森口哲朗まで。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                        <p id="pretopics">
+まずメールで連絡し、必要であればアポイントメントを取って会いに来てください。<BR>メールする際はフリーメール等でなく、大学のメールアドレスを使うようにしてください。                        </p>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
+                    <p id="style">
+全回のレポートを提出するようにしてください。<BR>出席しなかった実験に関するレポートは、提出できません。やむを得ない事情で欠席する必要が出た場合や欠席した場合は、該当テーマの担当教員に相談し、補講を願い出ること。<BR><BR>実験レポートは、プレゼンテーション技術を磨くことのできる数少ない訓練の場であることを認識し、推敲を重ね、論理的にわかりやすく書くこと。<BR>社会生活を送る上で物事を人に伝える必要がある以上、理系の人間にとっても、国語力・英語力は必須である。日常生活において、国語力・英語力を高める努力を怠らないこと。<BR>                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
+                    <p id="style">
+各実験テーマにTAが配置される場合がある。                    </p>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>

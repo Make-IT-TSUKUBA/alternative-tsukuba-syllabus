@@ -1,0 +1,576 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2024/W150131/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+W150131        </span>&nbsp;
+        <span id="title">
+スポーツと企業        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    1.0 単位,
+            </span>
+            <span id="grade">
+                    3 年次,
+            </span>
+            <span id="timetable">
+春AB 金5            </span>
+            <br>
+            <span id="assignments">
+嵯峨 寿            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+企業にとってのスポーツやアスリートの価値について、その具体的な内容、訴求方法、市場効果などをユニークな事例を参考にしながら理解を深める。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+対面        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+体育・スポーツ事象に関する人文科学、社会科学的な視点での理解力<BR>                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標（学修成果）</h2>
+                <p id="style">
+①企業からみたスポーツ、スポーツからみた企業それぞれの姿を捉えることができる。<BR>②現代社会あるいは歴史における、スポーツと企業の関係を理解できる。<BR>③スポーツと企業の連携・協力が社会や文化に及ぼすインパクトを展望することができる。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+マーケティング、スポンサーシップ、パートナーシップ、プロモーション、CSR（企業の社会的責任）                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+各回の授業内容は昨年度の受講生かによると以下の通りである。プロモーション力を試す最終課題において、学籍番号末尾の数字と同じ授業回の内容を書いてもらった中から最優秀作を掲載した（末尾0は第10回授業）。各1行目の「　　」内は受講生がつけたタイトル。残念ながら第7回・9回は該当がなかった。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+オリエンテーション「勇者となるか賢者となるか」　<BR>　この講義をうけることによって多くの生徒が勇者となる道を選び受講をあきらめる。嵯峨先生は第１回授業の序盤に「この教室にいる生徒の１/４ぐらいで授業を行いたいんだ」という宣言通り最終回には最初にいた生徒の半分以下になっていた。受講をあきらめる行為を勇者になると呼び決して逃げの選択ではないことを強調する。それによって意図的に受講生を減少させる。私はこのレポートを提出しているので勇者にはならない選択をしたのである。勇者にならないことを選択したおかげでスポーツと企業のかかわりについて学ぶことが出来た。切っても切れない関係であることを再認識したのである。大げさに言うと、勇者となることをあきらめた代わりに賢者となったのである。多くの生徒はこういう授業であることを知らずに履修登録をおこなうが勇者になることを選ぶか賢者になるかを迫られる。決断するのは本人である。（永戸涼世）                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+嵯峨 寿                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+スポーツのシューズとメーカー「モノを売りたいのなら○○を売れ」<BR>　第二回の授業では、今や世界一のスポーツ用品メーカーと言っても過言ではない大企業、ナイキが急成長を遂げた創業から70年代の出来事を中心に振り返っていく。ここで考えてみてほしい。ナイキはいかにして世界一になったのだろうか。人件費や原材料費を抑えた、広告に力を入れ企業名を広めた、有名人にナイキの製品を売り込んだ、ナイキの利益だけを考えればこのような方法が思いつくだろう。しかしナイキのとった方法はこのような些細なものではない。ナイキはモノではない何かを売って世界一になったのだ。ではナイキは何を売ったのか、その何かを売ることで社会にどのように貢献していったのか、そこに隠された創業者の思いとは何なのか。このような疑問を紐解いていくことでナイキという企業のマーケティング戦略について学んでいく。（佐藤活樹）                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+嵯峨 寿                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+スポーツ施設の開発・運営と会員権ビジネス「１億？！ どうやって準備しよう...」<BR>　スポーツ施設の建設には莫大な資金が必要となり、資金の調達が地域のスポーツ施設整備の大きな足枷となっている。その一方で大規模施設でありながら日本中に整備されているスポーツ施設がある。その施設とはゴルフ場である。ゴルフ場は広大な土地に美しいコースが整備され、レストランやコンペルームなどを備えた豪華なクラブハウスが建てられている。このように建設に巨額の資金が必要となるゴルフ場だが、茨城県だけでも126のコースが存在する。なぜスポーツ施設の中でも規模の大きなゴルフ場をこれほどたくさん建設することができるのだろうか。そこにはゴルフ場独自の資金調達の仕組みがあり、開発業者はなんと無利子で〇〇から資金を調達し建設をしている。この魔法のような資金調達の仕組みを地域のスポーツ施設の整備にも活かせないだろうか。ゴルフ場の事例を通してスポーツ施設開発の新たな方法について考えたい。（嶌田隼太）                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+嵯峨 寿                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+企業の福利厚生としてのスポーツ「企業におけるスポーツの存在」<BR>　1964年東京オリンピックの女子バレーボールで金メダルを獲得した東洋の魔女を生み出したのは、職場リフレッシュ・スポーツであった。紡績工場に勤める女性労働者向けのスポーツとして取り入れられたバレーボールは、労働力の再生や人間性の回復といった企業の福利厚生の役割を担っていた。のちに東洋の魔女を輩出する大日本紡績でも、はじめは職場リフレッシュ・スポーツという位置づけで始まったが、当時の社長である原吉平はバレーボールに社運をかけて本格的に強化を始めた。大日本紡績におけるバレーボールの価値の変容をたどりながら、企業がスポーツに抱く期待やスポーツが企業にもたらす好影響を考え、スポーツの持つ力や価値を探っていく。さらには、我々のような体育会の人材が企業からどのような期待を寄せられ、我々はその期待にどう応えていくべきかを考えるきっかけにもなるだろう。（星凌太）                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+嵯峨 寿                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+スタジアム・ビジット　スポーツ・ツーリストのビジョンと可能性「ライブ観戦の可能性&nbsp;&nbsp;世界平和とスポーツ・ツーリスト」<BR>　スポーツ・ボイコットは政治的問題を解決する圧力としてスポーツを利用する方法であり、企業も経済制裁に関与する形で同様に利用される。これらの方法はスポーツや企業活動を排除することで問題を解決するものであり、特にスポーツでは選手が犠牲になる。しかし、スポーツを積極的に用いて平和に寄与することは可能である。カントは世界平和のために商業精神に着目したが、現在の資源争奪などの問題から、商業精神に基づく企業の経済的交流には限界がある。ただスポーツの場合、スポーツ交流には「観客同士も交流」などの特長があるため、選手だけでなく、スタジアムに試合観戦に訪れるスポーツ・ツーリストも試合会場と会場外の両方での交流と異文化理解のための行動を通して世界平和に貢献できる。つまり、観客には世界平和への貢献という役割があり、その役割を全うすることでスポーツによる世界平和を実現する可能性がある。（山口歩）                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+嵯峨 寿                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6回                                        </th>
+                                        <td>
+メディア・ビジネスとスポーツ・プロモーション&nbsp;&nbsp;「箱根駅伝に見る、スポーツを愛し、成長を遂げる企業」<BR>　箱根駅伝はどうやって生中継を成功させているのか、考えたことはあるだろうか。箱根駅伝は山道も経路に含み、天候や電波など多くの生中継を阻害する要因がある。そもそもなぜ箱根駅伝は今日のように多くの日本国民を惹きつける番組になったのか。そこには一人の男とそれを支えた人々の、スポーツへの情熱と敬意が実現させた、未知の挑戦があった。この講義では箱根駅伝が完全生放送される過程を中心として、その意味や生み出された効果を考えるとともに、スポーツに熱を注ぐ企業の姿を追う。正月の代名詞でもある箱根駅伝は、昔から多くの注目を浴びていたわけではない。その魅力の継承、駅伝をフルで生中継するための努力など、多くの力が集結して、企業がスポーツを活性化させ、存続させた、そして企業も成長した、まさにスポーツと企業が相乗関係にある一例であるといえる。このような関係を学び、今後のスポーツ、そして企業の在り方について模索してく。（荒川祐衣）                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+嵯峨 寿                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第7回                                        </th>
+                                        <td>
+企業のスポンサーシップとアクティベーション　TOPを例に                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+嵯峨 寿                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第8回                                        </th>
+                                        <td>
+スポーツと企業をつなぐ広告代理店「スポーツ・企業の魂の表現」<BR>　スポーツと企業を繋ぎ、社会や消費者にイメージを宣伝する広告代理店について学ぶ。スポーツ場面のいたるところで、様々な媒体が利用され宣伝されている訳だが、企業であれば、企業としての一貫性や姿勢、魂が感じられなければ広告・宣伝は成功しない。つまり、広告代理店はただ広告業務を請け負っている訳ではなく、企業の魂を表現をしていると言っても過言ではない。贈収賄事件など広告代理店への印象は必ずしも良いわけではないが、本質的にはスポーツ固有の価値を高め、それと関わる大会や企業の奥底にある魂を表現することで、スポーツや大会や企業がより高みへ登る手助けを業務としなければならない。NIKEは「just do it」の社会浸透に代表されるように、広告代理店との魂の表現に成功し、広告にも成功している。広告代理店の基本を学び、NIKEの事例を中心に、スポーツ・企業・広告代理店・社会が互助的に高みに上るための学習を行う。（齋藤陸）                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+嵯峨 寿                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第9回                                        </th>
+                                        <td>
+スポーツビジネスとマネー                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+嵯峨 寿                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第10回                                        </th>
+                                        <td>
+プロ・リーグとクラブによるプロモーション　創設30周年を迎えたJリーグを例に「プロリーグやクラブが日本中を元気にする！」<BR>　私は、「プロリーグやクラブが日本中を元気にする！」をタイトルに第10回の授業内容を紹介したい。国内では、ラグビーや女子サッカーなどが新たにプロ化された一方で、プロ化されていないスポーツや、プロ化したものの、経営に苦しんでいるスポーツなど様々である。この授業では、アマチュアからプロになることで変化するのは、「仕組み」であることを踏まえて、企業とプロ化の関係が切り離せないものであること学ぶ。その上で、プロ化に成功し、不遇の時期がありながらも、「地域密着」を理念に活動し、遂に創設30周年を迎えたJリーグを例に、プロリーグやクラブが、どのように社会に貢献できるのか、そして、Jリーグのプロ化の方針が、様々なスポーツのプロ化に応用可能であることを踏まえて、スポーツのプロ化の成功の鍵となるものとは何かを考える。（八角空来）                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+嵯峨 寿                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第11回                                        </th>
+                                        <td>
+試験                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+嵯峨 寿                                         </td>
+                                    </tr>
+                        </table>
+                    </div>
+                        <p id="pretopics">
+授業内容は授業担当者と受講生の関心に応じて更新を図るようにしており、ここに掲載したものは暫定的なもの（2023年度実施）と受けとめ、初回授業で公表される更新版を参考に受講するかどうか判断すること。くれぐれも、科目名からイメージした内容と異なるといったミスマッチがないようにしてもらいたい。                        </p>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+体育専門学群3年生レベルの学修歴を前提とした内容である。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+毎授業時のリアクションペーパー400〜600字程度、ならびに学期末に課す最終レポートをもとに行う。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+講義で触れた概念や理論をスポーツ現象の理解に応用できるよう、テレビや新聞、ネットなどでスポーツ界、産業界などの動向を適時フォローするのが望ましい。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+教科書は用いないが、授業で紹介する参考書や文献をなるべく多く読むようにして、いわゆる体育学やスポーツ科学とは異なる用語や概念に慣れるようにしたい。毎時課すリアクションペーパーは翌週の授業で全員分を全員に対して開示する。他者の異見を知り、自身のモノの見方や考え方を相対化できるようになってもらいたい。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+嵯峨 寿 　随時メールにてアポを取った上で来室ください
+体育科学系棟B504研究室　029-853-2629                                                        <br>
+                                                                <span class="officehour-address">
+1001466                                                                </span>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
+                    <p id="style">
+今年度の受講生に望むことを昨年度の受講生（先輩）が寄稿してくれた。<BR>★まず、中途半端な考えで講義を受講することは勧めない。この講義はいわゆる&ldquo;楽単&rdquo;ではない。体専の授業は短い感想を添えたリアクションペーパーを提出したり、テストでは授業資料を暗記すれば解答できたり、比較的楽に単位を認定してもらえる。しかしこの講義では、毎回の授業の後400～600字程度のリアクションペーパーが課され、毎週評価が下される。０～５点で評価され、授業内容を反映していなかったり、考えが深まっていなかったりすると、０点になることもある。つまり、授業に行くだけでは何の意味もなく、学ぶ意欲や、学んだことから自らの視点を広げ、考えを深めることが求められる。これらに応じる意欲がないのなら、単位は認定されず時間の無駄であるといえる。逆に、授業内容に強く関心があったり、自らの視野を広げたいと考えていたりするのなら、非常に有意義な講義である。また、全員の意見が公開されるため、自らの中にある考えを深めるとともに、他者の異見に触れることで気づきを得ることができる点は非常に良い点である。基本的には体専の生徒が受講しているため、自分とは異なるスポーツ文化に触れている人の異見に触れることができる。私はもともと蹴球部のクラブハウスをつくりたいと考えており、その考えの根底には部員同士の交流を増やすことがあった。他者の異見に触れたことで、部員だけでなく相手チームとの交流の場としての機能を持つことも面白いと考えた。これはラグビーのアフターマッチファンクションの文化を知ったからである。これは一例であるが、体専以外にも受講している人はいるため、スポーツについて、スポーツと企業の関係について視野を広げることができると思う。授業は毎回異なる企業を取り扱い、スポーツとの関係を学ぶ。毎回異なる関係性をオムニバス形式で学ぶため意識しづらいが、10回の授業を通して共通性や特異性に気づけるようになると思う。特に私がこの講義をとって学んだことは、企業理念の重要性である。特に人を大事にする理念を持つ企業は、事業を拡大したり、危機を乗り越える力を持っていると感じた。また、スポーツは人と人をつなぐ役割を担う大きな力を持っているとも感じた。雇用主と労働者、労働者同士、地域と企業、アスリートと市民など、様々な関係性をスポーツは取り持つことが出来る。例えば、日紡は福利厚生としてバレーボールを導入し、結果的に社内連帯を強め、離職率を改善した。私は就活を進めるうえで企業理念で人を大事にしているかという視点を大切にしている。スポーツと企業の関係を通して様々な視点を得ることのできるこの講義は、キャリアを考える上でも有意義なものであるため、キャリアの選択に迷う人でスポーツと企業の関係に関心がある人は是非受講してほしい。（角田行崇）<BR><BR>★「本講義は、答えを追求するものではない。取り上げたテーマの本質を捉え、自ら考察し、思考力を深め、意見を述べることを目的としている。答えのない問題にどれだけ貪欲に取り組むことができるかが鍵である。決して授業の内容を覚えたからといって、成績が取れるわけではない。社会においても自ら課題を発見し、解決する能力が求められる。本講義を通して、その礎を築くことができたらなによりである。」私であれば、シラバスのその他（受講生にのぞむことや受講上の注意点等）にこのように記す。私は、本講義のポイントとして、いかに講義の本質を捉え、自分なりの意見を述べることができるかが重要であると感じた。自分なりの意見を述べることだけならばそう難しくはない。重要なのは、講義の本質を捉えることである。ここが私自身とても難しかった。最初は、ただ講義をなぞるだけの意見や調べたら出てくるような意見しか述べることができず、一度も４点以上をつけてもらうことができなかった。ただ、講義を重ね、先生の伝えたいメッセージは何なのかを注意しながら聴くようにすると、少しずつ本質を捉えられるようになった。後半で４点以上をつけてもらえるようになったことがその証である。もちろん、スポーツと企業の関係性や今後のスポーツの発展のための企業の可能性、社会の発展のためのスポーツの可能性といったような体育を専門としている身として学ぶべき素養を理解することもできた。ただ、それ以上に本講義は、社会に出てから必要な課題発見能力、課題解決能力を身につけるための根本的な考え方を教えてくれた。本講義全体の本質を捉えるならば、授業内容よりも授業を通した思考力の育成と言えよう。これまで、本質を捉えることの重要性を述べてきたが、自分含め今の学生はこの力が非常に足りないと感じている。それは、今の学生が完全に悪いというわけではなく、日本の教育制度に問題がある。高校までの教育というのは、テストで点数を取るために必死に暗記をし、どれだけ覚えられたかで優劣をつける。変わりつつあるが、大学入試でもそういった傾向がある。大学でもそういう授業がほとんどである。それらの成績に独自の思考力というものは一切反映されない。社会に出ると、主体性を持った人材や個別性のある人材が重宝される傾向があるが、こうした現状では、社会で求められる人材になる方が至難の業である。それに対して、本講義は今まで受けてきた授業とは全く逆のものであった。授業の内容を理解することだけではなく、その先にある問題解決や意見抽出まで求めてくる。これまでの教育のぬるま湯に居心地の良さを感じてしまっている人は決して受けるべきではない。いわば本講義は自分に新たな試練を与えてくる熱湯風呂なのである。これまでの自分を変えたい人、社会に求められる人になりたい者が受けるべき講義であろう。（中村大聖）                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>

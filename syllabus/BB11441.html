@@ -1,0 +1,542 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2024/BB11441/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+              最終更新日：2024/03/29
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+BB11441        </span>&nbsp;
+        <span id="title">
+メディア・コミュニケーション論        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    1.0 単位,
+            </span>
+            <span id="grade">
+                    2・3 年次,
+            </span>
+            <span id="timetable">
+春AB 火2            </span>
+            <br>
+            <span id="assignments">
+海後 宗男            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+マス・メディアの効果研究の主要な理論と実際の研究をとりあげ、現在のメディア・コミュニケーション研究の流れを概観し、考察する。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+AC64311, BB11411の単位取得者は履修できない。<BR>西暦偶数年度開講。<BR>AC64E11と同一。<BR>対面        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+「批判的・創造的思考力」「データ・情報リテラシー」「広い視野と国際性」「文化事象の理解力」に関連する。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標（学修成果）</h2>
+                <p id="style">
+広い視野と国際性の上に立つメディア研究の批判的・創造的思考力・データ・情報リテラシーについて学習する。また 文化事象の理解力の養成に不可欠な思考する力を見につけつつ、履修者自身の問題意識を深める。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+メディア産業, メディアリテラシー, 社会とメディア, 地域情報化とソーシャル・キャピタル, メディア効果                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+この授業では、メディア研究に関する様々な文献を読み、ディスカッションをすることによって、メディア研究方法や理論等を学習する。メディア研究への理解を深める。この授業では、以下の回で指定された文献を図書館のデータベースよりダウンロードし、授業のときまでに読み、事前にレポートをウェブにて提出する。授業では文献に関するディスカッションとプレゼンテーションを行い、他の履修生と情報共有し、授業後にその活動内容を報告する。これを、各回実施する。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+第1回目はイントロダクション、オリエンテーション                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+第2回はメディア産業に関する以下の文献を読み、指定された方法で事前に関連する課題を提出する。<BR><BR>1. 21世紀のメディア産業の現状と将来への展開<BR>冨澤 治<BR>映像情報メディア学会誌 <BR>65 巻 (2011) 8 号 1128-1132 <BR>公開日: 2013/08/01<BR>DOI https://doi.org/10.3169/itej.65.1128<BR><BR>米国新興デジタル・ニュース・メディアのジャーナリズム実践についての考察<BR>藤原 広美<BR>情報通信学会誌 <BR>34 巻 (2016) 2 号 99-108 <BR>公開日: 2017/02/06<BR>DOI https://doi.org/10.11430/jsicr.34.2_99                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+第3回と第4回はメディアリテラシーに関する以下の文献を読み、指定された方法で事前に関連する課題を提出する。<BR>メディア・リテラシーとはなにか(&lt;特集&gt;メディア・リテラシー)<BR>鈴木 みどり<BR>原稿種別: 本文<BR>48 巻 (1998) 7 号 p. 388-395<BR>公開日: 2017/05/25 <BR>DOIhttps://doi.org/10.18919/jkg.48.7_388<BR><BR>カナダにおけるメディア・リテラシー教育(&lt;特集&gt;メディア・リテラシー)<BR>増田 幸子<BR>原稿種別: 本文<BR>48 巻 (1998) 7 号 p. 396-401<BR>公開日: 2017/05/25 <BR>DOIhttps://doi.org/10.18919/jkg.48.7_396<BR><BR>コンピュータ・ネットワークを利用して情報発信する市民を育成する : アメリカのNPOセクターの役割(&lt;特集&gt;メディア・リテラシー)<BR>吉本 秀子<BR>原稿種別: 本文<BR>48 巻 (1998) 7 号 p. 402-406<BR>公開日: 2017/05/25 <BR>DOIhttps://doi.org/10.18919/jkg.48.7_402                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+第3回と第4回はメディアリテラシーに関する以下の文献を読み、指定された方法で事前に関連する課題を提出する。<BR>メディア・リテラシーとはなにか(&lt;特集&gt;メディア・リテラシー)<BR><BR>ユーザの視点から考えるZ39.50(抄訳)<BR>ペイエット サンドラ・D, リーガー オーヤ・Y, 吉間 仁子<BR>原稿種別: 本文<BR>48 巻 (1998) 7 号 p. 407-413<BR>公開日: 2017/05/25 <BR>DOIhttps://doi.org/10.18919/jkg.48.7_407<BR><BR>映像をめぐるメディア・リテラシー(&lt;特集&gt;映像コミュニケーション研究の新展開)<BR>鈴木 みどり<BR>マス・コミュニケーション研究 <BR>46 巻 (1995) 44-58 <BR>公開日: 2017/10/06<BR>DOI https://doi.org/10.24460/mscom.46.0_44<BR><BR>イギリス・カナダ・オーストラリアにおけるメディア・リテラシー教育カリキュラムの比較研究<BR>浅井 和行, 久保田 賢一, 黒上 晴夫<BR>教育メディア研究 <BR>15 巻 (2009) 2 号 35-49 <BR>公開日: 2017/07/18<BR>DOI https://doi.org/10.24458/jaems.15.2_35                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+第5回と第6回は社会とメディア(市民)に関する以下の文献を読み、指定された方法で事前に関連する課題を提出する。<BR><BR>オルタナティブ・メディアによる社会的弱者のエンパワメント<BR>八幡 耕一<BR>日本評価研究 <BR>5 巻 (2005) 2 号 27-39 <BR>公開日: 2010/06/15<BR>DOI https://doi.org/10.11278/jjoes2001.5.2_27<BR><BR>社会運動、マス・メディア、受け手 (&lt;特集&gt;新しい「受け手」論の研究)<BR>大畑 裕嗣<BR>新聞学評論 <BR>37 巻 (1988) 83-97,320-319 <BR>公開日: 2017/10/06<BR>DOI https://doi.org/10.24460/shinbungaku.37.0_83                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+第5回と第6回は社会とメディア(市民)に関する以下の文献を読み、指定された方法で事前に関連する課題を提出する。<BR><BR>コミュニケーションへの権利と市民社会メディア: 政策の新しい方向性<BR>ハード ガブリエレ, 浜田 忠久<BR>マス・コミュニケーション研究 <BR>77 巻 (2010) 149-166 <BR>公開日: 2017/10/06<BR>DOI https://doi.org/10.24460/mscom.77.0_149<BR><BR>地域情報化とソーシャル・キャピタル<BR>柴内 康文<BR>行動計量学 <BR>37 巻 (2010) 1 号 19-26 <BR>公開日: 2010/07/06<BR>DOI https://doi.org/10.2333/jbhmk.37.19<BR><BR>PCによるメール利用が社会的寛容性に及ぼす効果 : 異質な他者とのコミュニケーションの媒介効果に注目して<BR>小林 哲郎, 池田 謙一<BR>社会心理学研究 <BR>24 巻 (2008) 2 号 120-130 <BR>公開日: 2017/02/10<BR>DOI https://doi.org/10.14966/jssp.KJ00005103411                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+第7回と第8回は議題設定等に関する以下の文献を読み、指定された方法で事前に関連する課題を提出する。<BR><BR>マス・メディアの議題設定機能 : 研究の現状と課題<BR>竹下 俊郎<BR>新聞学評論 <BR>30 巻 (1981) 203-218 <BR>公開日: 2017/10/06<BR>DOI https://doi.org/10.24460/shinbungaku.30.0_203<BR><BR>議題設定研究の新たな課題(&lt;特集&gt;パワフル・メディア論再考)<BR>竹下 俊郎<BR>マス・コミュニケーション研究 <BR>60 巻 (2002) 6-18,204 <BR>公開日: 2017/10/06<BR>DOI https://doi.org/10.24460/mscom.60.0_6                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+第7回と第8回は議題設定等に関する以下の文献を読み、指定された方法で事前に関連する課題を提出する。<BR><BR>議題設定もうひとつの潮流 : 単一争点長期アプローチ<BR>小室 広佐子<BR>マス・コミュニケーション研究 <BR>60 巻 (2002) 92-107,202 <BR>公開日: 2017/10/06<BR>DOI https://doi.org/10.24460/mscom.60.0_92<BR><BR>ニュース報道におけるメディア間の共振性の検証<BR>張 寧<BR>マス・コミュニケーション研究 <BR>56 巻 (2000) 130-144 <BR>公開日: 2017/10/06<BR>DOI https://doi.org/10.24460/mscom.56.0_130                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+第9回は沈黙の螺旋に関する以下の文献を読み、指定された方法で事前に関連する課題を提出する。<BR><BR>沈黙の螺旋理論の展開(&lt;特集&gt;パワフル・メディア論再考)<BR>安野 智子<BR>マス・コミュニケーション研究 <BR>60 巻 (2002) 44-61,203 <BR>公開日: 2017/10/06<BR>DOI https://doi.org/10.24460/mscom.60.0_44<BR><BR>沈黙の螺旋と閾値分布構造 : 閾値モデルを用いた沈黙の螺旋現象の分析<BR>古賀 豊<BR>マス・コミュニケーション研究 <BR>81 巻 (2012) 125-142 <BR>公開日: 2017/10/06<BR>DOI https://doi.org/10.24460/mscom.81.0_125                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+第10回は第3者効果に関する以下の文献を読み、指定された方法で事前に関連する課題を提出する。<BR><BR>第3者効果<BR>メディアの影響力の認知は世論形成を媒介するか<BR>安野 智子<BR>選挙研究 <BR>11 巻 (1996) 46-60,145 <BR>公開日: 2009/01/22<BR>DOI https://doi.org/10.14854/jaes1986.11.46                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+課題・報告の提出状況（50％）と期末試験（50％）による評価。学習態度とマナーも重視する。<BR>尚、「事前課題」と「授業活動報告」の提出が期限内にされていることが、第2回目の授業から評価対象となる。いかなる理由があっても、第2回目以降から履修した人の評価は相応にマイナスとなる(就職活動中でも課題未提出は、減点対象になる)。特に4年生はこの点理解した上で履修すること。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+配付資料を予復習時に精読し, 事前課題を提出し、専門用語の意味を正確に理解しておくこと。授業の後、授業活動報告を毎回期限までに提出しておくこと。<BR>                     </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+上記各回に指示した通りである。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
+                <div id="topics">
+                        <p id="pretopics">
+水曜日１１：３０&minus;１２：１５（要事前アポ）                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
+                    <p id="style">
+・オフィスアワーは事前アポしてください。<BR>・受講に関しまして、以下のことを守ってください:1)授業中に私語をしない、2)無断で早退しない、3)授業中に、授業に関係ない物を使用しない、4)無断で携帯電話等、授業に関係のない電子機器を使用しない、5)他の学生と協調し、調和を乱さない、6)迷惑行為をしない。これら事項に反する行為がありましたら、即時退室と成績の減点になります。<BR>・卒業年度の学生(4年生以上)は履修する前に必ず担当教員と相談すること。                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
+                    <p id="style">
+配置予定                    </p>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>

@@ -1,0 +1,500 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2024/EB59063/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+              最終更新日：2024/03/29
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+EB59063        </span>&nbsp;
+        <span id="title">
+モデル生物多様性実習        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    1.0 単位,
+            </span>
+            <span id="grade">
+                    2・3 年次,
+            </span>
+            <span id="timetable">
+夏季休業中 集中            </span>
+            <br>
+            <span id="assignments">
+佐藤 幸恵, 出川 洋介, 神崎 菜摘            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+現代生物学の多くの研究は、酵母や線虫、ハダニなどの「モデル生物」によって支えられている。本実習では、野外に出かけてモデル生物種やその近縁種の多様な実体を体感することにより、興味深い生命現象を進化させてきた自然の生態系と、そこでの多様な生き物との関わりを理解することを目的とする。モデル生物に興味のある学生だけでなく、将来、生物学関係の教育に携わりたい学生も歓迎する。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+8/26-8/30<BR>事前の履修調整で許可を受けていること。<BR>多様性コース<BR>学研災に加入していること。<BR>履修登録は事務で行う。<BR>英語対応可(要相談)<BR>対面<BR>EB59053修得者の履修は認めない。EB59062と同時履修が必要。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+実習･実験･実技        </p>
+    </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業目的</h2>
+                <p id="style">
+現代生物学の多くの研究は、酵母や線虫、ハダニなどの「モデル生物」によって支えられている。本実習では、野外に出かけてモデル生物種やその近縁種の多様な実体を体感することにより、興味深い生命現象を進化させてきた自然の生態系と、そこでの多様な生き物との関わりを理解することを目的とする。モデル生物に興味のある学生だけでなく、将来、生物学関係の教育に携わりたい学生も歓迎する。                </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業内容</h2>
+                <div id="topics">
+                        <p id="pretopics">
+本実習では異なる分類群を対象にした下記４つのプログラムを体験します。<BR><BR>①　微生物の世界<BR>　モデル生物として著名な出芽酵母（Saccharomyces cerevisiae）は天然ではどこにでも生息しているのでしょうか。一説によると、その生息地は、モデル生物のショウジョウバエの仲間の消化管ではないかと推定されています。また、ショウジョウバエ以外にも、多様な節足動物の消化管内には様々な微生物が生息しているはずです。宿主の消化を助ける相利共生、居候する片利共生、あるいは宿主を殺す寄生関係にある微生物もおり、これらは、生物間相互作用研究のモデルの宝庫といえます。多様な節足動物を採集し、それらの消化管や体表に住む微生物の観察を試みます。<BR><BR>②　ハダニの世界<BR>　ダニというと、「痛い」、「かゆい」というイメージがもたれがちですが、ダニは英語でtick（マダニ類）とmite（その他のダニ類）とよばれており、miteの方は、植食者、捕食者、分解者、寄生者が含まれるなど、様々な生態がみられることから、小さな昆虫のように受けとめられています。本プログラムでは、ササ・タケ群落上でみられるハダニ類を中心としたミクロな世界の生物群集を観察します。<BR><BR>③　線虫の世界<BR>　線虫類は、一般的にはカイチュウやギョウチュウなどの寄生虫、ネコブセンチュウやマツノザイセンチュウなどの農林業害虫といった、人間生活とはネガティブな関わり方をするものが多く知られています。しかし、実際は大半の線虫は、土壌、枯死木、海水中で微生物食をしています。そして、この中には、一般生物学でもモデルとして用いられる Caenorhabidits elegans など、非常に重要、かつ有用な種類も含まれています。本プログラムでは、モデルの比較対象として用いられる近縁種群、いわゆるサテライトモデル線虫類の採集、培養、観察を行います。<BR><BR>④　ショウジョウバエの世界<BR>　渓流、草原、森林をもつ菅平高原実験所では、40 種以上のショウジョウバエを見ることができます。野外でみられるショウジョウバエは、体表や翅の模様が異なるなど多種多様で、中にはヒョウ柄のハエもいます。本プログラムでは、ショウジョウバエを採集し、採集地点毎に種多様性を評価してみましょう。また、その生態の違いから大きく人家性と野性性に分けることができ、環境評価の指標種に使われることがあります。人家性ショウジョウバエの割合を算出し、環境を評価してみましょう。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1日                                        </th>
+                                        <td>
+ガイダンス/野外活動/観察 /(EB59062モデル生物多様性演習)                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+出川 洋介 , 佐藤 幸恵 , 神崎 菜摘                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2日                                        </th>
+                                        <td>
+野外活動/観察 /(EB59062モデル生物多様性演習)                                         </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+出川 洋介 , 佐藤 幸恵 , 神崎 菜摘                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3日                                        </th>
+                                        <td>
+野外活動/観察 /(EB59062モデル生物多様性演習)                                         </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+出川 洋介 , 佐藤 幸恵 , 神崎 菜摘                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4日                                        </th>
+                                        <td>
+野外活動/観察 /(EB59062モデル生物多様性演習)                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+出川 洋介 , 佐藤 幸恵 , 神崎 菜摘                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5日                                        </th>
+                                        <td>
+総括&nbsp;&nbsp;/(EB59062モデル生物多様性演習)                                        </td>
+                                        <td nowrap="nowrap">
+                                                担当：
+                                                
+                                        </td>
+                                        <td nowrap="nowrap">
+出川 洋介 , 佐藤 幸恵 , 神崎 菜摘                                         </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">前提科目・履修上の注意事項</h2>
+                    <p id="style">
+気象条件や状況によりスケジュールは変更することがある。                     </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">単位取得条件・成績評価基準</h2>
+                    <p id="style">
+実習の取り組み状況と提出されたデータとレポートに基づいて評価する。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">準備学習・事後学習</h2>
+                    <p id="style">
+準備学習は特になし。事後学習は授業中に適宜指示する。                     </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">指定教科書</h2>
+                <div id="topics">
+                        <p id="pretopics">
+オリジナルテキストを配布する。                         </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">参考書</h2>
+                <div id="topics">
+                        <p id="pretopics">
+授業中に適宜指示する。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                    </table>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+佐藤 幸恵 　生物・農林学系B棟518                                                        <br>
+                                                                <span class="officehour-address">
+100000398                                                                </span>
+                                                                <a href="http://www.u.tsukuba.ac.jp/~sato.yukie.gn/" target="_blank">http://www.u.tsukuba.ac.jp/~sato.yukie.gn/</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">備考 (受講生に望むこと)</h2>
+            </div>
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>

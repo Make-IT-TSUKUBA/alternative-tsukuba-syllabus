@@ -1,0 +1,552 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2024/FH26051/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+FH26051        </span>&nbsp;
+        <span id="title">
+金融リスク管理論        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    2.0 単位,
+            </span>
+            <span id="grade">
+                    2 - 4 年次,
+            </span>
+            <span id="timetable">
+秋AB 月5,6            </span>
+            <br>
+            <span id="assignments">
+折原 正訓            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+企業金融(コーポレートファイナンス)を学ぶ。具体的には、企業の資金調達、投資決定、投資家還元、企業統治の繋がりを体系的に議論する。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+計量分析システムエリア<BR>オンライン(対面併用型)<BR>オンライン(オンデマンド型)。期末試験は対面実施予定。社会工学類生に限る。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+批判的・創造的思考力、データ・情報リテラシー、広い視野と国際性、社会システムの基礎的理解と洞察力、複雑な社会問題解決のための数学・統計学・情報技術                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標（学修成果）</h2>
+                <p id="style">
+日本経済新聞などのニュースメディアは、企業の意思決定やそのインセンティブに影響し得る公共政策を毎日報道している。企業はなぜその意思決定をそのタイミングで行ったのか?公共政策は企業行動を変えるか?こうした問題を理解するためには、企業金融(コーポレートファイナンス)論の体系的知識が必須である。本講義の目的は、企業金融論の視点からこうした経済ニュースを体系的に理解・分析できるようになることである。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+資金調達, 投資, 配当, 自社株買い, 企業統治, 企業税制, 金融税制, 契約理論, 経済ニュース                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+基本的にオンデマンド形式の講義の予定。講義の主軸は理論である。他の経済・金融・ファイナンス理論の講義に比べて、理論モデルの背後にある論理や現実的重要性、およびモデルから得られる結果の解釈や含意を重視する。また、最先端の学術論文を通じて明らかになった実証・データ分析の結果も紹介する。加えて、日本経済新聞の記事などを用いて個別企業の意思決定に関する最近の実例も多数紹介する。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1週                                        </th>
+                                        <td>
+企業金融論は日々の経済ニュースを理解する上で必須の知識である。過去1週間の日本経済新聞の記事に限定してもこの点が読み取れることを説明する。また、企業金融論の全体像を説明する。すなわち、企業の資金調達、企業の投資決定、投資家への資金還元、企業統治を一連の流れとして体系的に把握する。加えて、健全な企業金融機能は社会に価値をもたらすことを明らかにする。機能不全を起こす状況が学術的にも政策的にも重要な分析対象である。具体的には、資金調達制約 (Financial Constraint) および企業統治 (Corporate Governance) が論点となる。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2週                                        </th>
+                                        <td>
+企業金融論を作り上げたのはフランコ・モディリアーニとマートン・ミラーである。1950年代のことであった。彼らは同時に企業金融論の発展を止めた。彼らによれば、資金調達と配当は企業価値に影響しない。したがって、(投資決定以外で)企業金融論を学ぶ意味はない。Tirole (2005) の2.2節のモデルを用いて彼らの理論を説明する。また、企業の目的はあくまで企業価値最大化であるべき根拠を説明する(Jensen, 2010, &ldquo;Value Maximization, Stakeholder Theory, and the Corporate Objective Function,&rdquo; Journal of Applied Corporate Finance)。他方、企業がより広い利害関係者の便益も考慮すべきという発想が再度台頭してきている。ESG (Environment; Social; Governance) などが最近のキーワードである。その論拠も紹介する。また、こうした発想を支持する代表的な研究を紹介する(Lins, Servaes, &amp; Tamayo, 2017, &ldquo;Social Capital, Trust, and Firm Performance: The Value of Corporate Social Responsibility during the Financial Crisis,&rdquo; Journal of Finance)。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3週                                        </th>
+                                        <td>
+企業金融論を再生させたのは契約理論である。契約理論では、投資家と経営者間の利害対立や情報の非対称性が前提とされている。この前提を踏まえると、企業金融上の意思決定が企業価値に影響し得る。Tiroleの3.2節に基づき信用割当(Credit Rationing)の理論を紹介する。契約理論のテーマの1つであるモラルハザードの応用である。モデル分析の結果、余裕資金がなければ企業は追加的な資金調達できないことを示す。資金調達制約の一例である。企業金融機能の欠陥を示す重要なモデルである。このモデルは複数の含意をもたらす。たとえば、企業が保有する1円の価値が1円を超える可能性が理論的に明らかになる。Pinkowitz &amp; Williamson, 2007, &ldquo;What is the Market Value of a Dollar of Corporate Cash?,&rdquo; Journal of Applied Corporate Financeに基づき米国上場企業の現金の価値に関する実証研究の成果を紹介する。また、このモデルは企業の利益と設備投資との関係にも含意をもたらす。しばしば指摘される「利益を上げている企業は投資をすべき」という主張は理論的に誤りである。Fazzari, Hubbard, &amp; Petersen, 1988, &ldquo;Financing Constraints and Corporate Investment,&rdquo; Brookings Papers on Economic Activityに基づく。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4週                                        </th>
+                                        <td>
+負債契約の理論的特徴を説明する。第1に、負債は経営の規律付けの点で株式よりも望ましい側面を持つ。第2に、企業の精算価値を考慮すると負債契約の方が株式契約よりも望ましい。Tiroleの3.2.4節に基づく。第3に、特許を担保に負債調達を行う企業が米国で増えている (Mann, 2018, &ldquo;Creditor Rights and Innovation: Evidence from Patent Collateral,&rdquo; Journal of Financial Economics)。他方、負債の理論的な特徴のいくつかは現実には必ずしも成立していない。Tiroleの3.3節の過剰債務 (Debt Overhang) と再交渉モデル、およびRoberts &amp; Sufi (2009, &ldquo;Renegotiation of Financial Contracts: Evidence from Private Credit Agreements,&rdquo; Journal of Financial Economics) を通じて現実の負債契約のあり方を理解する。また、流動性管理 (Liquidity Management) を扱う。Tiroleの5.2節に基づき最適な現金保有額を理論的に導出する。企業が十分な現金を保有しない場合、社会的に望ましい投資が行われなくなってしまうことが明らかになる。すなわち、現金保有は経済ショックに対する保険として機能する。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5週                                        </th>
+                                        <td>
+中間試験                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6週                                        </th>
+                                        <td>
+非対称情報を扱う。投資家は経営者の能力や特性を必ずしも知っているわけではない。非対称情報と呼ばれる状況である。契約理論の対象の1つである。Tiroleの6.2.1節に基づいて、投資家と経営者間の情報の非対称性は優れた経営者からそうでない経営者への実質的な資金移転を引き起こすことを理論的に示す。非対称情報の程度が大きい場合、企業金融市場が崩壊する。非対称情報の応用例として、企業の株式調達のタイミングを扱うマーケットタイミング理論を取り上げる。Tiroleの6.2.2節に基づく。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第7週                                        </th>
+                                        <td>
+株式調達と株価との関係を理論的に明らかにする。経営能力の低い経営者ほど株式を発行する傾向があることを示す。非対称情報の帰結である。企業は投資家から調達した資金で価値を創造し、その一部を投資家に還元する。債権者への還元額と時期は負債契約の一部として事前に定められている。したがって、事後的な再交渉を除けば経営者に裁量の余地はない。他方、配当や自社株買いを通じた株主への還元に関しては経営者に戦略的意思決定の余地が大いに残っている。Tiroleの6.2.2節に基づき、シグナリング理論などの仮説を紹介する。また、情報の非対称性が存在する場合には株主還元が企業価値に影響することを理論的・実証的に示す。非対称情報の別の応用例として、企業の資金調達に関する順序付けを与えるペッキングオーダー理論も取り上げる。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第8週                                        </th>
+                                        <td>
+経営モニタリング・監視は近年の経済政策のキーワードである。受動的モニタリングや情報開示によって企業の資金調達が円滑化することを示す。Tirole 8.2節に基づく。ストックオプションと株式報酬の相違も扱う。金融市場の活性化は企業および社会全体にとって望ましいか。企業への資金提供や経営監視に関心のない投資家が増えるので望ましくないという意見もある。妥当であろうか?Tiroleの8.3節に基づき市場による監視メカニズムを扱う。手元資金の必要性を理由に株式取引を行う投資家の存在によって市場による経営監視が活性化することを示す。このため、多様な投資家の存在を通じて市場の厚みが増すことは望ましいと評価できる。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第9週                                        </th>
+                                        <td>
+企業統治は企業金融が機能する前提条件である。企業統治の代表的メカニズムは、社外取締役選任と機関投資家・物言う株主による経営監視である。日本を含めた各国で、様々な企業統治改革が進んでいる。こうした改革は意図した効果をあげているのであろうか?そもそも、企業統治に特化した公共政策は必要なのであろうか?まず、Tiroleの9.2節に基づき経営監視の利点を説明する。こうした仮説を支持する実証結果と支持しない結果の双方を紹介し、その背後にある論理を議論する。Brav et al., 2008, &ldquo;Hedge Fund Activism, Corporate Governance, and Firm Performance,&rdquo; Journal of Finance、Edmans &amp; Holderness, 2016, &ldquo;The Role of Blockholders in Governance,&rdquo; VoxEU、Edmans, Fang, &amp; Zur, 2013, &rdquo;Stock Market Turnover and Corporate Governance,&rdquo; VoxEU、などに基づく。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第10週                                        </th>
+                                        <td>
+企業金融論は税制と密接な関係を有する。まず、古典的論点である負債の法人税上の税務便益について数値例を用いて説明する。Graham (2001, &ldquo;Estimating the Tax Benefits of Debt,&rdquo; Journal of Applied Corporate Finance) に基づく。法人税だけを考慮すれば、企業は株式を使わずに常に負債のみで資金を調達すべきことになる。また、米国で行われた投資減税の効果に関する実証研究を紹介する。Zwick &amp; Mahon (2017, &ldquo;Tax Policy and Heterogeneous Investment Behavior,&rdquo; American Economic Review) などに基づく。さらに、近年は配当や株式譲渡益など金融所得への課税に関する制度改正も頻繁に行われている。こうした税制改正が投資決定など企業経営にどういった影響を与えたかも議論する。Hanlon &amp; Hoopes (2014, &ldquo;What Do Firms Do When Dividend Tax Rates Change? An Examination of Alternative Payout Responses,&rdquo; Journal of Financial Economics) などに基づく。また、企業統治に関する公共政策の評価も議論する。Black &amp; Kim, 2012, &ldquo;The Effect of Board Structure on Firm Value: A Multiple Identification Strategies Approach using Korean data,&rdquo; Journal of Financial Economics、Balsmeier, Fleming, &amp; Manso (2017, &ldquo;Independent Boards and Innovation,&rdquo; Journal of Financial Economics) などに基づく。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+特になし。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+1)中間試験40%・期末試験60%、2)中間試験と期末試験は対面形式の通常の試験の予定。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+講義日と翌週講義日(あるいはその前日)の復習が重要。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+講義スライドをmanabaにアップロードする。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th>
+1. Jean Tirole The Theory of Corporate Finance, 2005年, Princeton University Press                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+2. Paul Asquith; Lawrence A. Weiss Lessons in Corporate Finance: A Case Studies Approach to Financial Tools, Financial Policies, and Valuation, 2019年, Wiley                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
+                <div id="topics">
+                        <p id="pretopics">
+メール等で連絡の上随時。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
+                    <p id="style">
+履修にあたって合理的配慮が必要な学生は事前に連絡のこと。                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>

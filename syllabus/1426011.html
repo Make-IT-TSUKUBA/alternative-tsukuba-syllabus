@@ -1,0 +1,501 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2024/1426011/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+              最終更新日：2024/03/26
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+1426011        </span>&nbsp;
+        <span id="title">
+社会基礎学II-「グローバル化」と「地方の活性化」に貢献できる輝く人材の育成:世界に挑む産業界・官界トップリーダーによる連続リレー講義        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    1.0 単位,
+            </span>
+            <span id="grade">
+                    2 - 6 年次,
+            </span>
+            <span id="timetable">
+秋AB 集中            </span>
+            <br>
+            <span id="assignments">
+            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+世界は、新興国の急成長、産業や市場のボーダレス化、ICT等、先端技術の進歩などにより、人材・情報・資金が国境を越えて行きかっています。同時に国は勿論のこと、国内の地域や都市の間でも競争が激化しています。このため、地球環境問題や資源・エネルギー問題など、世界にまたがるグローバルな課題に的確に対処していくことが求められています。また、少子高齢化と人口減少が急速に進んでいるわが国で、豊かな生活と産業の発展の鍵を握るのは、地方の活性化であり、地方で活躍し、輝く若い人材が求められています。<BR>この激動の時代を生き抜く学生の皆さんが、「国際社会と地域社会に貢献する」という高い志を持って研鑽に励むためには、本リレー講義では、高年次の学群生を対象に、これまで学んできた教養や専門性を基礎に、社会で活躍する上において求められる総合的な基礎力や想像力、構想力、分野を超えた広い視野の向上をサポートします。<BR>講義のキーワードである、「グローバル化とは何か」、「日本国内におけるグローバル化とは」、「地域社会の発展に何が必要か?」、について理解し、様々な課題に対して強い関心と好奇心を持ち、グローバルと地方創生の時代に果敢にチャレンジし、活躍できる人材を目指すことを期待します。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+2024年度開講せず。<BR>実務経験教員<BR>対面<BR>         </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義        </p>
+    </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">科目群</h2>
+                <p id="style">
+                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+本科目の受講により,「広い視野と国際性」および「批判的・創造的思考力」が特に涵養されることを目的とする.                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
+                <p id="style">
+1社会の営み全般において密接に関係し合う、1 グローバル化と地域の日本のあり方、2 政治・政策、3 安全保障・憲法、4 経済・産業、5 資源・エネルギー、6 世界/アジア、の重点6分野のそれぞれにおいて、「グローバル化とは何か」、「日本国内におけるグローバル化とは」、「地域社会の発展に何が必要か?」という観点から、現代社会が抱えている問題やその問題解決のアプローチを、講義内容に即して説明することができる。<BR>2前記6分野における問題解決が、多くの場合、それぞれの分野にまたがって広範に関連し合うことを、講義の内容に即して説明できる。<BR>3社会の諸問題を解決するための方法論を提案でき、様々な分野や国にまたがる視座をもつ「グローバル人材」像を、その能力の具体例とともに説明できる。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+グローバル化, グローバル人材, 社会基礎学, 地方の活性化                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+・                                        </th>
+                                        <td>
+【第1日目：10月7日(土)13:30-16:30】<BR><BR>林田　康洋 一般社団法人 日本プロジェクト産業協議会（JAPIC） 常務理事<BR>　[導入講義]　連続リレー講義の意味・意義と狙い<BR><BR>石川 貴之 （株）㈱日建設計　執行役員　企画開発部門　新領域開拓グループ　プリンシパル<BR>平石 和昭 （株）㈱三菱総合研究所　主席研究部長／プラチナ構想ネットワーク　事務局長<BR>林田　康洋 一般社団法人 日本プロジェクト産業協議会（JAPIC） 常務理事<BR>坪内 孝司 筑波大学 教授／教学デザイン室長<BR>　[パネルディスカッション]<BR>　第1部<BR>　[グローバル化とは何か？グローバル化の中で日本は？]<BR>　グローバル化とは何か？日本経済の諸課題を浮き彫りにした上で、安全保障、資源、エネルギーなど様々な　観点から議論を進め、日本の進むべき未来を論じる。<BR><BR>　第2部<BR>[学生は何を学び、何を身に付けるべきか?]<BR>グローバル人材とは何か？産官学の第一人者たちが次世代のリーダーに必須となる素養について論じ、この講義で学んで欲しいことを明確化する。<BR>---------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+・                                        </th>
+                                        <td>
+【第2日目：10月14日(土)13:30-16:30】<BR><BR>三好 忠滿 日本製鉄（株）執行役員　人事労政部長<BR>　[企業経営の現状・課題と戦略]<BR>　本講義では、日本製鉄の過去・未来の取り組みを通じて、日本のものづくり産業が目指す成長戦略について考察する。／①「鉄」という素材の多様な特性・魅力／②プラザ合理による超円高、中国の台頭、川上・川下業界の再編等の危機をどのように乗り越えてきたか／③人口減少による内需縮小、気候変動への対応ニーズの急激な高まり等の環境変化にどう向き合っていくか<BR><BR>永井 利治 （一社）共同通信社　論説委員長<BR>　[日本経済が向き合うリスクと変革の可能性]<BR> 　日本経済はさまざまなリスクを抱えている。脱炭素、経済安全保障は企業の戦略を大きく変化させ、多くの経営者は緊張感をもって次の一手を検討している。新型コロナウイルスは物流の混乱と資源価格の上昇をもたらし、世界的な金融緩和は転換点を迎えた。日本では財政政策も政治の対立軸になってきた。中長期的なリスクへの対応策と、そこから生まれるゲームチェンジの可能性を探る。デジタル化が進むメディアの将来像にも触れたい。<BR>---------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+・                                        </th>
+                                        <td>
+【第3日目：11月11日(土)13:30-16:30】<BR><BR>中込 正志 外務省　欧州局長<BR>　[ロシアによるウクライナ侵略]<BR>　ロシアによるウクライナ侵略は、欧州のみならず、インド太平洋、そして国際社会に大きな影響を与えている。ロシアによるウクライナ侵略をどうみるか、今後の見通しや我が国の政策について議論する。<BR><BR>原田 文代 ㈱日本政策投資銀行　常務執行役員<BR>　[組織におけるダイバーシティと人的資本]<BR>　社会・経済のグローバル化やサステナビリティへの対応の必要性を背景に、ダイバーシティの重要性は言を俟たない。最近では人材を企業価値の源泉、「資本」としてとらえる機運も高まっている。当講義では組織におけるダイバーシティマネジメント、即ち構成員の多様な特性と個性の組織内への取込み、活用につき、歴史的発展過程及び現状、課題について解説する。また国内外の先進的事例を交えながらダイバーシティマネジメントの効用を明らかにし、将来像を展望する。<BR>-------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+・                                        </th>
+                                        <td>
+【第4日目：11月25日(土)13:30-16:30】<BR><BR>青木 健至&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;防衛省政策立案総括審議官<BR>　[日本の安全保障環境と防衛政策]<BR>　世界は歴史の分岐点を迎え、国際社会は新たな危機の時代に突入しつつある。戦後最も厳しく複雑な安全保障環境について、我が国周辺を中心に具体的事例をもとに解説する。そして、現実的に対峙していくための我が国の安全保障・防衛戦略、防衛力、防衛費について分かり易く解説する。専門知識は一切不要。<BR><BR>松尾 剛彦 経済産業省　通商政策局長<BR>　[我が国通商政策の現状と課題について]<BR> 　ロシアのウクライナ侵略と西側諸国を中心とした対露経済制裁、米中対立の激化など、これまでになく主要国による地政学的な対立が激しくなる一方、ＷＴＯ（国際貿易機関）の紛争解決機能が機能不全に陥る等、戦後構築されてきたルール・ベースの貿易システムは、大きな試練に直面している。この事態にどのように対処し、我が国、ひいては世界経済の発展を確保すべきか議論する。<BR>-------------------------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+・                                        </th>
+                                        <td>
+【第5日目：12月2日(土)13:30-16:30】<BR><BR>林田　康洋&nbsp;&nbsp;一般社団法人 日本プロジェクト産業協議会（JAPIC） 常務理事<BR>定岡 祐二 株式会社みずほ銀行 産業調査部長<BR>長橋 和久 国土交通省　総合政策局長<BR>坪内 孝司 筑波大学教員 システム情報系教授／教学デザイン室長<BR>　[パネルディスカッション]<BR>我が国が直面する構造改革と社会資本整備<BR>-------------------------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+・                                        </th>
+                                        <td>
+【12月16日(土)】<BR>&nbsp;&nbsp;&nbsp;期末試験<BR>・詳細は、後日manabaで周知                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+第1回授業日の13:30から行うオリエンテーションに必ず出席すること。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+期末試験の結果により評価する。なお、期末試験の方法はオリエンテーションにおいて説明する。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+各講義で紹介する。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+各講義で紹介する。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                        <p id="pretopics">
+お問い合わせは、こちらのメールアドレスで随時受け付けます。<BR>japic-2023@ml.cc.tsukuba.ac.jp                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
+                    <p id="style">
+各講義で紹介する。<BR>教室:                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>

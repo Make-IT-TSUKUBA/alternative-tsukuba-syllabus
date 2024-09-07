@@ -1,0 +1,602 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2024/FG31321/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+FG31321        </span>&nbsp;
+        <span id="title">
+線形システム制御        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    2.0 単位,
+            </span>
+            <span id="grade">
+                    3・4 年次,
+            </span>
+            <span id="timetable">
+春BC 金3,4            </span>
+            <br>
+            <span id="assignments">
+坪内 孝司            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+状態方程式に基づく制御理論と制御システムの設計法について述べる。動的システムの表現法,状態フィードバック制御,状態オブザーバ,動的出力フィードバック制御,制御系の実装など。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+FG21321と同一。<BR>対面        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係(学習・教育到達目標との関係)</h2>
+                <p id="style">
+この科目は,「2.4 具体的なシステムを設計し運用する能力 (i)問題解決能力」に対応している.                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
+                <p id="style">
+状態方程式で表された,主に線形システムの特性解析,状態フィードバック制御系,状態オブザーバーについて学び,制御系をシステム的観点から解析・設計できる能力を養う.<BR>1.状態変数の概念を理解し,基本的なシステムの物理方程式から状態方程式を立てることができる.<BR>2.システムの平衡点とその安定性を調べることができる.<BR>3.そのシステムの状態方程式があたえられたとき,その可制御性の判別を行うことができる,また状態フィードバックの概念を説明でき,極配置による制御系設計ができるようになる.<BR>4.そのシステムの状態方程式があたえられたときい,その可観測性の判別を行うことができる,また状態オブザーバの概念を説明でき,オブザーバゲインの設定が極配置法によりできるようになる.<BR>5.状態フィードバックと状態オブザーバの併用による閉ループ系の設計指針を述べることができるようになる.<BR>6.そのシステムの線形状態方程式があたえられたとき,それを代表的な正準形式に変換できるようになる.またその正準形式の意味するところを述べることができるようになる.                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+線形システム, 状態方程式, 状態変数, 状態フィードバック, オブザーバ, 分離原理                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+対面での講義を行う.基本はオンデマンド教材を用意して予習として学修できるようにする.講義時間帯内で，まず演習問題に取り組み，その演習問題に対する解答を解説を交えながら行う．双方向の対話による質問の受付などを行う.必要事項はmanabaの本コースにてアナウンスする.<BR><BR>概ね次の順序で講義を進めるが,進行状況に合わせて適宜変更する場合がある.                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+導入として，具体的な物理系の例を紹介し，システム制御の考え方,運動方程式と線形微分方程式を紹介する．                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+ 状態変数の考え方を述べ，n階1元線形微分方程式が1階n次元の線形微分方程式（状態方程式）と等価になることを示す．                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+状態変数の時間的な遷移が状態方程式に支配される概念を示し，これがベクトル場を考えることで視覚的にとらえることができることを示す．また，状態方程式を状態変数線図として図式化できることも示す．                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+行列の対角化を使うと，状態方程式を変数変換により等価で典型的な形式に変換できることを示す．この形式を対角正準形式と呼ぶことも示す．                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+対角正準形式に変換した後の状態方程式の入力係数ベクトルや出力係数ベクトルの要素にゼロがある場合の発想から，可制御性や可観測性の概念を見ることができることを示す．また，可制御正準形式，可観測正準形式も紹介する．                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+対角正準形式において，システム行列Aの固有値によって，状態変数の発散収束が決まり，また，入力と出力の関係にかかわるBIBO安定性との関連を紹介する．                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+システム行列Aが安定行列でない，すなわち内部安定でなくても，状態変数が観測できれば，それが可制御な系であれば状態フィードバックによってシステムを安定化できることを示す．                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+その状態方程式が可観測であれば，その系への入力と，その系からの出力，および状態方程式の係数行列や係数ベクトルから，系の内部の状態変数がすいてできることを示す．これをオブザーバと呼ぶことも紹介する．                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+その状態方程式が可制御かつ可観測であれば，オブザーバによる内部状態の推定値を用いて状態フィードバックが行えることを示す．また，フィードバックゲインとオブザーバゲインを独立に決定できることも示す（分離原理）．                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+入力と出力の関係と畳み込み積分が密接に関連することを示す．また伝達関数を紹介する．                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                        <p id="pretopics">
+講義に関する情報共有はmanabaをベースに行います.                        </p>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+本講義前に仮定する知識としては次のものがある.<BR>1. 線形代数:行列の固有値,逆行列、相似変換など.<BR>2. 微分方程式:線形微分方程式の解法など.                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+期末試験は対面で行う予定です.期末試験の方法について別途manaba上で連絡します.<BR><BR>ミニ課題(講義時間に毎回提出)，および期末試験などを総合して以下の様に評価します．なお，宿題を出すことがありますが，これを成績評価に含めるかどうかはmanabaのコース上で明示します．<BR><BR>期末試験の評価 70% / ミニ課題および宿題等の評価 30%                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+この講義での学修の流れは以下の通りです．<BR><BR>①予習　<BR>各講義日に講義に参加する前までに，該当する回の講義資料を読み，また，manaba上に用意した講義ビデオを視聴して内容の理解に努めてください．<BR><BR>②講義の受講<BR>講義は春BCの金曜3,4時限目に開講されます．<BR>3時限目は，毎回，その予習内容に基づくミニ課題に解答していただきます．この解答提出をもって講義の出席として扱います．このミニ課題の解答には，講義資料や予習で自ら作成したノート，参考書などを参照することは可とします．<BR>４時限目は，ミニ課題の略解を示し，その講義のポイントを解説します．<BR><BR>③復習<BR>問題文はmanaba上にもその回の講義終了後に掲載するので，これと，講義で解説した内容をもとに復習をしてください．復習は，その問題の解き方を覚えるよりは，その問題を解くために必要だった知識が講義資料のどこにあったかの確認，その知識の内容，および，その知識を成り立たたせる数学的な定理は何か，を理解することに注力してください．さらに参考書などをよみ，理解を深めるとよいでしょう．<BR><BR>以上の①②③を一週間ごとに繰り返しましょう．<BR><BR>④質問やコメントなど<BR>質問やコメントなどは，このコースの「レポート」機能を使って，毎回の講義ごとに入力できるようにします．質問やコメントを歓迎しますので，遠慮なく入力してください．また，質問やコメントに対する返信は，質問者を伏せてコースニュースでお知らせすることを原則にしますが，質問者のみにお返事する場合もあります．<BR><BR>⑤学修量について<BR><BR>ちなみに，大学設置基準上は，1単位の取得のために，講義と予習復習を含めて45時間の学修活動が必要とされています．この講義は2単位なので，合計90時間となり，１週あたりで９時間になります．このうち講義（上記②）が２時間半ありますから，予習復習（上記①と③）に６時間半を費やせると基準上は必要な学修量を確保できることになります．                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+主に講義ノート（オンデマンド教材のハンドアウト）を使用する.理論面で更に勉強したい人は以下の参考書などを利用のこと.                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                        <p id="pretopics">
+上記のうち,<BR>1は本講義の方針・内容に比較的よくマッチしている<BR>2は本講義にはない理論的な証明も含んでいる<BR>3も本講義にはない理論的な証明も含んでいる<BR>4は担当教員がかつて勉強に使った教科書.本書の8章以降が本講義の内容に該当.もともとは,昭晃堂から1982年に出版されたものが2014年よりコロナ社刊となった.<BR>5は，この講義に関連する内容が詳しく述べられた名著である．pdf版もダウンロードできる．                        </p>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">参考書</h2>
+                <div id="topics">
+                        <p id="pretopics">
+上記（教材・参考文献・配布資料）欄に記した通り．                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                    </table>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                        <p id="pretopics">
+随時(メイルでアポイントをとって下さい)                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+坪内 孝司 　                                                        <br>
+                                                                <span class="officehour-address">
+1001145                                                                </span>
+                                                                <a href="http://www.utarc.iit.tsukuba.ac.jp" target="_blank">http://www.utarc.iit.tsukuba.ac.jp</a>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
+                    <p id="style">
+本講義では,線形代数学における,行列の階数,対角化,座標変換と基底変換などに関する内容と密接に関連します.これらについて,講義を受講する前にあらかじめ復習をしておくことを勧めます.                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                            <tr>
+                                <th>
+FA01631                                </th>
+                                <td>
+線形代数1                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+FA01641                                </th>
+                                <td>
+線形代数1                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+FA01731                                </th>
+                                <td>
+線形代数2                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+FA01741                                </th>
+                                <td>
+線形代数2                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+FA01831                                </th>
+                                <td>
+線形代数3                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+FA01841                                </th>
+                                <td>
+線形代数3                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+FG21311                                </th>
+                                <td>
+フィードバック制御                                </td>
+                            </tr>
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+                    <p id="style">
+なし<BR>                    </p>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>

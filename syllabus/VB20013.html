@@ -1,0 +1,452 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2024/VB20013/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+              最終更新日：2024/04/12
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+VB20013        </span>&nbsp;
+        <span id="title">
+Practical Training on Global Issues A-I        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    3.0 単位,
+            </span>
+            <span id="grade">
+                    2 年次,
+            </span>
+            <span id="timetable">
+春ABC 木5,6,応談            </span>
+            <br>
+            <span id="assignments">
+森尾 貴広, サンドバール フェリーぺ            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+This practical training enhances skills of problem formation and solution development through PBL (Problem Based Learning) to attack global issues in the field of &ldquo;Earth Environment&rdquo; and &ldquo;Risk and Security&rdquo;.<BR>Firstly, students will set individual study project related to global issue. Then, students will conduct their research activities including literature review, data analysis, and survey by consulting with their advisor and mentor. Student will present on their study project and have discussion. This course also provide the lectures of methodology for data analysis related to themes of study project.        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+Students must follow this course at the same time as or after having accomplished the Seminars on Global Issues A-I (VB20012)<BR>英語で授業。<BR>主専攻必修科目<BR>対面        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+実習･実験･実技        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+In the diploma policy of BPGI, students are required to have the following knowledge and abilities:<BR>(1) A broad knowledge of global issues from the perspective of integrating the humanities and sciences.<BR>(2) Acquire a systematic specialized knowledge of global issues and the ability to analyze them comprehensively from multiple perspectives and to work on solving them with creativity and ingenuity.<BR>(3) The ability to communicate logically and persuasively to express one's own views in a global society, while also being flexible enough to listen to the opinions of others.<BR>(4) Demonstrate leadership in a cross-disciplinary and cross-cultural environment and have the ability to contribute to society.<BR>(5) High ethical standards in a global society and the ability to understand diversity.<BR><BR>This course is designed to cultivate the above competencies (1) (2), (3) and (4).                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標（学修成果）</h2>
+                <p id="style">
+The purposes of undertaking a practical training are to give you: <BR>-	An opportunity to enhance skills of problem formation and solution development to attack global issues regarding an area in which you have a special interest.<BR>-	An opportunity to learn broad knowledge from the presentation of other students and discussions.<BR>-	Experience in managing a project.                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+1. Orientation (2 periods)<BR>2. Lecture on research design (2 periods)<BR>3. Lecture on literature review (2 periods)<BR>4. Individual research (Preparing topic presentation, 6 periods)<BR>5. Group discussion on research topic (2 periods)<BR>6. Individual research and meeting with advisor (6 periods)<BR>7. Proposal presentation (1) (2 periods)<BR>8. Proposal presentation (2) (2 periods)<BR>9. Proposal presentation (3) (2 periods)<BR>10. Lecture on data analysis&nbsp;&nbsp;(2 periods)<BR>11. Meeting with advisor and mentor (Feedback of proposal presentation, 3 periods)<BR>12. Individual research (Preparing midterm presentation, 6 periods)<BR>13. Midterm presentation (1) (2 periods)<BR>14. Midterm presentation (2) (2 periods)<BR>15. Midterm presentation (3) (2 periods)<BR>16. Meeting with advisor and mentor (Feedback of midterm presentation, 3 periods)<BR>17. Individual research (Preparing final presentation, 6 periods)<BR>18. Final presentation (1) (2 periods)<BR>19. Final presentation (2) (2 periods)<BR>20. Final presentation (3) (2 periods)<BR><BR>&lt;Topic presentation&gt;<BR>Students will have the topic presentation to explain their study project and discuss with faculties and students to develop their idea. <BR>-	The topic presentation should include:<BR>	Background, motivation, and relationship with SDGs: It should provide sufficient background information for everyone to understand your study project. What issue, problem, controversy, or important matter has led to research on the topic.<BR>	Aim of study project and research questions (for the 3rd year students): The topic presentation should set out the central aims and questions that will guide your research. You should take time to reflect on the key questions that you are seeking to answer. Research questions should be set considering the time schedule.<BR>	&lsquo;Gap&rsquo; in the literature (for the 3rd year students): Outlines the field of literature and the &lsquo;gap&rsquo;, the main findings to date, theories, debates, and remaining questions within the literature, and explains how the research will contribute to the gap.<BR>	Research Methods (for the 3rd year students): The presentation should outline your research methods, explaining how you are going to conduct your research. Students must include their own analysis results using GIS, statistical method, interview, survey, etc.<BR>	Significance of Research: Students should demonstrate the originality of their intended research. You should therefore explain why your research is important (for example, how your research is expected to contribute to the progress of the research topics, why it is the very time to conduct your research, what impact of your research is expected on solving the global issues concerned, etc.).<BR>-	20 minutes per each student / use slides, videos, etc. + 10 minutes Q&amp;A<BR>-	Students have to submit a topic report before the presentation, and it should be a maximum of two pages in length, including references according to the designated format.<BR><BR>&lt;Midterm presentation&gt;<BR>The midterm presentation should summarize the literature review and the project&rsquo;s progress to date. <BR>-	The midterm presentation should include:<BR>	Summary of topic presentation: Background, aim, research questions<BR>	Aim of study project and research questions (for the 2nd year students): The topic presentation should set out the central aims and questions that will guide your research. You should take time to reflect on the key questions that you are seeking to answer. Research questions should be set considering the time schedule.<BR>	Literature review (for the 2nd year students): Outlines the trend of literature and, the main findings to date, theories, debates, and remaining questions within the literature.<BR>	Progress and future plan (for the 3rd year students): Students need to show what you have achieved and how you plan to complete the project. Be specific so that the faculties and other students can assess whether your progress and plan are reasonable.<BR>-	20 minutes per each student / use slides, videos, etc. + 10 minutes Q&amp;A<BR>-	Students have to submit a midterm report before the presentation, and it should be a maximum of four pages in length, including references according to the designated format.<BR><BR>&lt;Final presentation&gt;<BR>The final report should be in the style of a journal article with section headings. <BR>-	The final presentation should include:<BR> --	Introduction, literature review, methodology, results, discussion and conclusion<BR> --	Systematic literature review and &lsquo;Gap&rsquo; in the literature (for the 2nd year students): Outlines the field of literature and the &lsquo;gap&rsquo;, the main findings to date, theories, debates, and remaining questions within the literature, and explains how the research will contribute to the gap.<BR> --	The answers to the research questions (for the 3rd year students): Appropriate interpretation and discussion of results, and limitations.<BR>-	Students have to submit a final report before the presentation, and it should be a maximum of eight pages in length, including references according to the designated format.<BR><BR><BR>&lt;Discussion&gt;<BR>Asking questions and joining in discussions are important parts of practical training. Students learn broad knowledge from the presentations of other students and discussions.<BR>-	Students have to submit the question sheets for all presenters.<BR>-	Students are strongly recommended to give at least three oral questions during the class.<BR>-	Questions and answers that could not be done in class time will be threaded on the manaba forum as necessary.<BR><BR>Third-year students are encouraged to provide advice and assistance to second-year students in the preparation and presentation of their Study Projects, both in and out of class time.                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+Lectures are conducted in English.<BR>Required course.<BR>This course is for BPGI students, or students who have earned credits of VB10001 and VB10011.                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+Each presentation is evaluated as follows.<BR>-	Topic presentation 20% <BR>	Common criteria<BR>-	Clear introduction of research topic 5%<BR>-	Logical organization of report and appropriate citation 5% <BR>-	Appropriate response to questions and comments: 5%<BR>	Criteria by year <BR>-	Specific and clear aim, research question, gap in literature, and methodology 5% (for the 3rd year students)<BR>-	Clear relationship between research topic and global issue 5% (for the 2nd year students)<BR><BR>-	Midterm presentation 30%<BR>	Common criteria<BR>-	Clear introduction of research topic and aim 10%<BR>-	Logical organization of report and appropriate citation 5%<BR>-	Appropriate response to questions and comments: 5%<BR>	Criteria by year <BR>-	Specific results of current progress 10% (for the 3rd year students)<BR>-	Clear introduction literature review including trend and major findings 10% (for the 2nd year students)<BR><BR>-	Final presentation 30%.<BR>	Common criteria<BR>-	Clear introduction of research topic and aim 5%<BR>-	Logical organization of report and appropriate citation 5%<BR>-	Appropriate response to questions and comments: 5%<BR>	Criteria by year <BR>-	Logical organization of the presentation and appropriate methodology 5% (for the 3rd year students)<BR>-	Appropriate interpretation and discussion of results 10% (for the 3rd year students)<BR>-	Systematic literature review including trend, methodology, and major findings 10% (for the 2nd year students)<BR>-	Research gap and specific research plan 5% (for the 2nd year students)<BR><BR>-	Discussion and participation 20%.<BR>	The number of questions will be evaluated.<BR><BR>-	The evaluation for students who do not give any presentations will be D.<BR>-	The evaluation for students who attend lecture less then 70% will be D.                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法学修時間の割り当て及び授業外における学修方法（本授業は1単位当たり45時間の学修時間が必要です。対面授業と合わせ以下に記載する授業外学修を行ってください。）</h2>
+                    <p id="style">
+Note that one credit course requires 30 hours of self-study outside of class in addition to 15 hours of contact hours. <BR>Individual research and meeting with advisor/mentor                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+Provided in the course                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
+                <div id="topics">
+                        <p id="pretopics">
+By appointment                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+森尾 貴広 　国際室(本部アネックス棟) 6263                                                        <br>
+                                                                <span class="officehour-address">
+1001624                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+サンドバール フェリーぺ 　                                                        <br>
+                                                                <span class="officehour-address">
+100003626                                                                </span>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
+                    <p id="style">
+Be proactive to have basic and solid knowledge. <BR>Be interactive during classes, and do not be afraid to make mistakes.<BR>Course will be onsite basically.                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>
