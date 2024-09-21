@@ -1,0 +1,628 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2024/BB05011/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+              最終更新日：2024/03/29
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+BB05011        </span>&nbsp;
+        <span id="title">
+社会学の最前線        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    1.0 単位,
+            </span>
+            <span id="grade">
+                    1 年次,
+            </span>
+            <span id="timetable">
+秋AB 水6            </span>
+            <br>
+            <span id="assignments">
+社会学主専攻全教員            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+各教員が現在取り組んでいる研究を題材に、社会学研究の最前線を示す。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+専門導入科目(事前登録対象)<BR>オンライン(オンデマンド型)        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+批判的・創造的思考力、広い視野と国際性、心身の健康と人間性・倫理性、社会科学の基礎、社会科学の素養、社会問題の発見、社会的事象の理解・分析                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標（学修成果）</h2>
+                <p id="style">
+各教員が取り組んでいる研究を題材に、社会学研究の最前線を示す。各教員による最前線の研究課題にふれることで、社会学に対する関心を能動的に深める。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+社会学                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+以下に各回の担当者とテーマ・タイトル、および概要を記す。順番の変更は初回のガイダンスで示す。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+■ガイダンス(鈴木彩加)<BR>社会学類社会学主専攻のカリキュラムを説明するとともに、社会学研究の最前線にふれるにあたり、各回講師の紹介を中心に10回にわたるコースのガイダンスを行います。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+■葛山 泰央「&lsaquo;自我という都市&rsaquo;」<BR>[概要]<BR>近代性・現代性の時代において私たちの自我と都市とはいかなる歴史的・社会的・文化的諸関係を取り結んできたのでしょうか。シャルル・ボードレール『パリの憂愁』に所収のいくつかの散文詩を事例に、社会意識論の立場から考察します。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+■土井 隆義「犯罪社会学の最前線」<BR>[概要]<BR>現在、若年層の貧困率は上昇し、生活困窮家庭も増えています。しかし、同世代の生活満足度は上昇し、刑法犯も激減しています。この矛盾する現象をいかに理解すべきでしょうか。犯罪社会学の理論を応用しながら考えてみます。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+■五十嵐 泰正「放射能災害に社会学は何ができるか」<BR>[概要]<BR>福島第一原発事故後の課題に関して、社会学が十分な役割を果たしていないと失望する声があります。自然科学者や広く社会からの期待とどこにズレがあったのでしょうか。原発事故後8年を迎えて関心の低下と問題の複雑化・固定化が進む中、科学的に結論が出ていても社会的には何も解決されていない問題は山積しています。講師の8年間の取組や、文理協働の最前線を紹介し、社会学（者）に何ができるのか考えます。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+■目黒 茜「感染症と社会―科学的知識を媒介することによる連帯の可能性―」<BR>[概要]<BR>近年COVID-19を人間社会が経験してきたように、感染症は近現代社会において人びとの生活に大きな影響を与えてきました。戦前期の花柳病（現代的にいうと性感染症）に着目し、当時の人びとが科学的知識を媒介にしながら「性に病む社会」をどのように克服していこうとしていたのかを考察します。感染症が問う人間社会の問題とはどういったものかを、みなさんと一緒に検討していきたいと思います。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6回                                        </th>
+                                        <td>
+■調整中「社会的養護の社会学」<BR>[概要]<BR>全国の児童相談所が対応した虐待相談件数は増えています。子どもは保護された後、どのように生活をしているのでしょうか。本講義では、児童養護施設をはじめとする様々な児童福祉施設の説明を行います。現場を理解することだけにとどまらず、現場に生じる「ジレンマ」を学んだ上で、その背後にあるマクロな社会構造の問題がいかに影響しているのかを考察します。さらに、社会学理論を用いることで、長期的に見れば現場における困難や課題を解決する手がかりを探ります。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第7回                                        </th>
+                                        <td>
+■森 直人「福祉国家の変容と教育の社会学的啓蒙」<BR>[概要]<BR>「人のよりよい方向への変化」を促す「教育」を対象とする社会学は、20世紀前半の北米で形式化された機能分析の方法により飛躍的に発展しました。しかしそれは同時に、理念と善意にもとづく教育実践・政策の「意図せざる結果」をあげつらう（のみの？）学的営みへの変質をもたらしました。そうした暴露啓蒙とは異なる形での「社会学的啓蒙」をめざし、エスノメソドロジーという流派から学んだ取り組みについて論じます。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第8回                                        </th>
+                                        <td>
+■ウラノ・エジソン・ヨシアキ「労働環境の変貌と労働者の組織化の課題」<BR>[概要]<BR>労働市場の再編に伴い、労使関係も常に変化しています。労働者の組織率が減少傾向にある中、労働組合にはどのような取り組みが可能であり必要なのかをコミュニティユニオンの事例を取り上げて考えます。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第9回                                        </th>
+                                        <td>
+■加島 卓「メディア社会学の最前線」<BR>[概要]<BR>スマートフォンや人工知能など、メディアテクノロジーの開発は加速度的に進んでいます。しかし、私たち人間が生活する速度と技術開発の速度は同じとは言い切れません。そこで、メディア論、技術決定論、社会決定論といったアイデアを紹介し、メディアテクノロジーと人間の関係を社会学的に考えてみたいと思います。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第10回                                        </th>
+                                        <td>
+■鈴木 彩加「新自由主義時代のフェミニズム」<BR>[概要]<BR>フェミニズム運動は、２世紀あまりの歴史がある社会・政治運動であり、男女同権や教育機会の平等、性と生殖をめぐる自己決定、セクシュアル・ハラスメントやDV・性暴力などの概念化と可視化など、社会に大きな影響を与えてきました。しかし、女性が男性と同じように働けるようになりつつあるからこその課題も生まれ始めています。第10回では、フェミニズム運動の現代的位相について考えます。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+専門導入科目（事前登録対象）。オンライン（オンデマンド型）                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+最終期末試験におけるレポート（100％）。全10回のなかから１つを選び、自分が深めた関心に沿った（１）授業内容にかんする理解力、および、（２）授業内容を踏まえた自分の問題関心・考察の展開力、によって評価する。具体的な指示については、初回ガイダンスで説明する。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+１時限あたり３時間の授業外学修を必要とする。各回の予習として、下記の参考文献を読んでから授業に臨むこと。また、授業中に紹介される文献やウェブ記事等を実際に参照・読解し、授業内容との関連について考察すること。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+各回の主要なものを以下に示す。これ以外に各回の担当者が授業中に適宜紹介する。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th>
+1. [2]真木悠介, 2008,『自我の起原――愛とエゴイズムの動物社会学』岩波現代文庫.                                         </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+2. [3]土井隆義, 2012,『若者の気分 少年犯罪〈減少〉のパラドクス」岩波書店.                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+3. [4-1]五十嵐泰正・安全安心の柏産柏消円卓会議, 2012,『みんなで決めた安心のかた ち――ポスト3.11の「地産地消」をさがした柏の１年』亜紀書房.                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+4. [4-2]五十嵐泰正・安東量子, 2021, 「専門知と地域の人々のあいだで : 放射線リス クコミュニケーションの経験から」『年報社会学論集』34号.                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+5. [4-3]五十嵐泰正, 2012,『みんなで決めた安心のかたち――ポスト3.11の「地産地消」をさがした柏の１年』亜紀書房.                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+6. [5]目黒茜, 2021，「花柳病予防法改正運動と『社会的なもの』――『女医』竹内茂代の果たした役割」『思想』1170: 33-53.                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+7. [6]土屋敦・藤間 公太編, 2023,『社会的養護の社会学ー家庭と施設の間にたたずむ子どもたち』青弓社.　                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+8. [7-1]森直人・澤田稔・金子良事編, 2024（近刊），『シリーズ 公教育の再編と子どもの福祉1 「多様な教育機会」の実践の論理：ジレンマのなかで／と向き合う』明石書店．                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+9. [7-2]森直人, 2023，「「藤田-黒崎論争」を展開する：教育行政＝学校組織のエスノメソドロジーにむけて」『教育学年報14 公教育を問い直す』世織書房．                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+10. [8]未定 未定                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+11. [9-1]加島卓, 2013, 「「つながり」で社会を動かす」＋「メディア・リテラシーの 新展開」, 土橋臣吾・南田勝也・辻泉（編著）『デジタルメディアの社会学』北樹出版, 130-144; 207-220.                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+12. [9-2]加島卓, 2018, 「ネット広告の功罪：監視社会と消費行動への自由」, 辻泉・ 南田勝也・土橋臣吾（編著）『メディア社会論』有斐閣ストゥディア.                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+13. [9-3]大久保遼, 2023, 『これからのメディア論』有斐閣.                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+14. [10]鈴木彩加, 2024,「『名誉男性』概念をめぐる考察―女性リーダー批判の背景をさぐる」筑波大学社会学研究室『社会学ジャーナル』第49号．                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
+                <div id="topics">
+                        <p id="pretopics">
+授業内容や成績評価を含む授業全般についての問い合わせはmanabaの掲示板にて受け付ける。<BR>掲示板での問い合わせでは不都合が生じる場合は、鈴木彩加（担当教員代表・人文社会系）suzuki.ayaka.ge@u.tsukuba.ac.jpまで連絡すること。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
+                    <p id="style">
+授業時間外に各回の指定文献を精読してください。出席確認も兼ねて、授業後にリアクションペーパーの提出を求めることがあります。各回の担当教員の指示に従ってください。                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
+                    <p id="style">
+TA配置予定                    </p>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>

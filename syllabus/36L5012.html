@@ -1,0 +1,425 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2024/36L5012/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+36L5012        </span>&nbsp;
+        <span id="title">
+基礎スペイン語BII        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    1.0 単位,
+            </span>
+            <span id="grade">
+                    1 年次,
+            </span>
+            <span id="timetable">
+秋ABC 金1            </span>
+            <br>
+            <span id="assignments">
+メルチー ヤスキン            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+この授業では、すでにスペイン語の初歩的な文法やコミュニケーション能力を身につけている学習者を対象に、さらなる実践的なコミュニケーション能力の伸長を図りながら、2年次以降の継続的な学習に十分な語学能力の獲得を目指す。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+教育・心理・障害・知識・体育2・総学5組対象 主に日本語で授業。英語での対応可能。「基礎スペイン語BII」は選択・自由科目だが、「基礎スペイン語BI」との継続性を持っているので、そのまま続けて履修することを推奨する。<BR>G科目<BR>対面        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+演習        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+1.コミュニケーション能力<BR>2.批判的・創造的思考力<BR>4.広い視野と国際性<BR>6.協働性・主体性・自律性                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
+                <p id="style">
+- 要求を表現できる。<BR>- 依頼ができる。<BR>- 将来の計画について、情報を求めたり与えたりできる。<BR>- 活動や計画に勧誘することができる。<BR>- 勧誘を丁重に受け入れたり断ったりすることができる。<BR>- 意見を求めたり伝えたりできる。<BR>- 余暇の活動についての情報をやり取りできる。<BR>- 習慣について話すことができる（食事、健康、日常生活...）。<BR>- 一般的な（非人称的な）話をするための質問や文を作れるようになる。<BR>- 現在継続中の活動について話すことができる。<BR>- 公共行事のスケジュール、時間、場所を尋ねることができる。<BR>- 言い訳や事情説明ができる。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+スペイン語, 発音, 基礎会話                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+第 1回. 自己紹介、スペイン語についての概説、履修上の注意など。<BR>MODELO DE CONVERSACI&Oacute;N: EXPRESIONES USADAS EN LA CLASE クラスで使う表現。<BR><BR>第 2回. Lecci&oacute;n 6<BR>文法的な内容: 1.直説法現在-不規則活用 2.所有詞 3.接続詞。<BR>機能的な内容: 願望を表現する。物の所有権について質問し答える。友人関係や家族構成を説明する。TRABAJO EN CLASE: 大声で早口言葉を言う。 国/地域の紹介： ベネズエラ。 詩/歌の朗読：Alma llanera。<BR>MODELO DE CONVERSACI&Oacute;N: EXPLICAR LA FAMILIA家族関係の説明。<BR><BR>第3回. Lecci&oacute;n 7<BR>文法的な内容: 1.直説法現在-不規則活用(3) 2.目的格人称代名詞 3.基数詞(101〜100.000.000)。<BR>機能的な内容: 未来の計画についての情報を求めたり与えたりする。勧誘と諾否。人に選択肢を提供するときの丁寧な表現。助けを求める。<BR>TRABAJO EN CLASE:大声で早口言葉を言う。国/地域の紹介：チリ。 詩/歌の朗読：La Jardinera o Gracias a la vida。<BR>MODELO DE CONVERSACI&Oacute;N: DESEO Y SOLICITUD 欲求と依頼、PLANES FUTUROS　未来の計画。<BR><BR>第 4回. Lecci&oacute;n 8.A<BR>文法的な内容: 1.前置詞 2.前置詞格人称代名詞。<BR>機能的な内容: 勧誘と諾否。意見を求めたり表現したりする。<BR>TRABAJO EN CLASE: 大声で早口言葉を言う。国/地域の紹介： スペイン。 詩/歌の朗読：Romance de la luna luna。<BR>MODELO DE CONVERSACI&Oacute;N: DAR ALGO A ALGUIEN　人に物をあげる、SOLICITUD II 依頼 II。<BR><BR>第 5回. Lecci&oacute;n 8.B<BR>文法的な内容: 3.gustar 型動詞。<BR>機能的な内容:余暇の活動について情報を求めたり与えたりする。説明を求めたり説明したりする。<BR>TRABAJO EN CLASE:大声で早口言葉を言う。国/地域の紹介： メキシコ。 詩/歌の朗読：La llorona。 <BR>MODELO DE CONVERSACI&Oacute;N: QUIERES Y GUSTAR勧誘の諾否・好き、COMUNICACI&Oacute;N (YO DIGO, T&Uacute; DICES&hellip;)　通信。<BR><BR>第 6回. Lecci&oacute;n 9.A<BR>文法的な内容: 1.再帰動詞 2.無人称文&nbsp;&nbsp;3.曜日・日付の表現。<BR>機能的な内容: 天気について話す。日常の習慣的な行動について質問し答える。身繕いの習慣、食習慣、健康習慣について話す。日取りや日程について話す。主語を言わずに質問したり表現したりする。<BR>TRABAJO EN CLASE:大声で早口言葉を言う。国/地域の紹介：コスタリカ。 詩/歌の朗読：Tu coraz&oacute;n es una fruta。<BR>MODELO DE CONVERSACI&Oacute;N: ME GUSTA PORQUE&hellip; ので好き、EL CLIMA お天気、CUANDO HACE SOL... 晴れたら&hellip;する。<BR><BR>第 7回. 中間テスト<BR><BR>第 8回. Lecci&oacute;n 10.A<BR>文法的な内容: 1.命令法 2.不定詞。<BR>機能的な内容: 命令する。願望を表現する。意見を表現する。<BR>TRABAJO EN CLASE:　大声で早口言葉を言う。国/地域の紹介：ボリビア。 詩/歌の朗読：Vuelve coraz&oacute;n。<BR>MODELO DE CONVERSACI&Oacute;N: IMPERATIVO命令INVITAR招待、IMPERATIVO命令II、ESTAR/ TENER/ DOLER 体調や気分。<BR><BR>第 9回. Lecci&oacute;n 10.B<BR>文法的な内容: 3.過去分詞 4.現在分詞。<BR>機能的な内容:予定や習慣的な行動について情報を求めたり与えたりする。現在継続中の活動について話す。TRABAJO EN CLASE:大声で早口言葉を言う。国/地域の紹介：ペルー。 詩/歌の朗読：Masa。<BR>MODELO DE CONVERSACI&Oacute;N: H&Aacute;BITOS DIARIOS習慣、LA HORA時刻。<BR><BR>第 10回. Lecci&oacute;n 11.A<BR>文法的な内容: 1.直説法現在完了2.直説法点過去-規則活用。<BR>機能的な内容: 最近起きた出来事について話す。過去の経験についての情報を求めたり与えたりする。TRABAJO EN CLASE:大声で早口言葉を言う。国/地域の紹介： キューバ。 詩/歌の朗読：Guantanamera。<BR>MODELO DE CONVERSACI&Oacute;N: ESTAR + 形容詞、TENER ＋名詞、EXPRESIONES DE PASADO 過去の時を表す表現。<BR><BR>第 11回. Lecci&oacute;n 11.B<BR>文法的な内容: 3.受動文 4.縮小辞と増大辞。<BR>機能的な内容:お店の営業時間を確認する。語の指示内容に話者の感情や評価を付け加える。<BR>TRABAJO EN CLASE:大声で早口言葉を言う。国/地域の紹介： メキシコのクリスマス。 詩/歌の朗読：Campana sobre campana。<BR>MODELO DE CONVERSACI&Oacute;N: CUANTIFICADORES名詞、形容詞、動詞の修飾語、CONJUNCIONES POR ESO, PORQUE, COMO接続詞。<BR><BR>第 12回. Lecci&oacute;n 12.A<BR>文法的な内容: 1.直説法点過去-不規則活用 2.知覚・使役・放任・命令・許可の動詞<BR>機能的な内容: 過去の出来事について情報を求めたり与えたりして会話する。<BR>TRABAJO EN CLASE:大声で早口言葉を言う。国/地域の紹介：メキシコ湾。 詩/歌の朗読：La bamba。<BR>MODELO DE CONVERSACI&Oacute;N: IR (PASADO)とSER (PASADO)　点過去。<BR>PASADO (PRET&Eacute;RITO PERFECTO) II / ANTES DE / DESPU&Eacute;S DE　点過去。 <BR><BR>第 13回. Lecci&oacute;n 12.B<BR>文法的な内容: 3.不定語と否定語。<BR>機能的な内容: 過去の出来事について情報を求めたり与えたりして会話する。<BR>TRABAJO EN CLASE:大声で早口言葉を言う。国/地域の紹介：グアテマラ。 詩/歌の朗読：El fuego。<BR>MODELO DE CONVERSACI&Oacute;N: PASADO (PRET&Eacute;RITO PERFECTO) Y COPRET&Eacute;RITO (PRET&Eacute;RITO IMPERFECTO) 点過去 と線過去。　<BR><BR>第 14回. Lecci&oacute;n 13.A<BR>文法的な内容: 1.直説法線過去 2.直説法過去完了3.間接疑問文 4.因果関係を表す接続表現。<BR>機能的な内容: 過去の特定の時点に継続していた出来事や状態について情報を求めたり与えたりする。言い訳や事情説明をする。<BR>TRABAJO EN CLASE:大声で早口言葉を言う。国/地域の紹介：コロンビア。 詩/歌の朗読：Colombia, Mi Encanto。<BR>MODELO DE CONVERSACI&Oacute;N: PASADO Y FUTURO (VOLITIVO) 過去と将来の計画、VOY A 型、EXCUSAS 言い訳。<BR><BR>第 15回. まとめと復習の練習。<BR>文法的な内容: 第２回～第14回のまとめ復習の練習。<BR>機能的な内容: 第２回～第14回のまとめ復習の練習。<BR>TRABAJO EN CLASE:　大声で早口言葉を言う。国/地域の紹介：アルゼンチン。 詩/歌の朗読：Caminito。<BR>MODELO DE CONVERSACI&Oacute;N: RESUMEN DE LOS MODELOS モデルのまとめ。<BR><BR>第16回. 期末試験。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+期末試験の点数と、普段の授業への取り組み（小テスト、課題提出の状況など）に基づいて成績評価を行う。具体的には、期末試験（中間テスト等も含む）70％、課題提出等の平常点30％を標準とする。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+予習: 毎回の授業前に教科書等の該当箇所や配布プリントを予習する。 <BR>復習: 授業後は必ず復習し、ノートにまとめる。授業で勉強した部分を教科書のCDで聞く。 <BR>課題: 授業後に学生は課題ファイルに授業で学んだ表現をまとめて入れる。課題は必ず次の授業までに提出すること。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+参考書(購入の義務はありません)<BR><BR>Atsuko Wasa, Gram&aacute;tica elemental del espa&ntilde;ol, Nueva Edici&oacute;n, Editorial Asahi<BR><BR>Juan Carlos MOYANO L&Oacute;PEZ, Carlos GARC&Iacute;A RUIZ-CASTILLO, Yoshimi HIROYASU, &iexcl;Muy bien! compacto, Curso de espa&ntilde;ol 1, Editorial Asahi<BR><BR>井上大輔、Monica ALVAREZ 『日常スペイン語会話ネイティブ表現』語研<BR><BR>単語集(購入の義務はありません)<BR><BR>GIDE語彙研究班編『スペイン語語彙練習帳』朝日出版社<BR>GIDE語彙研究班編『スペ単!―頻度で選んだスペイン語単語集(練習問題つき)』朝日出版社<BR>                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                        <p id="pretopics">
+MELCHY RAMOS Yaxkin （メルチー　ラモス　ヤスキン）<BR>木曜5・6限は在室の可能性が高いと思われます。CEGLOC棟CA309 研究室<BR>melchy.yaxkin.ga@u.tsukuba.ac.jp <BR>                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
+                    <p id="style">
+出席、課題の提出、積極性、リスニングはこの授業を受ける上で、また、スペイン語を習得する上でもとても大切です。スペイン語の発音は日本語に似ているので、日本人の学生にとって親しみやすい言語だと思います。                    </p>
+            </div>
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>
