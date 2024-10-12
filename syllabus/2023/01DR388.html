@@ -1,0 +1,542 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2023/01DR388/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+              最終更新日：2023/03/30
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+01DR388        </span>&nbsp;
+        <span id="title">
+アジアのCMC 1        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    1.0 単位,
+            </span>
+            <span id="grade">
+                    1・2 年次,
+            </span>
+            <span id="timetable">
+春AB 火4            </span>
+            <br>
+            <span id="assignments">
+海後 宗男            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+この授業では、メディアとコミュニケーションの研究方法に関する文献を輪読する。主にメディア研究方法について学習する。メディアの実証研究の読み方及び実証研究を実施する際に必要になる能力を習得することを目標とする。指定された文献を図書館のデータベースよりダウンロードし、授業のときまでに読み、事前にレポートをウェブにて提出する。授業では文献に関するディスカッションとプレゼンテーションを行い、他の履修生と情報共有し、授業後にその活動内容を報告する。これを、各回実施する。「メディア研究 1」とは異なるトピックスを扱う。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+西暦奇数年度開講。<BR>0ABE330と同一。<BR>対面(オンライン併用型)        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+汎用コンピテンスのうち「知の活用力」「コミュニケーション能力」に関連する。専門コンピテンスのうち「研究力」「専門知識」に関連する。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標（学修成果）</h2>
+                <p id="style">
+メディア研究の専門的知識・研究方法について学習する。また 知の活用力、コミュニケーション能力・国際性の養成に不可欠な思考する力を見につけつつ、履修者自身の問題意識を深め、メディア研究において論文執筆が可能な研究力を身につけることができる。<BR>                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+実証的研究, メディア, コミュニケーション, 科学的手法                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+この授業では、メディアとコミュニケーションの研究方法に関する文献を輪読し、メディア研究方法について学習する。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+オリエンテーション                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+活字メディアにおけるオーガナイザー効果に関する実証的研究 : 見出し、写真が読み手に与える影響についての認知心理学的再検討<BR>福田 充<BR>マス・コミュニケーション研究<BR>1995 年 47 巻 p. 127-139,237<BR>DOI https://doi.org/10.24460/mscom.47.0_127<BR><BR>携帯電話の「利用と満足」 : その構造と状況依存性<BR>中村 功<BR>マス・コミュニケーション研究<BR>1996 年 48 巻 p. 146-159,282<BR>DOI https://doi.org/10.24460/mscom.48.0_146<BR><BR>ジェンダーの観点からのメディア研究再考 : ジェンダーとメディアの社会的構成に焦点をあてながら<BR>松田 美佐<BR>マス・コミュニケーション研究<BR>1996 年 48 巻 p. 190-203,281<BR>DOI https://doi.org/10.24460/mscom.48.0_190<BR><BR>メディアイベントの展開とニュース概念の変化(&lt;特集&gt;&lt;変容&gt;の時代とジャーナリズム意識)<BR>藤竹 暁<BR>マス・コミュニケーション研究 <BR>1996 年 48 巻 p. 3-19,286<BR>DOI https://doi.org/10.24460/mscom.48.0_3<BR><BR>テレビが子どもの向社会的行動に及ぼす影響に関する研究についての一考察 : 研究の概観として<BR>山下 玲子<BR>マス・コミュニケーション研究 <BR>1996 年 49 巻 p. 161-179,230<BR>DOI https://doi.org/10.24460/mscom.49.0_161<BR><BR>地域メディアとデモクラシー(&lt;特集I&gt;地域メディアと政治)<BR>内田 満<BR>マス・コミュニケーション研究 <BR>1996 年 49 巻 p. 3-13,236<BR>DOI https://doi.org/10.24460/mscom.49.0_3<BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+「マスメディア」としてのインターネット : インターネット利用者調査からの一考察<BR>辻 大介<BR>マス・コミュニケーション研究 <BR>1997 年 50 巻 p. 168-181,229<BR>DOI https://doi.org/10.24460/mscom.50.0_168<BR><BR>表現の自由の政治学 : 差別的表現の社会的規制と表現の自由の共和主義的理解<BR>伊藤 高史<BR>マス・コミュニケーション研究 <BR>1997 年 50 巻 p. 140-154,230<BR>DOI https://doi.org/10.24460/mscom.50.0_140<BR><BR>テレビドラマの構造分析・序説 : その方法と意義を中心に<BR>阿部 孝太郎<BR>マス・コミュニケーション研究 <BR>1997 年 50 巻 p. 127-139,231<BR>DOI https://doi.org/10.24460/mscom.50.0_127<BR><BR>言語行為としての広告 : その逆説的性格<BR>辻 大介<BR>マス・コミュニケーション研究 <BR>1998 年 52 巻 p. 104-117<BR>DOI https://doi.org/10.24460/mscom.52.0_104<BR><BR>コンピュータ・コミュニケーション : 個人が情報を生産・発信することの意味を再考する(&lt;特集&gt;ディジタル化時代におけるメディア環境)<BR>宮田 加久子<BR>マス・コミュニケーション研究 <BR>1998 年 52 巻 p. 33-48<BR>DOI https://doi.org/10.24460/mscom.52.0_33<BR><BR>若い世代とメディア環境(&lt;特集&gt;ディジタル化時代におけるメディア環境)<BR>富田 英典<BR>マス・コミュニケーション研究 <BR>1998 年 52 巻 p. 49-66<BR>DOI https://doi.org/10.24460/mscom.52.0_49<BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+CMCの双方向的公開コミュニケーション場における充足と発信行動に関する研究<BR>金 官圭<BR>マス・コミュニケーション研究 <BR>1998 年 53 巻 p. 97-111,213<BR>DOI https://doi.org/10.24460/mscom.53.0_97<BR><BR>メディア・イベントとしての「無党派層」現象<BR>山田 一成<BR>マス・コミュニケーション研究 <BR>1998 年 53 巻 p. 153-166,211<BR>DOI https://doi.org/10.24460/mscom.53.0_153<BR><BR>情報の双方向性とパッケージ資料 : メディアの複製可能性との関わりのなかで<BR>後藤 嘉宏<BR>マス・コミュニケーション研究 <BR>1999 年 54 巻 p. 141-155,248<BR>DOI https://doi.org/10.24460/mscom.54.0_141<BR><BR>『3年B組金八先生』の「質的」内容分析と受け手の反応<BR>小川 有希子<BR>マス・コミュニケーション研究 <BR>1999 年 54 巻 p. 96-112,249<BR>DOI https://doi.org/10.24460/mscom.54.0_96<BR><BR>「子どもとメディア」研究の動向 : 新たな研究の方向をさぐるために(&lt;特集&gt;マス・メディアと子ども)<BR>小平 さち子<BR>マス・コミュニケーション研究<BR>1999 年 54 巻 p. 4-20,252<BR>DOI https://doi.org/10.24460/mscom.54.0_4<BR><BR>子どもをめぐるメディア環境を考える : グローバルな視野から(&lt;特集&gt;マス・メディアと子ども)<BR>鈴木 みどり<BR>マス・コミュニケーション研究<BR>1999 年 54 巻 p. 38-54,251<BR>DOI https://doi.org/10.24460/mscom.54.0_38<BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+テレビにおける暴力 : その実態と培養効果<BR>中村 功<BR>マス・コミュニケーション研究<BR>1999 年 55 巻 p. 186-201<BR>DOI https://doi.org/10.24460/mscom.55.0_186<BR><BR>米エリート紙における日本の首相報道 : 逸脱理論、覇権理論による偏向の研究<BR>井上 泰浩<BR>マス・コミュニケーション研究<BR>2000 年 56 巻 p. 203-216<BR>DOI https://doi.org/10.24460/mscom.56.0_203<BR><BR>一九九六年米大統領選のテレビ・コマーシャルに見る政策争点情報と感情アピール : 外交・安全保障を例として<BR>小野 恵子<BR>マス・コミュニケーション研究<BR>2000 年 56 巻 p. 217-231<BR>DOI https://doi.org/10.24460/mscom.56.0_217<BR><BR>ニュース報道におけるメディア間の共振性の検証<BR>張 寧<BR>マス・コミュニケーション研究<BR>2000 年 56 巻 p. 130-144<BR>DOI https://doi.org/10.24460/mscom.56.0_130<BR><BR>フレーム形成過程に関する理論的一考察 : ニュース論の統合化に向けて<BR>烏谷 昌之<BR>マス・コミュニケーション研究<BR>2001 年 58 巻 p. 78-93,224-223<BR>DOI https://doi.org/10.24460/mscom.58.0_78<BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6回                                        </th>
+                                        <td>
+コミュニティ放送局のインターネット利用<BR>森田 均<BR>マス・コミュニケーション研究<BR>2001 年 59 巻 p. 178-192<BR>DOI https://doi.org/10.24460/mscom.59.0_178<BR><BR>韓国・北朝鮮首脳会談に関するテレビ報道の内容分析<BR>金 京煥<BR>マス・コミュニケーション研究<BR>2001 年 59 巻 p. 138-150<BR>DOI https://doi.org/10.24460/mscom.59.0_138<BR><BR>議題設定研究の新たな課題(&lt;特集&gt;パワフル・メディア論再考)<BR>竹下 俊郎<BR>マス・コミュニケーション研究<BR>2002 年 60 巻 p. 6-18,204<BR>DOI https://doi.org/10.24460/mscom.60.0_6<BR><BR>テレビと現実認識 : 培養理論の新たな展開を目指して(&lt;特集&gt;パワフル・メディア論再考)<BR>斉藤 慎一<BR>マス・コミュニケーション研究<BR>2002 年 60 巻 p. 19-43,204<BR>DOI https://doi.org/10.24460/mscom.60.0_19<BR><BR>沈黙の螺旋理論の展開(&lt;特集&gt;パワフル・メディア論再考)<BR>安野 智子<BR>マス・コミュニケーション研究<BR>2002 年 60 巻 p. 44-61,203<BR>DOI https://doi.org/10.24460/mscom.60.0_44<BR><BR>インターネットが「視聴者&rarr;テレビ局」のフィードバック過程に及ぼしている影響に関する一考察 : TBSのWebサイトの機能分析を中心として<BR>松野 良一<BR>マス・コミュニケーション研究<BR>2002 年 61 巻 p. 207-220<BR>DOI https://doi.org/10.24460/mscom.61.0_207<BR><BR>インターネット利用に関する日韓大学生比較研究 : 利用動機・効用の分析を中心に<BR>金 相美<BR>マス・コミュニケーション研究<BR>2003 年 63 巻 p. 112-129<BR>DOI https://doi.org/10.24460/mscom.63.0_112<BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第7回                                        </th>
+                                        <td>
+内容分析研究におけるコンピュータの利用状況<BR>米国の事例を中心として<BR>吉田 文彦<BR>マス・コミュニケーション研究<BR>2004 年 64 巻 p. 41-69<BR>DOI https://doi.org/10.24460/mscom.64.0_41<BR><BR>日本の新聞におけるＳＡＲＳ報道について<BR>中国報道の宣伝的側面に関する数量分析<BR>杉野 定嘉<BR>マス・コミュニケーション研究<BR>2004 年 65 巻 p. 96-115<BR>DOI https://doi.org/10.24460/mscom.65.0_96<BR><BR>メディア利用行動におけるテレビとインターネットの同時的並行行動に関する研究 : 日記式調査(Time Use Survey)による分析結果を元に<BR>金 相美<BR>マス・コミュニケーション研究<BR>2006 年 68 巻 p. 97-114<BR>DOI https://doi.org/10.24460/mscom.68.0_97<BR><BR>インターネットのメディア信頼性形成モデルに関する実証分析<BR>小笠原 盛浩<BR>マス・コミュニケーション研究<BR>2008 年 73 巻 p. 113-130<BR>DOI https://doi.org/10.24460/mscom.73.0_113<BR><BR>読者が認識したブロガータイプにもとづく,2007年参議院選挙時のブログ読者行動の分析<BR>小笠原 盛浩<BR>マス・コミュニケーション研究<BR>2010 年 77 巻 p. 261-278<BR>DOI https://doi.org/10.24460/mscom.77.0_261<BR><BR>「ネット世論」という曖昧 : &lt;世論&gt;,&lt;小公共圏&gt;,&lt;間メディア性&gt;(&lt;特集&gt;世論と世論調査)<BR>遠藤 薫<BR>マス・コミュニケーション研究<BR>2010 年 77 巻 p. 105-126<BR>DOI https://doi.org/10.24460/mscom.77.0_105<BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第8回                                        </th>
+                                        <td>
+日本のブロゴスフィアにおける政治系有名ブログの影響 : 2007年参議院議員選挙時の内容分析から<BR>小笠原 盛浩<BR>マス・コミュニケーション研究<BR>2012 年 81 巻 p. 87-104<BR>DOI https://doi.org/10.24460/mscom.81.0_87<BR><BR>メディアのゲートキーピング研究 : 現状と課題<BR>佐々木 悠亮<BR>マス・コミュニケーション研究<BR>2013 年 82 巻 p. 193-210<BR>DOI https://doi.org/10.24460/mscom.82.0_193<BR><BR>デジタルメディアと政治参加をめぐる理論的考察(&lt;特集&gt;現代のメディアとネットワークにおける政治参加)<BR>山腰 修三<BR>マス・コミュニケーション研究<BR>2014 年 85 巻 p. 5-23<BR>DOI https://doi.org/10.24460/mscom.85.0_5<BR><BR>多様化するメディア環境と政治広告(&lt;特集&gt;現代のメディアとネットワークにおける政治参加)<BR>李 津娥<BR>マス・コミュニケーション研究<BR>2014 年 85 巻 p. 25-41<BR>DOI https://doi.org/10.24460/mscom.85.0_25<BR><BR>デジタルメディア時代のデモクラシー(&lt;特集&gt;現代のメディアとネットワークにおける政治参加)<BR>逢坂 巌<BR>マス・コミュニケーション研究<BR>2014 年 85 巻 p. 43-61<BR>DOI https://doi.org/10.24460/mscom.85.0_43<BR><BR>ソーシャルメディア上の政治コミュニケーションとマスメディア(&lt;特集&gt;現代のメディアとネットワークにおける政治参加)<BR>小笠原 盛浩<BR>マス・コミュニケーション研究<BR>2014 年 85 巻 p. 63-80<BR>DOI https://doi.org/10.24460/mscom.85.0_63<BR><BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第9回                                        </th>
+                                        <td>
+デジタルメディア時代における言論空間<BR>理論的探求の対象としての制御，情動，時間<BR>伊藤 守<BR>マス・コミュニケーション研究<BR>2016 年 89 巻 p. 21-43<BR>DOI https://doi.org/10.24460/mscom.89.0_21<BR><BR>メディアの進化と 「危機管理」化する社会<BR>福田 充<BR>マス・コミュニケーション研究<BR>2016 年 89 巻 p. 45-60<BR>DOI https://doi.org/10.24460/mscom.89.0_45<BR><BR>メディア・コミュニケーション研究と政治・社会理論<BR>ヘゲモニー概念の展開とラディカル・デモクラシー<BR>山腰 修三<BR>マス・コミュニケーション研究<BR>2017 年 90 巻 p. 47-63<BR>DOI https://doi.org/10.24460/mscom.90.0_47<BR><BR>「ネット世論」研究から見る「ハイブリッド・エスノグラフィー」の必要性<BR>木村 忠正<BR>マス・コミュニケーション研究<BR>2018 年 93 巻 p. 43-60<BR>DOI https://doi.org/10.24460/mscom.93.0_43<BR><BR>ＲＤＤによる世論調査の現状と課題<BR>細貝 亮<BR>マス・コミュニケーション研究<BR>2019 年 94 巻 p. 13-22<BR>DOI https://doi.org/10.24460/mscom.94.0_13<BR><BR><BR>RDD 調査に代わる世論調査手法に向けた試論<BR>大隈 慎吾<BR>マス・コミュニケーション研究<BR>2019 年 94 巻 p. 23-34<BR>DOI https://doi.org/10.24460/mscom.94.0_23<BR><BR>世論調査とは何か？<BR>岐路に立つ世論調査　その信頼性を巡っての議論―方法論的アプローチ<BR>佐藤 寧<BR>マス・コミュニケーション研究<BR>2019 年 94 巻 p. 43-50<BR>DOI https://doi.org/10.24460/mscom.94.0_43<BR><BR><BR>守崎 誠一<BR>日本コミュニケーション研究 <BR>44 巻 (2015) 1 号 37-45 <BR>公開日: 2017/05/17<BR>DOI https://doi.org/10.20698/comm.44.1_37		<BR>産業界のニーズに傾倒したコミュニケーション教育の現状と課題<BR>石橋 嘉一<BR>原稿種別: 論文<BR>44 巻 (2015) 1 号 p. 47-56<BR>公開日: 2017/05/17 <BR>DOIhttps://doi.org/10.20698/comm.44.1_47                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第10回                                        </th>
+                                        <td>
+総括                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+パソコンのソフトインストールが自分でできること。オープンソースのソフトが利用できるパソコン環境をもつこと。表計算ソフト等の知識は必要。基礎的な統計能力も前提とする。第1回目の授業の際に検査する。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+期末課題(60%)および授業内提出物 (40%)なお、3分の1以上(4回以上)欠席した場合には欠格となる。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+本授業を受講する前に、実証的研究の手法について予習・復習しなさい。特に、実証的研究に基づく論文を複数読んでおき、論文作成手法について理解していることが必要である。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+ユーザのための教育・心理統計と実験計画法(田中敏・山際勇一郎著) 教育出版<BR>すぐわかる調査系論文の読み方 浦上昌則・脇田貴文著 東京図書<BR>SPSSによるアンケートの調査・集計・解析 内田治 東京図書                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
+                <div id="topics">
+                        <p id="pretopics">
+水曜日１１：３０&minus;１２：１５（要事前アポ）                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
+                    <p id="style">
+本授業を受講する前に、実証的研究の手法について予習・復習しなさい。特に、教材・参考文献・配付資料等にある、実証的研究に基づくテキストを複数読んでおき、論文作成手法について理解していることが必要である。                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>
