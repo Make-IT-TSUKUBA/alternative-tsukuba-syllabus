@@ -1,0 +1,453 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    body {background-color:#FFFFFF;color:#383838;font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#dbdbff;}
+h2 {margin:1em 0px;font-weight:bold;background-color:#ffe0ff;}
+p, table {margin:1em;}
+th, td {padding-right:5px;border: 1px #808080 solid;background-color:#e5e5ff;}
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2023/01PC207/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+              最終更新日：2023/03/29
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+01PC207        </span>&nbsp;
+        <span id="title">
+Business Anthropology        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    1.0 単位,
+            </span>
+            <span id="grade">
+                    1・2 年次,
+            </span>
+            <span id="timetable">
+秋B 火7,8            </span>
+            <br>
+            <span id="assignments">
+SASAGAWA ANNAMARIE            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+usiness anthropology is the application of theoretical frameworks and research methods from anthropology to understand and solve management challenges. Business anthropology can help managers design and market products in home or overseas markets; adapt to new organizational cultures; communicate effectively across with stakeholders from different cultural backgrounds; and predict and manage conflict in global business situations.<BR><BR>This course will introduce ways of thinking about and researching culture and cultural differences from the anthropology. After an introductory session covering the fundamentals of business anthropology, we will focus on thinking about how business anthropology can contribute to solving three specific management challenges: product design and marketing; organizational culture; and cultural conflict in global business projects.<BR><BR>The course is aimed at students who are not familiar with anthropology or qualitative research in the social sciences.        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+0AFM203と同一。<BR>英語で授業。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義        </p>
+    </div>
+            <div id="style-heading-style">
+                    <h2 id="style-heading">Teaching methods</h2>
+                <p id="style">
+Field study<BR>Discussion<BR>Case method                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">Types of competencies expected to be gained after taking this course</h2>
+                <p id="style">
+Anticipate problems                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">Course Objectives(Learning Outcomes)</h2>
+                <p id="style">
+After completing this course, students will be able to:<BR>□	Understand the concept and research methods of business anthropology and when it can (and cannot) contribute to solving management challenges in global business<BR>□	Make basic application of anthropological research methods&nbsp;&nbsp;<BR>                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">Course Keywords</h2>
+                <p id="style">
+Business anthropology, ethnography, qualitative research                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">Class Schedule</h2>
+                <div id="topics">
+                        <p id="pretopics">
+Day 1 [Topic]<BR>What is business anthropology?<BR>[Reading]<BR>&bull;	Read Chapter One in Tett, G. (2021). Anthro-Vision: How Anthropology Can Explain Business and Life. Simon and Schuster.<BR>&bull;	Watch https://www.youtube.com/watch?v=jgujRP6ux7w (55 minutes)<BR>&bull;	Watch https://www.youtube.com/watch?v=QT6Xao97BjI (&lt;3 minutes)<BR>&bull;	Read Roller, M. &ldquo;Ten Distinctive Qualities of Qualitative Research&rdquo; https://researchdesignreview.com/2013/07/31/10-distinctive-qualities-of-qualitative-research/<BR>[Exercises]<BR>Lectures, class discussion<BR>Day 2 [Topic]<BR>Using anthropological approaches in product design and marketing<BR>[Reading]<BR>Read Chapter Two in Tett, G. (2021). Anthro-Vision: How Anthropology Can Explain Business and Life.<BR>Read &ldquo;An Anthropologist Walks into a Bar.&rdquo; Harvard Business Review, 2014. https://hbr.org/2014/03/an-anthropologist-walks-into-a-bar<BR>****<BR>[Exercises]<BR>Lecture, class discussion<BR>Day 3 [Topic]<BR>Anthropological approaches to organizational culture and intercultural communication                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                        <p id="pretopics">
+[Reading]<BR>Read: &ldquo;Take Off Your Hat. You&rsquo;re in the Presence of Culture.&rdquo; Balzac, Stephen. https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.169.5546&amp;rep=rep1&amp;type=pdf<BR>Watch 19 Days (a short documentary about a refugee resettlement organization in Canada): https://www.nfb.ca/film/19_days/<BR>Reach Ch 9 in Tett, G. (2021). Anthro-Vision: How Anthropology Can Explain Business and Life. Simon and Schuster.<BR>***<BR>[Exercises]<BR>Lecture, class discussion, in-class exercise<BR>Day 4 [Topic]<BR>Anthropological approaches to doing business globally<BR>[Reading]<BR>Watch Empire of Dust (a documentary about a Chinese railway infrastructure project in Congo) https://dafilms.com/film/9731-empire-of-dust<BR>Read&rdquo;Being the Boss in Brussels, Boston, and Beijing.&rdquo; Harvard Business Review. https://hbr.org/2017/07/being-the-boss-in-brussels-boston-and-beijing<BR>***<BR>[Exercises]<BR>Lecture, class discussion, guest speaker<BR>Day 5[Topic]<BR>Student project presentations<BR>[Reading]<BR>No readings                        </p>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">Course Prerequisites</h2>
+                    <p id="style">
+None                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">Grading Philosophy</h2>
+                    <p id="style">
+Students will be evaluated on the following criteria:<BR>□ Active participation (50%)<BR>□ Student project (50%)<BR>Further information and instructions for student projects will be distributed in Week 1.                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">Course Hours Breakdown and Out-of-Class Learning</h2>
+                    <p id="style">
+Students are expected to read/watch the assigned readings for each class in advance.                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">Textbooks, References,and Supplementary Materials</h2>
+                <div id="topics">
+                        <p id="pretopics">
+&bull;	Tett, G. (2021). Anthro-Vision: How Anthropology Can Explain Business and Life. Simon and Schuster.                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">Office Hours and Contact Information</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">Class attendance and withdrawal policy</h2>
+                    <p id="style">
+Once registered for a course, a student may withdraw from the course without penalty by notifying the instructor before the THIRD CLASS MEETING of the course. Absence without notice may result in a failing grade and the student may receive a &ldquo;D.&rdquo; Courses will be closed for registration after the second class meeting.                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">Notice of Class Cancellation and Make-up classes</h2>
+                    <p id="style">
+Check the notice posted on mailing list and on bulletin board in front of the Academic Service Office. Instructor will also make every attempt to inform each enrolled students by email of any changes in schedule.                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">Relation to Other Courses</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>
