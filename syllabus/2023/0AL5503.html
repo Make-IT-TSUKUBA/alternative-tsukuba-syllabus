@@ -1,0 +1,544 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2023/0AL5503/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+              最終更新日：2023/04/06
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+0AL5503        </span>&nbsp;
+        <span id="title">
+スマートインフォメディアシステム特論        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    2.0 単位,
+            </span>
+            <span id="grade">
+                    1・2 年次,
+            </span>
+            <span id="timetable">
+春AB 月5,6            </span>
+            <br>
+            <span id="assignments">
+延原 肇            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+★本講義は、対面で実施予定です。オンラインでの配信は行いません。<BR>★AI関連の幅広い俯瞰力を身につけるために最適な授業です。<BR><BR>本講義では、世の中に溢れる情報(ビッグデータ)や複雑怪奇な現象を、粋(いき)に処理・解析する方法論の総称をスマートインフォメディアシステムと定義する。本講義では、スマートインフォメディアシステムの代表的なもの、例えば、黄金比などの美しさ、交通渋滞のメカニズム、ソーシャルメディアの炎上、鳥インフルエンザなどの感染現象、マーケティングにおける口コミ効果、ビッグデータに潜む興味深い法則の発見、機械学習による人工社会の構成など、それらの原理を簡単なプログラミング演習を通して教授する。本講義のポリシーは、(プログラミングで)楽しみながら、講義のテーマの本質を会得し、気がついたら、その分野のエッジ(最先端)に到達していた、と感じてもらうことである。これらを通じて、知能機能システムにおけるシステムデザイン分野の専門知識を養う。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+対面        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義及び演習        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+この科目は,以下のコンピテンスに対応している.<BR><BR>(専門的知識・能力)<BR>II. 専門知識:工学分野の高度専門職業人にふさわしい基礎知識と学力、および知能機能システム分野における高度な専門知識と運用能力                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
+                <p id="style">
+・本授業におけり以下の座学式・演習を通して、AI人材としてのコアコンピタンス(専門的な能力)を身に着ける<BR>・授業前半の座学式授業を通してスマートインフォメディアシステムの要素技術を理解する<BR>・授業後半の演習を通して、プログラミングを楽しみながらスマートインフォメディアシステムの要素技術を実装する                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+人工知能, 計算知能, フラクタル, 1/fノイズ, 経済現象の解析, 黄金比, カオス, 決定論, 非決定論, バタフライ効果, セルオートマトン, 渋滞学, パーコレーション, 感染現象, 噂の伝搬, 複雑ネットワーク, WSモデル, BAモデル, マルチエージェント, 囚人のジレンマ, ゲーム理論                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+★本講義は、対面で実施予定です。オンラインでの配信は行いません★<BR><BR>本講義では、世の中に溢れる情報(ビッグデータ)や複雑怪奇な現象を,粋(いき)に処理・解析する方法論の総称をスマートインフォメディアシムと定義する。本講義では,スマートインフォメディアシステムの代表的なもの,例えば、黄金比などの美しさ, 交通渋滞のメカニズム、ソーシャルメディアの炎上、鳥インフルエンザなどの感染現象、マーケティングにおける口コミ効果、ビッグデータに潜む興味深い法則の発見, 機械学習による人工社会の構成など、それらの原理を簡単なプログラミング演習を通して理解してもらう.本講義のポリシーは、(プログラミングで)楽しみながら、(講義のテーマ)の本質を会得し、気が付いたら、その分野のエッジ(最先端)に到達していた、と感じてもらうこと。<BR><BR>==========<BR>&lt;今年度の授業計画は以下の通りとする&gt;<BR>授業計画について変更がある場合はmanabaで周知する.                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+1回	第1回は、本授業のねらい、構成、各回の流れについて概説する。特に、本授業が座学だけではなく、授業中のワークやロールプレイ、授業後のレポートとしてのプログラミング演習を通して、楽しく知識を身につけてゆく形式であることを説明する。また、本授業で紹介する6つの要素技術いずれもが、NatureやScienceといった世界一流雑誌が発端となって発展した学問分野であること、また20世紀を代表する多くの天才達が関わり展開されていったこと、そして、それらが我々の身近にある日常生活に頻繁に現れることに言及する。これらを「わかりやすく学ぶ」ことができる本授業が、非常に「贅沢」な授業であることを理解してもらう。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+第2回目の授業では、「フラクタル」について、座学およびプログラミング演習を通して楽しく学ぶ。<BR>座学式の授業では、フラクタルの歴史、数理的な背景や定義などを学ぶ。応用事例として、コンピュータグラフィクス、1/fノイズ、経済現象の解析、黄金比などを紹介する。後半の演習では、コンピュータグラフィクスを実際にフラクタルに基づき楽しくプログラミングし、我々の予想をはるかに超える、美しいグラフィクスを手軽に生成できることを学ぶ。また、黄金比を考慮した写真家のテクニックなどの小話も紹介する。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+第3回目の授業では、2つめのトピックである「カオス」について、座学およびプログラミング演習を通して楽しく学ぶ。<BR>座学式の授業では、カオスの歴史、特に有名なバタフライ効果を事例にとりあげ、また生物の世代交代のモデルを用いて数理的な理解を深める。後半の演習では、100円ショップのグッズを利用したバタフライ効果の動画作成課題や、ローレンツが当時、カオス現象を発見した状況をプログラミング演習で再現し、その感動を味わってもらう。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+第4回目の授業では、3つめのトピックである「セルオートマトン」について、座学およびプログラミング演習を通して楽しく学ぶ。<BR>座学式の授業では、セルオートマトンという斬新な計算モデルが、20世紀を代表する天才科学者 フォン・ノイマンによって提唱され、その後も、コンウェイやウォルフラムといった天才達によって洗練されてゆく過程についても紹介する。セルオートマトンという計算モデルによって、どのような世界が記述(計算)できるのかを具体的な応用事例を通して紹介し、その壮大さに感動する。<BR>後半の演習では、コンウェイによって発案されたライフゲームや、交通渋滞シミュレータ、さらにバス停でみかける奇妙な現象について、プログラミングを通して理解を深めてもらう。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+第5回目の授業では、4つめのトピックである「パーコレーション」について、座学およびプログラミング演習を通して楽しく学ぶ。<BR>座学式の授業では、パーコレーション(浸透)という、どちらかと言えば地味で、さらにマニアックな現象が、実は、世の中の重要な社会現象、例えば、ソーシャルメディアサービスにおける炎上や、インフルエンザの伝搬の現象などを説明することができ、非常に便利な<BR>モデルであることを解説する。また、さらなる応用として、我々がある商品をヒットさせるための戦略を、パーコレーションに基づき解説を行う。後半の演習では、森林火災シミュレータ、病気の伝搬シミュレータをプログラミングし、理解を深めてもらう。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6回                                        </th>
+                                        <td>
+第6回目の授業では、5つめのトピックである「複雑ネットワーク」について、座学およびプログラミング演習を通して楽しく学ぶ。<BR>座学式の授業では、複雑ネットワークという、ここ10年で急激に注目を集めるようになった学術分野を、グラフ理論の基礎の復習から丁寧に解説を行う。特に、この分野が、Natureに採録された1本の論文をきっかけに、ダイナミックに展開してゆく様子などを、関わった人物の面白いストーリーをまじえながら解説する。後半の演習では、複雑ネットワークの基本となるモデル、WSモデルやBAモデルをプログラミングし、理解を深めてもらう。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第7回                                        </th>
+                                        <td>
+第7回目の授業では、6つめのトピックである「マルチエージェント」について、座学およびプログラミング演習を通して楽しく学ぶ。<BR>座学式の授業では、人工知能の発展系として分散人工知能、すなわちマルチエージェントが注目された背景について言及し、その定義や、またどのような現象を記述することができるかについて丁寧に解説を行う。授業中に、いくつかのワークやロールプレイを行い、マルチエージェントの奥深さについても学んでもらう。後半の演習では、マルチエージェントの小さなモデルとして、ある小さな村とそこに住む住人を、マルチエージェントシミュレータとして作成し、さまざまな状況を設定しシミュレーションしてもらうことで理解を深めてもらう。                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第8回                                        </th>
+                                        <td>
+第1回から7回目までの内容を演習を通して理解                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第9回                                        </th>
+                                        <td>
+第1回から7回目までの内容を演習を通して理解                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第10回                                        </th>
+                                        <td>
+第1回から7回目までの内容を演習を通して理解                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+なし                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+==========<BR>&lt;今年度の成績評価方法は以下の通りとする&gt;<BR>成績評価の方法について変更がある場合はmanabaで周知する.<BR><BR>講義に出席し、レポートを提出すること。<BR>講義の最終回において、スマートインフォメディアシステムに関する独自のテーマを設定し、それに関するプレゼンテーションを行う。<BR><BR>毎回の講義に対するレポートを70%、最終のプレゼンテーションを30%の割合で評価する。<BR>                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+レポートやプレゼンテーションのために関連分野を調査すること。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+テキスト:授業中に授業資料をアップしたWebページを紹介する.<BR><BR>参考書:応用事例とイラストでわかる離散数学 改訂版 (延原肇著、共立出版)                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                        <p id="pretopics">
+オフィスアワーは特に定めないが、事前連絡をしてから訪問すること                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
+                    <p id="style">
+本講義で紹介する6つの要素技術は、いずれもNatureやScienceといった世界一流雑誌が発端となって発展した学問分野であり、また20世紀を代表する多くの天才達が関わり展開された、そして現在でも発展している分野である。いずれも奥深い分野であり、授業で紹介することができるのは、そのわずかな一部分に過ぎない。もちろん、本講義では、それらの分野のエッセンスを可能なかぎり抽出し、わかりやすく丁寧に紹介することに努めるが、受講生たちも、興味をもって、これらの分野を深掘りしてほしい。<BR>この深掘りの一つのトリガとして、毎回の講義におけるレポートを設定しているので、これらに対して積極的に熱意をもって取り組んでほしい。                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+                    <p id="style">
+あり                    </p>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>
