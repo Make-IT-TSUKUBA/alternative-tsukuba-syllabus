@@ -1,0 +1,547 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2023/01BC621/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+              最終更新日：2023/03/30
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+01BC621        </span>&nbsp;
+        <span id="title">
+表面・ナノ構造物性特論        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    1.0 単位,
+            </span>
+            <span id="grade">
+                    1・2 年次,
+            </span>
+            <span id="timetable">
+春AB 水3            </span>
+            <br>
+            <span id="assignments">
+久保 敦            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+固体表面・界面や人工的なナノ構造に固有な電子物性・光学物性の講義を行う。固体の電子論、固体表面におけるシュレーディンガー方程式の境界条件と表面状態、光と物質の相互作用、固体表面におけるMaxwell方程式解の境界条件、表面・界面・多層膜・ナノ構造における電磁固有モード・集団励起モード、表面プラズモン、モード間結合、利得、メタマテリアル        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+教室：自然系D413<BR>0AJCE05と同一。<BR>対面        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+1.知の活用力、6.活用力、7.物理力、9.論理力                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標（学修成果）</h2>
+                <p id="style">
+固体表面、および、プラズモニックナノ構造やメタマテリアル等人工的なナノ構造を対象とし、それらに固有の電子物性や光学物性に関する先端的な知識を習得する。<BR>(1)電子論的な固体表面の取り扱いや定義を学び、表面近傍の電子構造・電子状態を記述する代表的アプローチを理解する。<BR>(2)固体表面の代表的物理量：仕事関数、真空準位、電子親和力、等を学ぶ。特に、仕事関数を構成するポテンシャルの電子論的な解釈や、表面修飾による仕事関数の変化などについて理解する。<BR>(3)エネルギーギャップ中における波数が複素数の波動方程式解であるショックレー表面状態、固体表面における隣接原子との相互作用変調の結果であるタム表面状態、半導体表面における非結合手（ダングリングボンド）が誘導する表面再構成や表面状態について理解する。<BR>(4)光電子分光法の実験手法や動作原理を学び、固体の電子状態の実験的計測法について理解する。また、光電子放出過程を理解する上で重要な、遷移行列要素の導出や光電子放出の一段階モデルについて理解する。<BR>(5)Maxwell電磁気学で記述される固体の光学的性質（Fresnel理論）を学び、またFresnel理論と量子力学的な微視的解釈を比較し両者がどの様な違いを生じるかを理解する。また代表的な誘電関数モデルについて理解する。<BR>(6)固体・固体表面における準粒子、集団励起、およびそれらの表面モードについて、特に表面エキシトン、表面プラズモン（表面プラズモンポラリトン）について学ぶ。金属-誘電体界面における電磁場の固有モードや波数-エネルギーの関係について理解する。<BR>(7)表面プラズモンポラリトンと伝搬光との結合条件、および、人工ナノ構造によるモード制御の実例としてプラズモニック結晶・プラズモニックバンドについて理解する。<BR>(8)金属-誘電体多層膜や、共振器-分子系におけるモード間結合や固有モード分裂を学び、モード間結合の古典力学的表現や、共振器量子電気力学の弱結合・強結合、エキシトン-プラズモン結合系のエネルギー移行等について理解する。<BR>(9)負の屈折率、メタマテリアル、左手系における電場、磁場、波数ベクトル、ポインティングベクトルの関係について理解する。<BR>(10)メタマテリアルが生じる特異な光学特性、負屈折率媒質中の物体の見え方、光パルスの伝搬、波面形成のダイナミクスなどについて理解する。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+固体表面, 電子状態, 表面状態, 光励起, 光電子分光, 光学遷移, 素励起, 集団励起, 固有モード, ナノ構造, 人工構造、表面プラズモン, メタマテリアル                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+　固体表面に固有の境界条件により生じる表面電子状態や表面電磁モード、積層膜構造やナノ構造に励起される表面プラズモンや、人工ナノ構造に基づくメタマテリアルの特異な光学特性等について講義を行う。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+固体表面の電子構造・電子的性質と理解のためのアプローチ：<BR>固体の清浄表面，薄膜，ナノ構造の作製、ハートリー‐フォック方程式とクープマンの定理、密度汎関数法/ジェリウムモデル、ジェリウム表面での電子密度、電気２重層、フリーデル振動                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+表面に特徴的な物理的諸量：<BR>仕事関数，真空準位，電子親和力，イオン化エネルギー，電気陰性度，フェルミ準位、仕事関数のバルク項と表面項、面方位，原子層ステップ，化学吸着に対する仕事関数の変化、共鳴準位モデル、負の電子親和力                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+表面状態ー周期ポテンシャルの「途切れ」がもたらす局在的電子状態：<BR>ほとんど自由な電子モデルによるエネルギーギャップ中の波動方程式の虚数解、ショックレー表面状態、Cu(111)表面における表面電子状態のSTM観察、強束縛近似描像（LCAO法）による電子状態と表面状態、タム表面状態、半導体（共有結合結晶）の表面構造と表面電子状態、ダングリングボンド、Si結晶表面                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+光電子分光法による電子状態計測の物理：<BR>光電子分光法の歴史、X線光電子分光法、紫外光電子分光法、ユニバーサル曲線、光電子分光器の構造と実験装置例、光電子分光法における電子エネルギーダイヤグラム、光電子スペクトルの解釈、光電子励起の原理、遷移行列、光電子放出の３段階モデルと１段階モデル、角度分解光電子分光法、光電子顕微鏡法                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+固体の光学的性質の物理的表式について：<BR>平面電磁波の入射，反射，透過、Maxwell電磁気学の波動方程式と波動方程式解、Fresnel反射係数、複素誘電率媒質における虚数の波数ベクトルの扱い、ジェリウムモデルによる光入射の微視的解釈、分散媒質の光応答の特徴、プラズマ振動数、誘電関数モデル（Lorentzモデル、Drudeモデル）                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6回                                        </th>
+                                        <td>
+固体/固体表面における準粒子と集団励起：<BR>物質の素励起（電子準粒子，正孔，エキシトン，プラズモン，フォノン，マグノン），素励起の表面モード、表面エキシトン、表面プラズモン、ポラリトン、表面プラズモンポラリトン（SPP）の波動関数解の導出、SPPの分散関係、SPPの光励起（クレッチマン配置、回折格子結合）                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第7回                                        </th>
+                                        <td>
+人工ナノ構造による表面プラズモンのモード制御：<BR>プラズモニック結晶、プラズモニックバンド、プラズモニック結晶導波路、フレネル式の特異点の性質と固有モードとの関係、多層積層膜の反射係数と表面プラズモンモード、絶縁体-金属-絶縁体構造におけるモードの分散曲線・空間分布の特徴                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第8回                                        </th>
+                                        <td>
+積層膜系や共振器-分子系におけるモード間結合、固有モード分裂：<BR>モード結合の力学（連成振り子）モデル、固有振動数と振幅確率の特徴、力学モデルと電磁場モードの対応、正規モード分裂、ナノ粒子，ナノシェル，積層膜構造における表面プラズモンモード結合、共振器モードと分子の結合（共振器量子電気力学）、弱結合・強結合、励起子と表面プラズモンモードの結合、金属基板上における振動双極子のエネルギー散逸、利得媒質と表面プラズモンモードの相互作用                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第9回                                        </th>
+                                        <td>
+負屈折率物質の実現とその光学的性質：<BR>&epsilon;-&micro;平面における通常物質と負屈折率媒質、誘電率(&epsilon;)，透磁率(&micro;)と屈折率(n)との関係式、負の屈折率をもたらす人工構造、分割リング型共振器の動作，等価回路，比透磁率特性，光領域で機能するメタマテリアル、左手系物質におけるk,E,Hの関係、正・負屈折率媒質界面における光の反射と屈折、スネルの法則の拡張                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第10回                                        </th>
+                                        <td>
+メタマテリアルによる特異な光学特性：<BR>負屈折率媒質中の物体の見え方、正・負屈折率媒質界面での光パルスの屈折，パルス面形成のダイナミクス、パルスの群速度、数値計算（FDTD法）<BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+なし                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+期末にレポートを課すのでこれを解き、満点の60%以上をとることで合格とする。点数に基づきA+~Cの評価を行う。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+授業の参考文献・参考資料(temasで配布)等もよく読み、復習を行うこと。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+参考文献はteamsで配布する。参考となる主だった書籍を以下に示す。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
+                <div id="topics">
+                        <p id="pretopics">
+事前にe-mailで連絡のこと                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+久保 敦 　                                                        <br>
+                                                                <span class="officehour-address">
+1002429                                                                </span>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
+                    <p id="style">
+受講生には、量子力学、電磁気学、固体物理学の知識を前提とする。<BR>                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
+                    <p id="style">
+なし                    </p>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>
