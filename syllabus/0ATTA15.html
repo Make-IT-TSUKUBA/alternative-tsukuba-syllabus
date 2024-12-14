@@ -208,6 +208,50 @@ $(window).on('load', function() {
     }
     // 変換した文字列を設定
     $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
 });
 </script>
 <body>
@@ -223,10 +267,6 @@ $(window).on('load', function() {
         <td align="left">
             
             
-              <a href="/syllabi/2023/0ATTA15/jpn/0/">
-                  最新版のシラバスを表示
-              </a>
-          
           
           &nbsp;
       </td>
@@ -234,7 +274,7 @@ $(window).on('load', function() {
   <tr>
       <td align="right">
           
-              最終更新日：2023/03/30
+              最終更新日：2024/03/18
           
             &nbsp;
         </td>
@@ -309,7 +349,7 @@ $(window).on('load', function() {
                     <h2 id="style-heading">授業計画</h2>
                 <div id="topics">
                         <p id="pretopics">
-近・現代の美術に関する英語の文献講読により近・現代の美術に関する理解を深め問題意識を高める。<BR>コロナ禍における授業形態について：<BR>◎本演習は対面授業を基本としますが、感染拡大の状況によってはTeamsでのライブ同時配信によるハイフレックス型（対面・同期オンライン・非同期オンライン）も検討します。授業形態の変更についてはmanaba上で告知します。個別理由によるオンライン受講の申し出はメールにてお問合せ下さい。                        </p>
+近・現代の美術に関する英語の文献講読により近・現代の美術に関する理解を深め問題意識を高める。<BR>◎本講義は対面授業で行いますが、Teamsでの配信（同期オンライン・非同期オンライン）を行う場合はmanaba上で告知します。個別理由によるオンライン受講はメールにて申し出てください。                        </p>
                     <div id="topic-assignments">
                         <table summary="topsics">
                                     <tr>
@@ -499,6 +539,9 @@ TF,TAなし。                    </p>
 
 
 
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
 
 </body>
 </html>
