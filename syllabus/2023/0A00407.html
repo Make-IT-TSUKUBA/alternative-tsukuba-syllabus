@@ -1,0 +1,452 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2023/0A00407/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+0A00407        </span>&nbsp;
+        <span id="title">
+脳の多様性とセルフマネジメント        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    1.0 単位,
+            </span>
+            <span id="grade">
+                    1 - 5 年次,
+            </span>
+            <span id="timetable">
+夏季休業中 集中; 秋A 集中            </span>
+            <br>
+            <span id="assignments">
+佐々木 銀河, 脇 貴典, 野呂 文行, 岩本 友規            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+本学大学院生が産業界や地域社会で自身の能力を十分に発揮できるよう、自己および他者における脳の多様性を適切に理解することを通して、自身の特性に合ったセルフマネジメントスキルを身に付けることを目標とする。<BR> 講義としては、発達障害から定型発達の連続体として捉えられる「脳の多様性(ニューロダイバーシティ)」について概説する。加えて学業や日常生活において有効なセルフマネジメントテクニック・ツールを紹介する。<BR> 演習としては、自身にはどのような特性があるかを客観視する個人ワークを行う。また自身の特性に合ったマネジメント方法を身に付ける。さらに社会で活躍する発達障害当事者をゲストスピーカーとして招き、自己および他者における脳の多様性を深く理解するための事例を提供する。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+オンライン(対面併用型)<BR>オンライン（オンデマンド型）、対面またはオンライン（同時双方向型）のハイブリッド形式で実施する        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義及び演習        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+修士レベル<BR> 知の活用力・マネジメント能力、コミュニケーション能力、チームワーク力<BR>博士レベル<BR> 知の創成力・マネジメント能力、コミュニケーション能力                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
+                <p id="style">
+1)脳の多様性(ニューロダイバーシティ)、発達障害を理解する<BR>2)自身の特性について説明できるようになる<BR>3)自身の特性に合ったセルフマネジメント方法について説明できるようになる<BR>4)多様な特性のある学生同士をお互いに尊重してコミュニケーションをすることができる<BR>5)多様な特性を組み合わせて、チームの強みを活かしたプロジェクトを立案できる                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+脳の多様性, 発達障害, セルフマネジメント                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+本科目では、本学大学院生が産業界や地域社会で自身の能力を十分に発揮できるよう、自己および他者における脳の多様性を適切に理解することを通して、自身の特性に合ったセルフマネジメントスキルおよび多様な特性のある学生同士のコミュニケーションスキルを身に付けることを目標とする。<BR>まず、発達障害から定型発達の連続体として捉えられる「脳の多様性（ニューロダイバーシティ）」について概説し、自身にはどのような特性があるかを客観視するワークを行う。<BR>加えて、学業や日常生活において有効なセルフマネジメントテクニックやツールを紹介することで、自身の特性に合ったマネジメント方法を身につけるまた、社会で活躍する発達障害当事者とともに、自己および他者における脳の多様性を深く理解するための講義を提供する。<BR>講義を踏まえて、１日目から２日目にかけて、多様な特性のある受講生同士がグループを組み、自身の強みを活かし、他者の弱みを補い合いながら、社会に役立つ事業・商品・プロジェクトを考えるアイデアソンを行う。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                        <p id="pretopics">
+本授業は対面（１日目）とオンライン（２日目）のハイブリッド形式で実施する予定である。<BR>受講人数が多く、１日目の対面授業用の教室確保が困難な場合や状況によってはMicrosoft Teamsを用いてオンライン（同時双方向型）で実施することがある。授業実施方針はmanabaにて履修登録者に連絡をする。<BR>本授業ではグループワークを中心に行うため、講義部分については事前にMicrosoft Streamによる動画配信を行うので、視聴すること。グループワーク等の演習は基本的に対面またはTeamsにより同時双方向で行う。グループワークを行うため、事前に受講生自身がどのような受講環境であれば学びやすいかを考えておくことが良い。グループ活動が苦手な場合は事前に相談することで受講しやすい環境調整にも対応する。<BR><BR>＜事前の動画視聴＞<BR>履修登録者に対して、下記の講義部分をMicrosoft Streamで授業開始前に配信する<BR>（１） 発達障害と脳の多様性<BR>（２） 弱みを補うセルフマネジメント・テクニック<BR>（３） 発達障害当事者からの体験談<BR><BR>＜１日目＞１０時００分〜１７時３０分<BR>講義内容の振り返り・質疑応答、自分の強み・弱み・弱みの対処法を確認するためのグループワークなど<BR><BR>＜２日目＞１０時００分〜１７時３０分<BR>各グループによる自分の強みを活かし、他者の弱みを補いながら社会に役立つアイデアを創出する凸凹（でこぼこ）アイデアソン、アイデアプレゼンテーション                        </p>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+特になし（博士後期課程学生の受講および学群学生等の聴講も歓迎する）<BR>聴講による参加希望の学生は下記の連絡先まで事前に申し出ること。<BR>ただし、聴講希望者は原則的に2日間の日程全てに参加することを前提とする。<BR>(連絡先)佐々木 銀河 sgalaxy#@#human.tsukuba.ac.jp<BR> ※#@#を変換してください。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+1_評価方法:リアクションペーパー、レポート課題、プレゼンテーション評価（manabaにて提出・評価）<BR>2_割合:リアクションペーパー(40%)、レポート課題(40%)、プレゼンテーション評価(20%)<BR>3_評価基準:3つの成績評価方法を用いて、下記2点の基準で成績を評価します。<BR>(1)自身の特性(強み・弱み・弱みへの対処法)を他者が理解できる程度に的確に説明できること、<BR>(2)誰かの弱み(凹)を解決するために、自分や他者の持っている強み(凸)を積極的に発見してチームプロジェクトに反映すること                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+講義(30%)、演習(70%)<BR>1日目および事前の講義動画視聴についてリアクションペーパー、2日目にレポート課題の提出を求める。また、2日目にはチームでのグループ活動の結果についてプレゼンテーションを行う。この授業の効果的な学習には自身の特性(強み・弱み)の洞察が不可欠であり、受講前・受講中における自身の特性の振り返りを行うこと。また、これまでの日々の学業・生活における自身の特性と対処に関する内省が本授業の学修において重要となる。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+【参考文献】授業外の学修に活用してください<BR>村中直人著（2020）ニューロダイバーシティの教科書：多様性尊重社会へのキーワード．金子書房．<BR>スティーブ・シルバーマン著(2017)自閉症の世界 多様性に満ちた内面の真実.講談社.<BR>キャロル・ウォーダマン著(2017)イラストで学ぶスタディスキル図鑑:自ら学習する力をつける.創元社.                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
+                    <p id="style">
+この授業では筑波大学における多様な専門の大学院生が協働して、自らの強みを生かし、誰かの弱みを補うための新事業・商品・プロジェクトを考える授業です。他の専門の大学院生と交流することに関心のある学生には良い機会になると思います。<BR><BR>グループワークの参加にあたり、心配なことや配慮を要する学生は、お知らせください。多様な形態での参加方法を検討します。<BR><BR>発達障害の有無にかかわらず、全ての学生において自身の特性をより良く知り、自己対処法を見つけることはスキルアップや社会参加の重要な要素となります。<BR>本科目受講後に学生の希望により、DACセンターで行う個別アセスメントを受けることも可能です。<BR>                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+                    <p id="style">
+0A00406 アクセシビリティリーダー特論                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+                    <p id="style">
+TA配置あり（1人）                    </p>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>
