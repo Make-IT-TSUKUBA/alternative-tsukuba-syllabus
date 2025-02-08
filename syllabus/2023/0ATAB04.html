@@ -1,0 +1,667 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2023/0ATAB04/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+0ATAB04        </span>&nbsp;
+        <span id="title">
+青年の発達        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    2.0 単位,
+            </span>
+            <span id="grade">
+                    1・2 年次,
+            </span>
+            <span id="timetable">
+秋AB 火1,2            </span>
+            <br>
+            <span id="assignments">
+佐藤 有耕            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+授業の目標は、次の3つと発展的な目標になる。<BR>1青年、青年期、青年心理学についての理解を深めること<BR>2青年心理学の研究パラダイムについて理解すること<BR>3青年の発達を理解するための多様な観点を身につけること<BR> 発展的には,青年の発達に関する学習を通して,青年に対する理解と支援の水準を上昇させること。 <BR> このために、青年心理学に関する重要な文献を教材として、青年の発達に関する知見を深める。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+小学校専修免許対応はR2年度以降の入学生のみ。<BR>対面        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+汎用コンピテンス１　知の活用能力<BR>専門コンピテンス１　教育課題発見能力<BR>専門コンピテンス３　教育学的分析能力                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標（学修成果）</h2>
+                <p id="style">
+1青年,青年期,青年心理学について理解すること。<BR>2青年心理学の研究パラダイムについて理解すること。<BR>3青年の発達を理解するための多様な観点を身につけること。<BR>4青年の発達を検討するための学術的アプローチを先行研究の読解により理解すること。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+心理学, 発達, 人格形成, 青年期, 思春期, 青年教育                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+（2023.2.24）<BR>授業実施方法:対面。<BR>講義のほか,青年心理学の専門書,古典的な青年心理学のテキスト,体系的な青年心理学のテキストなどの講読を基本とし,さらにはレビュー論文,学会誌論文,隣接する学問領域の文献などを含める。検討する重要文献は,講義内で指定する。<BR><BR>授業日(予定)：10/3，10/10，10/17，10/24，10/31，11/14，11/21，12/5，12/12，12/19。<BR><BR>                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+オリエンテーション:青年期発達                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+思春期・青年期に関する先行知見の理解                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+青年心理学研究の方法論1 研究パラダイムの理解                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+青年心理学研究の方法論2 研究例の解説                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+生涯発達の中の思春期・青年期の理解1 概念的理解                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6回                                        </th>
+                                        <td>
+生涯発達の中の思春期・青年期の理解2 身体発達からの理解                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第7回                                        </th>
+                                        <td>
+青年期の発達的特徴1 現代青少年の心理的な問題                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第8回                                        </th>
+                                        <td>
+青年期の発達的特徴2 身体的・心理的・対人関係上の特徴                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第9回                                        </th>
+                                        <td>
+青年心理学研究の重要文献の検討(古典):第1発表と討論<BR>                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第10回                                        </th>
+                                        <td>
+青年心理学研究の重要文献の検討(古典):第2発表と討論                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第11回                                        </th>
+                                        <td>
+青年心理学研究の重要文献の検討(古典):第3発表と討論                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第12回                                        </th>
+                                        <td>
+青年心理学研究の重要文献の検討(古典):第4発表と討論                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第13回                                        </th>
+                                        <td>
+青年心理学研究の重要文献の検討(古典):第5発表と討論                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第14回                                        </th>
+                                        <td>
+青年心理学研究の重要文献の検討(古典):第6発表と討論                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第15回                                        </th>
+                                        <td>
+青年心理学研究の重要文献の検討(最新):第1発表と討論                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第16回                                        </th>
+                                        <td>
+青年心理学研究の重要文献の検討(最新):第2発表と討論                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第17回                                        </th>
+                                        <td>
+青年心理学研究の重要文献の検討(最新):第3発表と討論                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第18回                                        </th>
+                                        <td>
+青年心理学研究の重要文献の検討(最新):第4発表と討論                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第19回                                        </th>
+                                        <td>
+青年心理学研究の重要文献の検討(最新):第5発表と討論                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第20回                                        </th>
+                                        <td>
+青年心理学研究の重要文献の検討(最新):第6発表と討論                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                        <p id="pretopics">
+◎講義資料配布方法:教員が授業で用いる資料は,manabaの「コースコンテンツ」に置くので,ファイルをダウンロードして各自が活用すること。受講生の発表用資料については,発表者がMS Teamsの「青年の発達」チームの「ファイル」にアップすること。受講生は,アップされたファイルを授業の前にダウンロードしておくこと。印刷するしないは受講生の判断に任せる。<BR>◎授業で課される課題:&lt;1&gt;教員が講義した内容について,A4判1枚程度のコメントを複数回提出する。&lt;2&gt;受講生が発表する際は,資料の作成および対面による口頭発表を求める。&lt;3&gt;試験は行わない。<BR>◎出席確認:院生の出席は当然のことなのでrespon等を用いた出席管理はしない。<BR>◎授業に関する追加の連絡事項は,manabaの「コースニュース」に掲載するので,見ておくこと。<BR>                        </p>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+青年心理学の文献に興味・関心があること。日本語の文献が読めること。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+評価方法:授業に参加して,討議や発表や質疑応答など,受講生としての責任を果たした場合に単位の認定を行う。講義期間中に複数回のレポート提出を課し,講義内容以上の理解水準の場合にA+相当,講義内容の十分な理解の場合にA相当,講義内容に対する標準レベルの理解の場合にB相当,理解の水準が合格最低ラインの場合にC相当とする。それ以下はＤとなる。テストは行わない。<BR>評価の配点:おおよそ以下のようにする。&lt;1&gt;教員が講義した内容についてのコメント提出,&lt;2&gt;受講生による発表と討論を,到達目標の基準に照らして成績評価を行う。配点比率は,&lt;1&gt;約50%,&lt;2&gt;約40%,そして&lt;3&gt;総合評価約10%とする。<BR>                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+講義内容に関して積極的に関心を向けて,関心を持った概念について各自図書館等で文献を調べて理解を深めておくこと。また,重要文献の検討に際しては,十分に資料を読み込み,必要な準備をしてくること。さらには講義内容を参考にして,自分自身あるいはかかわってきた生徒の心理に対して理解を深めておくこと。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+ファイルを配布し,それに沿って進める。取り上げる文献によっては，図書館に所蔵されていない場合もあるため，教科書として購入することが望ましい場合もあり得るが受講生に任せる。<BR>参考書は以下の通り。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th>
+1. B. Bradford Brown, Mitchell J. Prinstein 編 (子安増生・二宮克美 監訳) 青年期発達百科事典 全3巻 丸善出版 2014                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+2. 日本青年心理学会(企画) 新・青年心理学ハンドブック 福村出版 2014                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+3. 久世敏雄・齋藤耕二(監修) 青年心理学事典 福村出版 2000                                        </th>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                        <p id="pretopics">
+ここにあげた3点の書籍は参考文献であり，教科書ではない。購入する必要はない。                        </p>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
+                <div id="topics">
+                        <p id="pretopics">
+授業後に直接,あるいはメールで連絡してください。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+佐藤 有耕 　                                                        <br>
+                                                                <span class="officehour-address">
+1001431                                                                </span>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
+                    <p id="style">
+自分の研究に活かせることを授業で用いる文献から,受講生仲間の発表レジメから,授業担当者の発言から,できるだけたくさん拾ってください。<BR>授業に出ることよりも,授業を活用することが大事なので,授業をきっかけにして自分で自由に学習を進めてくれることを望んでいます。                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
+                    <p id="style">
+配置はありません。                    </p>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>
