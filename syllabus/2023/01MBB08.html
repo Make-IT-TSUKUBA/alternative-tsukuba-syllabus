@@ -1,0 +1,548 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2023/01MBB08/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+              最終更新日：2023/04/04
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+01MBB08        </span>&nbsp;
+        <span id="title">
+音声・音響メディア処理        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    2.0 単位,
+            </span>
+            <span id="grade">
+                    1・2 年次,
+            </span>
+            <span id="timetable">
+春AB 月3,4            </span>
+            <br>
+            <span id="assignments">
+真榮城 哲也, 寺澤 洋子            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+生命が持つ情報の側面について学ぶ。具体的には、遺伝情報、生体内の情報処理、脳活動、生体信号等を題材に、様々な現象の計測やモデル化、データの保存、分析、表現等について学ぶ。特に、バイオインフォマティクスで使われる生命情報を扱う手法や、生命をモデル化するためのシステムバイオロジーの考え方、生体信号処理や知覚システムモデリングの手法,生体情報を用いた芸術表現など関連分野の知識について理解することを目的とする。さらに、近年の生物学の研究において、必須となっている情報学の考え方や手法を、関連する生命現象とともに学ぶ。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+偶数年度は英語で授業,奇数年度は日本語で授業;メディアサイエンス専門科目;教職科目<BR>西暦奇数年度開講。<BR>0ATW115と同一。<BR>対面(オンライン併用型)<BR>英語シラバスは科目番号0ATW125を参照のこと        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+数理的研究力 メディア専門知識                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標（学修成果）</h2>
+                <p id="style">
+遺伝情報、生体内の情報処理、脳活動、生体信号等に関する現象の計測やモデル化、データの保存、分析、表現等について理解し、説明できるようになることを目的とする                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+バイオインフォマティクス, システム生物学, 生体信号処理，脳波，心電図，筋電図。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+(1) ゲノムと遺伝情報 (真栄城)<BR>(2)&nbsp;&nbsp;遺伝情報の類似性 (真栄城)<BR>(3)&nbsp;&nbsp;遺伝子発現と遺伝子調節ネットワーク (真栄城)<BR>(4)&nbsp;&nbsp;システム科学 (真栄城)<BR>(5) 生命のモデル化 (真栄城) <BR>(6) ディジタル信号と生体信号処理&nbsp;&nbsp;(寺澤) <BR>(7)&nbsp;&nbsp;脳波の周波数解析 (寺澤) <BR>(8)&nbsp;&nbsp;誘発脳波と加算平均(寺澤) <BR>(9) 心電図と心拍変動分析&nbsp;&nbsp;(寺澤) <BR>(10) 筋電図の解析 (寺澤)                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+                                        </th>
+                                        <td>
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+評価方法<BR><BR>授業内で行なう課題およびレポートの成果を評価する<BR><BR>割合<BR><BR>課題およびレポート 100%<BR><BR>・レポートの評価項目は各レポート課題の要求を満たしている度合いとする．<BR>・レポートの評価項目について100点満点で評価する．<BR><BR>評価基準<BR><BR>下記の基準で合格とする。<BR>・全ての課題およびレポートを提出期限内に提出する<BR>・全ての課題およびレポートで到達目標を最低限達成している<BR><BR>なお，A+～Cの評点は、全ての課題およびレポートの平均点に基づいて行う。<BR><BR><BR>                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+指定された文献の予習および指定された教科書や文献を用いてレポートを進める。<BR>                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+・manaba にて連絡<BR>・配付資料がある回は，その回に配布<BR>参考書（前半5週分）<BR>(1) Alberts et.al, Molecular Biology of the Cell, Garland Science<BR>教科書（後半5週分）<BR>(1) MATLABで学ぶ生体信号処理（小野弓絵，コロナ社，2018）                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等（連絡先含む）</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+真榮城 哲也 　水1・2限　7D409                                                        <br>
+                                                                <span class="officehour-address">
+1001930                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+寺澤 洋子 　授業時間後に事前アポイントメントにより実施。　                                                        <br>
+                                                                <span class="officehour-address">
+23051913                                                                </span>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他（受講生にのぞむことや受講上の注意点等）</h2>
+                    <p id="style">
+授業形態<BR>・対面（前半5週）<BR>・オンデマンドビデオと演習課題（後半5週）<BR><BR>講義資料の配布方法<BR>・manaba にて連絡<BR><BR>提出課題<BR>・内容：到達目標に示された項目に基づいて課された課題<BR>・提出先：manaba<BR>・提出期限：manaba に記載<BR><BR><BR>                    </p>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+            <div id="topic-assignments">
+                <table summary="topsics">
+                </table>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー（TF）・ティーチングアシスタント（TA）</h2>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>
