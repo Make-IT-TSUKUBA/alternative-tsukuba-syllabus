@@ -1,0 +1,549 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+
+
+
+
+
+
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        
+        <meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00 GMT">
+
+        
+        <link rel="SHORTCUT ICON" href="/syllabi/theme/default/image/favicon.ico">
+
+         
+        <title></title>
+        <link rel=stylesheet href="/syllabi/theme/default/StyleSheet.css" type="text/css">
+        
+        <script type="text/javascript" src="/syllabi/js/ScriptColor.js"></script>
+        <script type="text/javascript" src="/syllabi/js/Script.js"></script>
+        
+        
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/jquery-ui/css/smoothness/jquery-ui-1.8.19.custom.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_body.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/portal_table.css" />
+        <link rel="stylesheet" type="text/css" href="/syllabi/theme/default/newportal/wrapperStyleSheet.css" />
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/jquery-ui/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/CLEditor1_4_4/jquery.cleditor.js"></script>
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/portal_common.js"></script>
+
+        <script type="text/javascript" src="/syllabi/theme/default/newportal/main_portlet.js"></script>
+
+</head>
+
+<style type="text/css">
+   body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p,
+   blockquote, th, td {margin:0;padding:0;}
+   table {border-collapse:collapse;border-spacing:0;}
+   fieldset,img {border:0;}
+   address,caption,cite,code,dfn,em,strong,th,var {font-style:normal;font-weight:normal;}
+   ol,ul {list-style:none;}
+   caption,th {text-align:left;}
+   h1,h2,h3,h4,h5,h6,textarea {font-size:100%;font-weight:normal;}
+   q:before,q:after {content:'';}
+   abbr,acronym {border:0;}
+   .ktag {border-bottom:dotted 1px #00F;color:#00F;cursor:pointer;}
+   .rtag {border-bottom:dashed 1px #00F;color:#00F;cursor:pointer;}
+   .domain::before {content:'@';}
+   body {font:80%/160% Verdana, Osaka, sans-serif;letter-spacing:0.1em;padding:0px 30px 30px 30px;}
+h1 {margin-bottom:1em;padding:1em;font-weight:bold;border-top:10px solid #6600CC;font-size:128%;background-color:#EEE;}
+h2 {margin:1em 0px;font-weight:bold;}
+p, table {margin:1em;}
+th, td {padding-right:5px;}
+</style>
+<script language="JavaScript" type="text/javascript">
+
+$(function() {
+    // オフィスアワーメールアドレス
+    var agents = new Array();
+    $('.officehour-pdf-address').remove();
+    $('.officehour-address').each(function() {
+        var el = $(this);
+        el.hide();
+        agents.push(el.text());
+    });
+    if (agents.length > 0) {
+        // URL
+        var url = '/syllabi/syllabi.do?action=dispmail';
+        // Ajax処理
+        $.ajax({
+            type : "POST",
+            url : url + '&agents=' + agents,
+            dataType : "json",
+            cache : false,
+            success : function(data, status, xhr) {
+                $('.officehour-address').each(function() {
+                    var el = $(this);
+                    
+                    
+                    if (!Object.entries) {
+                    	  Object.entries = function( obj ){
+                    	    var ownProps = Object.keys( obj ),
+                    	        i = ownProps.length,
+                    	        resArray = new Array(i); 
+                    	    while (i--)
+                    	      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+                    	    return resArray;
+                    	  };
+                    	}
+                    
+                    
+                    var obj = Object.entries(data);
+                    for (var i = 0; i < obj.length; i++) {
+                        var agent = obj[i][0];
+                        var target = el.text().replace(/\s+/g, '');
+                        if (target == agent) {
+                            el.text(obj[i][1]).show();
+                            break;
+                        }
+                    }
+                });
+            },
+            error : function(XMLHttpRequest, status, errorThrown) {
+                console.log('error');
+            }
+        });
+    }
+});
+$(window).on('load', function() {
+    var lang = $('input[name="lang"]').val();
+    // 学期、曜日時限の区切り文字(表示対象はこの文字で区切られているはず)
+    var arrJa = ['月','火','水','木','金','土','日','全','集','応','随','NT'];
+    var arrEn = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','All', 'Intensive','by','NT'];
+    var timetable = $("#timetable").text();
+    
+    var timetableArr = [];
+    if (timetable.match(/;/)) {
+        timetableArr = timetable.split(';');
+    } else {
+        timetableArr = [timetable]; 
+    }
+    
+    var curStr = "";
+    for (j=0; j < timetableArr.length; j++) {
+        // 区切り文字の場所
+        var pos = 0;
+        // 区切り文字の場所を取得する
+        if (lang == "ja_JP") {
+            // 日本語の場合
+            for (i=0; i<arrJa.length; i++) {
+                var ret = timetableArr[j].indexOf(arrJa[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        } else {
+            // 英語の場合
+            for (i=0; i<arrEn.length; i++) {
+                var ret = timetableArr[j].indexOf(arrEn[i]);
+                if (ret > 1) {
+                    // 検索対象文字列が見つかった
+                    pos = ret;
+                    break;
+                }
+            }
+        }
+        
+        var chgStr = "";
+        // 区切り文字の前までを取得する
+        chgStr = timetableArr[j].substring(1, pos);
+            
+        // 区切り文字の前にスペースが存在するか確認する
+        if (timetableArr[j].substring(pos-1, pos) != ' ') {
+            // 学期、曜日の間がスペースでない場合のみ半角スペースを追加する
+            chgStr = chgStr + ' ' + timetableArr[j].substring(pos);
+            if (curStr.length > 1) {
+                curStr = curStr + '; ' + chgStr;
+            } else {
+                curStr = chgStr;
+            }
+        } else {
+            if (curStr.length > 1) {
+                curStr = curStr + ';' + timetableArr[j];
+            } else {
+                curStr = timetableArr[j];
+             }
+         }
+    }
+    // 変換した文字列を設定
+    $("#timetable").text(curStr);
+    
+    // #202312270014 『シラバス参照』画面のISBNリンク変更 
+    // シラバス関連で、tulipsのURL変更についての修正
+    $("#topic-assignments tr a").each(function (index, element) {
+        // システムパラメータの設定値「isbnを設定するURL」を取得する。
+        var isbnUrl = "https://" + $("input[name='isbnUrl']").val();
+        // URLのテキスト部分の取得(画面表示)
+        var urlText = $(this).text();
+        // URLの要素の部分の取得(実際のlink)
+        var urlElement = $(this).attr("href");
+        
+        // 変換対象が同じかどうかの確認
+        var before = urlElement.substring(0,urlElement.indexOf("q="));
+        var after = isbnUrl.substring(0, isbnUrl.indexOf("q="));
+        
+        // 変換対象が違う場合のみ変換処理を行う
+        if (before != after) {
+          // 新しいURLのインデックスを取得する(変換対象は、ISBN：までとする)
+          var isbnIdx = isbnUrl.length;
+          
+          // 図書館旧URLかどうかの確認(URLの中に「tulips」が含まれるはずなので)
+          // この確認がないと、「#topic-assignments tr a」で取得される中に、
+          // 図書館URL以外が存在した為の対応
+          if (urlText.indexOf("tulips") >= 1) {
+            // 古いURLのテキストのインデックスを取得する(変換対象は、q=までとする)
+            var urlIdx = urlText.indexOf("q=") + 2;
+            // URLのテキスト変更 
+            // URLテキスト部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlText = urlText.replace(urlText.substring(0, urlIdx), 
+                    isbnUrl.substring(0, isbnIdx));
+            // 変換したURLテキストの書き換え
+            $(this).text(repUrlText);
+            
+            // 古いURLのエレメントのインデックスを取得する(変換対象は、q=までとする)
+            var urlEleIdx = urlElement.indexOf("q=") + 2;
+            // URLの要素変更
+            // URL要素部分で、古い部分「q=」の前までと、新しい「q=ISBN:」変換する
+            var repUrlElement = urlElement.replace(urlElement.substring(0, urlEleIdx), 
+                  isbnUrl.substring(0, isbnIdx));
+            // 変換したURL要素の書き換え
+            $(this).attr("href", repUrlElement);
+          }
+        }
+    });
+});
+</script>
+<body>
+
+<style type="text/css">
+    
+</style>
+
+<h2 align="center">シラバス参照</h2>
+        <input type="hidden" name="lang" value="ja_JP">
+<table width="100%">
+    <tr>
+        <td align="left">
+            
+            
+              <a href="/syllabi/2023/0A00508/jpn/0/">
+                  最新版のシラバスを表示
+              </a>
+          
+          
+          &nbsp;
+      </td>
+  </tr>
+  <tr>
+      <td align="right">
+          
+              最終更新日：2023/04/04
+          
+            &nbsp;
+        </td>
+    </tr>
+</table>
+
+    <h1 id="course-title">
+        <span id="course">
+0A00508        </span>&nbsp;
+        <span id="title">
+UT-Top Academist&#039;s Lecture        </span>
+    </h1>
+    <div id="credit-grade-assignments">
+        <p>
+            <span id="credit">
+                    1.0 単位,
+            </span>
+            <span id="grade">
+                    1 - 5 年次,
+            </span>
+            <span id="timetable">
+秋AB 水6            </span>
+            <br>
+            <span id="assignments">
+五十嵐 沙千子, 藤田 直子, 柏木 健一            </span>
+        </p>
+    </div>
+    <div id="summary-heading-summary-contents">
+        <h2 id="summary-heading">
+            授業概要
+            
+        </h2>
+        <p id="summary-contents">
+本学学長をはじめとする経験豊かな講師陣が、大学と学問、あるいは学問と人生について広いテ一マで講義を行う。本講義は、大学で学ぶべきことや自分の今後の人生について熟考する機会を受講生に提供するとともに、明確な目的意識をもって自発的に研究していくことができるように、学問への道案内をすることを目的とする。また、学長をはじめ本学に関係する優れた研究者が、自らの学問と人生体験を語ることにより、日本および世界において次世代の指導者となりうる有能な研究者や高度専門職業人を育成する機会とする。        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            備考
+            
+        </h2>
+        <p id="note">
+実務経験教員<BR>オンライン(対面併用型)        </p>
+    </div>
+    <div id="note-heading-note">
+        <h2 id="note-heading">
+            授業方法
+            
+        </h2>
+        <p id="note">
+講義        </p>
+    </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学位プログラム・コンピテンスとの関係</h2>
+                <p id="style">
+修士レベル<BR> 知の活用力・マネジメント能力・コミュニケーション能力・国際性<BR>博士レベル<BR> 知の創成力・マネジメント能力・コミュニケーション能力・リーダーシップ力、国際性                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業の到達目標(学修成果)</h2>
+                <p id="style">
+経験豊富な講師陣による講義内容をふまえ、<BR>1)各自の研究テーマの理解を深め、大学院で研究する意義を理解できるようになること。<BR>2)学際的な観点から各自の研究テーマについて、考察できるようになること。<BR>3)社会における大学院、社会における大学院生の役割を理解できるようになること。                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">キーワード</h2>
+                <p id="style">
+学問, 社会, 研究, 大学院教育, 人生経験                </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">授業計画</h2>
+                <div id="topics">
+                        <p id="pretopics">
+本授業は、オンライン（対面併用型）で実施します。（詳細は各授業回の内容を参照）<BR>対面の回の教室は「大学会館講堂」です。オンラインの回は同時双方向型（Zoomを予定）で実施します。<BR>講義終盤に、皆さんからの質問を受け付ける質疑応答の時間を設けます。<BR><BR>原則として、オンデマンド配信は行いません。<BR><BR>参加のためのURLや詳細な受講方法は、manabaのコースに掲載します。<BR>manabaのコースは、TWINSから履修登録した翌日（事前登録抽選日の翌日）以降に表示されます。<BR>事前登録抽選後の先着順受付（2次募集）にて履修登録する場合は、受講を迷っている場合でも、必ず初回の前々日（10月9日（月））までにまずTWINSから履修登録を済ませ、前日までにmanabaを確認するようにしてください。<BR>なお、10月4日は休講、12月27日は授業を実施します。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第1回                                        </th>
+                                        <td>
+【10月11日&nbsp;&nbsp;永田 恭介：筑波大学 学長】<BR>実施形態：対面<BR>[大学と学問]<BR>コロナウイルス感染症の拡大とともに、他の地球規模課題をも実感している。こうした課題を解決するための科学と技術の進歩は、一方ではエネルギー・資源に関する問題、産業・経済に関わる問題、食料、人口構成、格差社会の問題などを生んだ。いずれの問題についてもやはり地球規模での認識と解決が必要である。基礎科学から創薬にまで繋がる研究に携わってきた経験と実感を交えて、これからの大学の役割と大学における学問について考える。<BR>-----------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第2回                                        </th>
+                                        <td>
+【10月18日&nbsp;&nbsp;柳沢 正史：筑波大学 教授、筑波大学国際統合睡眠医科学研究機構(WPI-IIIS) 機構長】<BR>実施形態：対面<BR>[睡眠・覚醒の謎に挑む]<BR>「なぜ眠らなければならないのか？」「そもそも眠気とは何か？」といった誰もが抱く疑問は未だに解明されていない。日米両国で最先端の研究を行ってきた経験を踏まえ、現在筑波大学で行っている睡眠・覚醒の根本的メカニズムの解明に関する研究について紹介する。<BR>-----------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第3回                                        </th>
+                                        <td>
+【10月25日 伊藤　節：筑波大学芸術系 教授、デザイナー】<BR>実施形態：オンライン（同時双方向型）<BR>[ネイチャーセンタードデザイン]<BR>全ての人が人間らしく生きるための原動力ともいえるアート活動、人と科学技術の間のインターフェースともいえるデザイン活動は、俯瞰知、総合知として現代の多くの難解な社会問題に挑み、大きな社会変革に人類を適応させていくための有効なツールである。現代の非人間的な科学技術革新に対し、自然の一部としての人類は如何に人間性を維持、回復し、自然と共生していけるのか。分野を超えた様々なネイチャーセンタードデザイン事例を通して考えていく。<BR>-----------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第4回                                        </th>
+                                        <td>
+【11月8日 辻中 豊：東洋学園大学 学長、筑波大学 名誉教授】<BR>実施形態：オンライン（同時双方向型）<BR>[世界と日本の市民社会と政治を輪切りにする：政治のなぜに答える]<BR>世界との比較でみると日本政治には「なぜ」が無数にあります。なぜ、保守党がかくも長期に政権を維持し、他方野党にはできないのか、なぜ官僚制は小さいのにタフなのか、なぜ、政治の決定がかくも遅いのか、日本は非西洋でまれな自力近代化と民主主義を確立しえたのか、とはいえいまも市民の参加は乏しいのか、なぜ、大震災に耐ええたのに、コロナ禍では、デジタル政府が進まなかったのか？謎を解く鍵は、政治と市民を結ぶ市民社会にあります。国際比較の中で答えを探ります。<BR>-----------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第5回                                        </th>
+                                        <td>
+【11月15日 尾縣 貢：筑波大学体育系 教授】<BR>実施形態：オンライン（同時双方向型）<BR>[トップアスリートの「心技体」を探る]<BR>オリンピックなどの国際競技大会で活躍するためには、心（精神）・技（技術）・体（体力）が高いレベルで求められる。トップアスリートの心技体を高めるための取り組みを科学的に検証するとともに、本番で最大力を発揮する秘訣についても考える。加えて、東京2020後においてスポーツが果たすべき社会的な役割、アスリートの目指すべき姿についても触れる。<BR>-----------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第6回                                        </th>
+                                        <td>
+【11月22日 伊藤　眞：日本フンボルト協会 理事長、筑波大学 名誉教授】<BR>実施形態：オンライン（同時双方向型）<BR>[大学で学ぶということ、海外で学ぶということ]<BR>コロナ禍の中、海外留学がしづらい状況が続いているが、チャンスをつかんで、是非、海外に飛び出してもらいたい。海外での生活にはそれなりの苦労があるが、それぞれの国で実際に生活することにより、その国の長所、短所を直接、肌で感じるという貴重な体験をすることができる。本講義では、大学で学ぶこと、海外で学ぶことの意義を、日独学術交流の促進に努める立場を踏まえて考えてみたい。<BR>-----------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第7回                                        </th>
+                                        <td>
+【12月6日 鈴木 健嗣：筑波大学システム情報系 教授】<BR>実施形態：オンライン（同時双方向型）<BR>[人々を支援する人工知能とヒューマン・テクノロジー]<BR>人々の残存機能や、本来有する能力を引き出すためのテクノロジーに関する研究を紹介する。これらは、人々の行動の深い理解に基づき、人工知能やロボット等の工学的な手法により行動形成を支援することで、人々が主体性を持って社会的な行動を行う未来を実現するための取り組みである。応用科学と社会実装に携わってきた経験を踏まえ、文理を超えた新しい学問分野や新産業を開拓するため、学術性と実践知を両立する学問の重要性について考える。<BR>-----------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第8回                                        </th>
+                                        <td>
+【12月13日 長谷川 康一：UiPath株式会社 代表取締役CEO】<BR>実施形態：オンライン（同時双方向型）<BR>[Brimming with Curiosity （あふれ出る好奇心）]<BR>これからDXの時代ををリードする人財、世界に羽ばたいていける人材に必要とさせてるものは何か？2017年に1人で、スタートアップの日本法人を立ち上げ、３年でリーデイングカンパニーに成長させ、NYSEでの上場に大きく貢献した自らの体験をもとに、実際に学生にも参加してもらいながら検討していく。<BR>-----------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第9回                                        </th>
+                                        <td>
+【12月20日 林 佳世子：東京外国語大学 学長】<BR>実施形態：オンライン（同時双方向型）<BR>[歴史から考える]<BR>皆さんが中学や高校で習った日本史や世界史は、暗記科目だったかもしれません。しかし、歴史を学ぶということは、そもそもは、これまでの人類の歩みから今の私たちの立ち位置を考える、という行為にほかなりません。それが、古代の都市の繁栄であれ、ロシアのウクライナ侵攻であれ、過去の出来事を、今の私たちの目で解釈し説明する、そのストーリーが「歴史」となります。そんなことを、私の専門であるオスマン帝国を例に少し紹介したいと思います。<BR>-----------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th valign="top" nowrap="nowrap">
+第10回                                        </th>
+                                        <td>
+【12月27日 受川 史彦：筑波大学数理物質系 教授】<BR>実施形態：オンライン（同時双方向型）<BR>[基礎学問の価値とは何か]<BR>物理学は自然の法則を明らかにする学問分野で，その中でも素粒子物理学はいわゆる「世の中の役に立たない学問」の筆頭に分類される。一方で，現在の大学は，社会のさまざまな課題を直接的・即効的に解決することが期待されている。このような時代において，基礎学問の持つ価値とは何か，社会に対してどのような貢献ができるのか，を考えてみたい。素粒子物理学の最新の研究の一端も紹介します。<BR>-----------------------------------------------------------------------------------------------------------------------                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                        <td nowrap="nowrap">
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">履修条件</h2>
+                    <p id="style">
+特になし                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">成績評価方法</h2>
+                    <p id="style">
+1評価方法:毎回の講義について作成する合計10編の小レポートと、1回の期末レポートとを総合的に評価します。<BR>2割合:小レポート(50%)、期末レポート(50%)<BR>3評価基準:小レポートと期末レポートの点数を100点満点換算して60点以上を合格とします。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">学修時間の割り当て及び授業外における学修方法</h2>
+                    <p id="style">
+講演者の著作を幅広く読むこと。                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">教材・参考文献・配付資料等</h2>
+                <div id="topics">
+                        <p id="pretopics">
+特にありません。印刷資料が配布されたり、参考文献が紹介されることがあります。                        </p>
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">オフィスアワー等(連絡先含む)</h2>
+                <div id="topics">
+                    <div id="topic-assignments">
+                        <table summary="topsics">
+                                    <tr>
+                                        <td>
+五十嵐 沙千子 　                                                        <br>
+                                                                <span class="officehour-address">
+1001150                                                                </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                    </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">その他(受講生にのぞむことや受講上の注意点等)</h2>
+                    <p id="style">
+※「筑波大学特別講義-大学と学問-」と共通                    </p>
+            </div>
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">他の授業科目との関連</h2>
+            </div>
+    
+    
+            <div id="style-heading-style">
+                    <h2 id="style-heading">ティーチングフェロー(TF)・ティーチングアシスタント(TA)</h2>
+                    <p id="style">
+TA配置あり                    </p>
+            </div>
+    
+    
+    
+    
+    
+
+
+
+
+
+<input type="hidden" name="isbnUrl" value="tsukuba.summon.serialssolutions.com/advanced#!/search?q=ISBN:" />
+
+</body>
+</html>
