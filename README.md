@@ -1,4 +1,4 @@
-# 筑波大学のシラバスっぽいもの
+# [deprecated] 筑波大学のシラバスっぽいもの
 
 [![Syllabus scheduled update](https://github.com/Make-IT-TSUKUBA/alternative-tsukuba-syllabus/actions/workflows/main.yml/badge.svg)](https://github.com/Make-IT-TSUKUBA/alternative-tsukuba-syllabus/actions/workflows/main.yml)
 
